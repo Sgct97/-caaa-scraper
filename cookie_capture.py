@@ -171,8 +171,10 @@ def verify_cookies():
         page = context.new_page()
         
         # Navigate to a protected page (not login page)
-        # Adjust this URL to a page that should show authenticated content
-        test_url = "https://www.caaa.org/"
+        # Use the same domain as LOGIN_URL for testing
+        from urllib.parse import urlparse
+        domain = urlparse(LOGIN_URL).netloc
+        test_url = f"https://{domain}/"
         print(f"→ Testing cookies by visiting: {test_url}")
         page.goto(test_url, wait_until="domcontentloaded")
         
