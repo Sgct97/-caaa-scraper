@@ -1,0 +1,4 @@
+playwright==1.41.0
+cryptography==42.0.2
+python-dotenv==1.0.1
+
