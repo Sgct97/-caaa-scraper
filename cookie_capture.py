@@ -11,7 +11,7 @@ from playwright.sync_api import sync_playwright
 from cryptography.fernet import Fernet
 
 # Configuration
-LOGIN_URL = "https://www.caaa.org/?pg=login"
+LOGIN_URL = "https://github.com/login"
 STORAGE_STATE_PATH = "auth.json"
 ENCRYPTED_STATE_PATH = "auth.json.enc"
 KEY_PATH = ".auth_key"
