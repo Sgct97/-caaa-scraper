@@ -38,20 +38,34 @@ def test_search(search_params: SearchParams):
         for field_name, field_value in form_data.items():
             print(f"   Setting {field_name} = '{field_value}'")
             
-            # Handle text inputs
-            if field_name.startswith('s_'):
-                selector = f'input[name="{field_name}"]'
-                if page.query_selector(selector):
-                    # For date fields with calendar widgets, use JavaScript to set value directly
-                    if 'date' in field_name:
-                        page.evaluate(f"document.querySelector('{selector}').value = '{field_value}'")
-                    else:
-                        page.fill(selector, str(field_value))
-                else:
-                    # Try select dropdown
-                    selector = f'select[name="{field_name}"]'
+            try:
+                # Handle text inputs
+                if field_name.startswith('s_'):
+                    selector = f'input[name="{field_name}"]'
                     if page.query_selector(selector):
-                        page.select_option(selector, str(field_value))
+                        # For date fields with calendar widgets, use JavaScript to set value directly
+                        if 'date' in field_name:
+                            page.evaluate(f"document.querySelector('{selector}').value = '{field_value}'")
+                            print(f"      ✓ Set via JavaScript (date field)")
+                        else:
+                            # Use force and timeout for problematic fields
+                            page.fill(selector, str(field_value), timeout=5000, force=True)
+                            print(f"      ✓ Set via fill")
+                    else:
+                        # Try select dropdown
+                        selector = f'select[name="{field_name}"]'
+                        if page.query_selector(selector):
+                            page.select_option(selector, str(field_value))
+                            print(f"      ✓ Set via select")
+            except Exception as e:
+                print(f"      ⚠️  Could not set field: {e}")
+                # Try JavaScript as fallback
+                try:
+                    selector = f'input[name="{field_name}"], select[name="{field_name}"]'
+                    page.evaluate(f"document.querySelector('{selector}').value = '{field_value}'")
+                    print(f"      ✓ Set via JavaScript fallback")
+                except:
+                    print(f"      ❌ Failed to set field, skipping")
         
         # Submit search
         print("\n→ Submitting search...")
