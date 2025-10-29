@@ -42,7 +42,11 @@ def test_search(search_params: SearchParams):
             if field_name.startswith('s_'):
                 selector = f'input[name="{field_name}"]'
                 if page.query_selector(selector):
-                    page.fill(selector, str(field_value))
+                    # For date fields with calendar widgets, use JavaScript to set value directly
+                    if 'date' in field_name:
+                        page.evaluate(f"document.querySelector('{selector}').value = '{field_value}'")
+                    else:
+                        page.fill(selector, str(field_value))
                 else:
                     # Try select dropdown
                     selector = f'select[name="{field_name}"]'
