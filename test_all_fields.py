@@ -33,31 +33,63 @@ def test_single_search(description, search_params, page):
         try:
             if field_name.startswith('s_'):
                 selector = f'input[name="{field_name}"]'
+                
+                # Check if field exists
                 if page.query_selector(selector):
                     if 'date' in field_name:
+                        # Date fields: use JS
                         page.evaluate(f"document.querySelector('{selector}').value = '{field_value}'")
                     else:
-                        page.fill(selector, str(field_value), timeout=3000, force=True)
+                        # For fields that might have multiple instances, find the visible one
+                        all_matches = page.query_selector_all(selector)
+                        visible_field = None
+                        
+                        for field in all_matches:
+                            if field.is_visible():
+                                visible_field = field
+                                break
+                        
+                        if visible_field:
+                            visible_field.fill(str(field_value), timeout=3000, force=True)
+                        else:
+                            # No visible field found, use JS on first match
+                            page.evaluate(f"document.querySelector('{selector}').value = '{field_value}'")
                 else:
+                    # Try select dropdown
                     selector = f'select[name="{field_name}"]'
                     if page.query_selector(selector):
                         page.select_option(selector, str(field_value))
         except Exception as e:
             print(f"   ⚠️  Error setting {field_name}: {e}")
+            # Fallback: try JS on visible element
             try:
-                selector = f'input[name="{field_name}"], select[name="{field_name}"]'
-                page.evaluate(f"document.querySelector('{selector}').value = '{field_value}'")
+                page.evaluate(f"""
+                    const elements = document.querySelectorAll('input[name="{field_name}"], select[name="{field_name}"]');
+                    for (let el of elements) {{
+                        if (el.offsetParent !== null) {{  // Check if visible
+                            el.value = '{field_value}';
+                            break;
+                        }}
+                    }}
+                """)
             except:
                 pass
     
     # Submit
     print("→ Submitting...")
     page.click('#s_btn')
+    
+    # Wait for page to navigate/reload
+    try:
+        page.wait_for_load_state("domcontentloaded", timeout=10000)
+    except:
+        pass
+    
     page.wait_for_timeout(3000)
     
     # Check results
     try:
-        page.wait_for_selector("table.table-striped tbody tr", timeout=5000)
+        page.wait_for_selector("table.table-striped tbody tr", timeout=10000)
         rows = page.query_selector_all("table.table-striped tbody tr")
         result_count = len([r for r in rows if not r.query_selector("b")])
         
