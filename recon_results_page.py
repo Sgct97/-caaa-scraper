@@ -51,8 +51,13 @@ def recon_results_page():
         print("→ Submitting search...")
         page.click('#s_btn')
         
-        # Wait for results to load
-        page.wait_for_load_state("networkidle")
+        # Wait for results to load (with timeout handling)
+        try:
+            page.wait_for_load_state("networkidle", timeout=10000)
+        except:
+            print("  (page taking a while, continuing anyway...)")
+            page.wait_for_load_state("domcontentloaded")
+        
         time.sleep(2)
         
         results_url = page.url
