@@ -1,0 +1,1404 @@
+<!DOCTYPE html><html xmlns="//www.w3.org/1999/xhtml" class="js flexbox canvas canvastext webgl no-touch geolocation postmessage no-websqldatabase indexeddb hashchange history draganddrop websockets rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients cssreflections csstransforms csstransforms3d csstransitions fontface generatedcontent video audio localstorage sessionstorage webworkers no-applicationcache svg inlinesvg smil svgclippaths" style="height: 100%;"><head>
+<script type="text/javascript" async="" src="https://www.google-analytics.com/analytics.js"></script><script type="text/javascript" async="" src="https://www.googletagmanager.com/gtag/js?id=G-6TQJVEGPN5&amp;cx=c&amp;gtm=4e5ar1"></script><script type="text/javascript" async="" src="https://www.googletagmanager.com/gtag/js?id=UA-48973775-1&amp;cx=c&amp;gtm=4e5ar1"></script><script type="text/javascript" async="" src="https://www.google-analytics.com/analytics.js"></script><script type="text/javascript" async="" src="https://www.googletagmanager.com/gtag/js?id=G-3SFV9G1MCW&amp;cx=c&amp;gtm=4e5ar1"></script><script type="text/javascript" async="" src="https://www.googletagmanager.com/gtag/js?id=UA-26951335-1&amp;cx=c&amp;gtm=4e5ar1"></script><script async="" src="//www.datadoghq-browser-agent.com/us1/v4/datadog-logs.js"></script><script>
+(function(h,o,u,n,d) {
+h=h[d]=h[d]||{q:[],onReady:function(c){h.q.push(c)}}
+d=o.createElement(u);d.async=1;d.src=n
+n=o.getElementsByTagName(u)[0];n.parentNode.insertBefore(d,n)
+})(window,document,'script','//www.datadoghq-browser-agent.com/us1/v4/datadog-logs.js','DD_LOGS')
+window.DD_LOGS.onReady(function() {
+window.DD_LOGS.init({
+clientToken: 'pub01c3dc4781a2d0d60b9e4dd9ef0aa90b',
+site: 'datadoghq.com',
+service:'membercentral',
+env:'production',
+forwardErrorsToLogs: true,
+forwardConsoleLogs: "all",
+forwardReports: "all",
+sessionSampleRate: 100,
+})
+window.DD_LOGS.setUserProperty('cfid', '85bd7715-8116-4347-975c-a46353b3eb90')
+window.DD_LOGS.setGlobalContextProperty('environment', 'production')
+window.DD_LOGS.setGlobalContextProperty('sitecode', 'caaa')
+window.DD_LOGS.setGlobalContextProperty('CF-RAY', '99652898004ecb9b-LAX')
+window.DD_LOGS.setGlobalContextProperty('deviceProfile_device_os', 'macos')
+window.DD_LOGS.setGlobalContextProperty('deviceProfile_browser_name', 'chrome')
+window.DD_LOGS.setGlobalContextProperty('deviceProfile_subtype', 'web-browser')
+window.DD_LOGS.setGlobalContextProperty('deviceProfile_is_bot', '0')
+window.DD_LOGS.setGlobalContextProperty('deviceProfile_request_date', '2025-10-24 05:36:44')
+window.DD_LOGS.setGlobalContextProperty('deviceProfile_hardware_subtype', '')
+window.DD_LOGS.setGlobalContextProperty('deviceProfile_hardware_type', 'computer')
+window.DD_LOGS.setGlobalContextProperty('deviceProfile_is_restricted', 'false')
+window.DD_LOGS.setGlobalContextProperty('deviceProfile_is_weird', 'false')
+window.DD_LOGS.setGlobalContextProperty('deviceProfile_browser_version', '120')
+window.DD_LOGS.setGlobalContextProperty('deviceProfile_is_spam', 'false')
+window.DD_LOGS.setGlobalContextProperty('deviceProfile_type', 'browser')
+window.DD_LOGS.setGlobalContextProperty('deviceProfile_is_small_screen', '0')
+window.DD_LOGS.setGlobalContextProperty('deviceProfile_is_abusive', 'false')
+window.DD_LOGS.setGlobalContextProperty('deviceProfile_is_tablet', '0')
+});
+var MCJSErrorReporting = MCJSErrorReporting || {};
+MCJSErrorReporting.promiseRejectionHandler = function(reason, wasCaught=true){ 
+window.DD_LOGS.onReady(function() {
+if (wasCaught)
+window.DD_LOGS.logger.error(`Caught Promise Rejection: ${reason}`, {}, (new Error(reason)));
+else
+window.DD_LOGS.logger.error(`Uncaught Promise Rejection: ${reason}`, {}, (new Error(reason)));
+})
+};
+MCJSErrorReporting.exceptionHandler = function(error){ 
+window.DD_LOGS.onReady(function() {
+window.DD_LOGS.logger.error(error.message, {}, error)
+})
+};
+MCJSErrorReporting.scriptLoadError = (event) => {
+window.DD_LOGS.onReady(function() {
+let reason = `Javascript failed to load: ${event.target.src}`;
+window.DD_LOGS.logger.error(reason, {}, (new Error(reason)));
+})	};
+MCJSErrorReporting.cssLoadError = (event) => {
+window.DD_LOGS.onReady(function() {
+let reason = `CSS failed to load: ${event.target.href}`;
+window.DD_LOGS.logger.error(reason, {}, (new Error(reason)));
+})
+};
+window.addEventListener('unhandledrejection', event => MCJSErrorReporting.promiseRejectionHandler(event.reason, false));
+window.addEventListener('error', event => {
+window.DD_LOGS.onReady(function() {
+window.DD_LOGS.logger.error(event.message, {
+filename: event.filename ?? '',
+lineno: event.lineno ?? '',
+colno: event.colno ?? '',
+}, event.error)
+})
+});
+</script>
+<link type="text/css" media="screen" rel="stylesheet" href="/assets/common/javascript/jQueryAddons/colorbox/colorbox-1.4.19.css" onerror="MCJSErrorReporting.cssLoadError(event)">
+<link rel="stylesheet" type="text/css" href="/assets/common/javascript/jQueryAddons/datetimepicker/jquery.datetimepicker.custom.css?mcts=20251029104039" onerror="MCJSErrorReporting.cssLoadError(event)">	
+<link rel="stylesheet" type="text/css" href="/assets/common/javascript/jQueryAddons/multiselect/jquery.multiselect.css?mcts=20251029104039" onerror="MCJSErrorReporting.cssLoadError(event)">
+<link rel="stylesheet" type="text/css" href="/assets/common/javascript/jqueryUI/1.12.1/jquery-ui.min.css" onerror="MCJSErrorReporting.cssLoadError(event)">
+<link rel="stylesheet" type="text/css" href="/assets/common/images/font-awesome/7.0.1/css/all.min.css" onerror="MCJSErrorReporting.cssLoadError(event)">
+<link rel="stylesheet" type="text/css" href="/assets/common/images/font-awesome/7.0.1/css/v4-shims.min.css" onerror="MCJSErrorReporting.cssLoadError(event)">
+<style type="text/css">
+div.mc-noty-item { font-family:'Open Sans', Helvetica Neue, Helvetica, Arial; }
+div.mc-noty-item i { float:left; margin-top:3px; font-size:17px; }
+div.mc-noty-item div.mc-noty { margin-left:28px; margin-right:14px; }
+.homepageWarningPopupBgColor{ background-color:#FFFFFF; }
+.homepageWarningPopupTextColor{ color:#3e3e3f; }
+.homepageWarningOverlayColor{ background-color: #808080; }
+.homepageWarningOverlayOpacity{ opacity:0.5; }
+#homepageWarningBlock.modal { position: fixed; z-index: 9999999; left: 50%; top: 10%; width:560px; overflow: auto; height:auto; border:0px!important; margin-left: -280px; padding:20px; max-height:100%; }
+#homepageWarningBlock .modal-content { padding: 0px; max-width: 750px; position: relative; }
+#homepageWarningBlock .close { float: right; font-weight: bold; line-height: 20px; font-size: 25px; opacity: .2; font-size: 35px!important; position: absolute; right: -20px; top: -20px; }
+#homepageWarningBlock .close:hover, #homepageWarningBlock .close:focus { cursor: pointer; }
+#homepageWarningBlock .modal-content img{ max-width: 750px!important; height: auto!important; width:100%; }
+.warningPopUpOverlay{ width: 100%; position: fixed; z-index: 1000; top: 0; left: 0; overflow-x: auto; overflow: hidden; text-align: center; height: 100%; }
+@media screen and (max-width:767px){ #homepageWarningBlock.modal { top: 20px; right: 20px; left: 20px; width:auto; margin:0; height:auto; max-height:95%; } }
+@media screen and (max-width:480px){ #homepageWarningBlock.modal { top: 10px; right: 10px; left: 10px; width:auto; margin:0; height:auto; max-height:95%; } }
+.ui-multiselect-checkboxes label input {top: 0px !important; margin-top: 0px !important; margin-right: 3px !important;}
+.ui-multiselect-checkboxes label {display: flex; align-items: center;}
+</style>
+<script type="text/javascript" src="/assets/common/javascript/core/jquery-2.2.4.min.js" onerror="MCJSErrorReporting.scriptLoadError(event)"></script>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/bluebird/3.7.2/bluebird.min.js" onerror="MCJSErrorReporting.scriptLoadError(event)"></script>
+<script type="text/javascript" src="/assets/common/javascript/jQueryAddons/jQueryMigrate/production-jquery-migrate-1.4.1.min.js" onerror="MCJSErrorReporting.scriptLoadError(event)"></script>
+<script type="text/javascript" src="/assets/common/javascript/moment2.10.6.min.js" onerror="MCJSErrorReporting.scriptLoadError(event)"></script>
+<script type="text/javascript" src="/assets/common/javascript/handlebars/handlebars-v4.7.8.js" onerror="MCJSErrorReporting.scriptLoadError(event)"></script>
+<script type="text/javascript" src="/assets/common/javascript/platformUtils.js?mcts=20251029104039" onerror="MCJSErrorReporting.scriptLoadError(event)"></script>
+<script type="text/javascript" src="/assets/common/javascript/jQueryAddons/colorbox/jquery.colorbox-min-1.4.19.js" onerror="MCJSErrorReporting.scriptLoadError(event)"></script>
+<script type="text/javascript" src="/assets/common/javascript/jQueryAddons/datetimepicker/jquery.datetimepicker.full.custom.min.js?mcts=20251029104039" onerror="MCJSErrorReporting.scriptLoadError(event)"></script>
+<script type="text/javascript" src="/assets/common/javascript/jqueryUI/1.12.1/jquery-ui.min.js" onerror="MCJSErrorReporting.scriptLoadError(event)"></script>
+<script type="text/javascript" src="/assets/common/javascript/jQueryAddons/multiselect/jquery.multiselect-1.13a.js" onerror="MCJSErrorReporting.scriptLoadError(event)"></script>
+<script type="text/javascript" src="/assets/common/javascript/ajax.js?mcts=20251029104039" onerror="MCJSErrorReporting.scriptLoadError(event)"></script>
+<script type="text/javascript" src="/assets/common/javascript/cfform.js?mcts=20251029104039" onerror="MCJSErrorReporting.scriptLoadError(event)"></script>
+<script type="text/javascript">
+var ajaxAppInstanceID="237592";;
+var appProxyAppInstanceID="237596";;
+var MCPromises = {
+BackendPlatformServices: MCLoader.loadJS('//services.membercentral.org/assets/common/javascript/backendPlatformServices.js?mcts=20251029104039').catch(MCJSErrorReporting.promiseRejectionHandler)
+};
+try { MCKeepAlive.startKeepAlive(300,120); } catch (error) {console.error('Failed to start keepalive',error)}
+</script><script src="//services.membercentral.org/assets/common/javascript/backendPlatformServices.js?mcts=20251029104039" async=""></script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-W7PB18WMHX"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+/* make gtag available at our old custom gtag function name in case there are content object references that we don't find */
+var mc_custom_gtag = gtag;
+/* Build Cookie Flags */
+var mcGACookieFlags = 'SameSite=None'
+if ('https:' == document.location.protocol) {
+mcGACookieFlags = mcGACookieFlags + '; Secure';
+}
+/* build override pageURL passed to Analytics */
+var mcGAPageLocation = document.location.protocol + '//' + document.location.hostname + '/search' + '?bid=3305&s_a=doSearch';
+gtag('js', new Date());
+/* Platform Wide GA4*/
+gtag('config', 'G-W7PB18WMHX',{ 
+'groups': 'default,platformWide',
+'page_title': 'Search',
+'page_location': mcGAPageLocation,
+'cookie_prefix': '_mcga',
+'cookie_domain': document.location.hostname,
+'cookie_flags': mcGACookieFlags
+});
+/* Site-Specific Google Analytics 4 */
+gtag('config', 'UA-26951335-1',{ 
+'groups': 'default,siteSpecific',
+'page_title': 'Search',
+'page_location': mcGAPageLocation,
+'cookie_prefix': '_mcga',
+'cookie_domain': document.location.hostname,
+'cookie_flags': mcGACookieFlags
+});
+</script>
+<script>
+$(function() {
+if(isIEBrowser() && (typeof localStorage.ieWarningAck == "undefined" || localStorage.ieWarningAck != "1")) {
+Promise.all([MCLoader.loadJS('/assets/common/javascript/noty/3.1.4/noty.min.js'),MCLoader.loadCSS('/assets/common/javascript/noty/3.1.4/noty.css')]).then(function(){
+popupText = '<div class="MC-IEmsg row-fluid">Internet Explorer is no longer supported. Please update to Edge or use an alternative browser such as Chrome or Firefox for best viewing results.</div>';
+new Noty({
+type:'success',
+layout:'topLeft', 
+theme:'bootstrap-v4', 
+text:popupText,
+timeout:false,
+callbacks: {
+beforeShow: function() {},
+onShow: function() {},
+afterShow: function() {},
+onClose: function() {localStorage.ieWarningAck = 1},
+afterClose: function() {},
+onHover: function() {},
+onTemplate: function() {
+this.layoutDom.className = 'noty_layout MC-IEmsgWrapper';
+this.barDom.classList.add("MC-IEmsgInnerWrapper");
+this.barDom.innerHTML = '<div class="MC-IEmsgBody noty_body">' + this.options.text + '<div>';
+// Important: .noty_body class is required for setText API method.
+}
+}
+}).show();
+}).catch(error => console.error('Failed to load Noty',error));
+}
+});
+function isIEBrowser() {
+ua = navigator.userAgent;
+/* MSIE used to detect old browsers and Trident used to newer ones*/
+var is_ie = ua.indexOf("MSIE ") > -1 || ua.indexOf("Trident/") > -1;
+return is_ie; 
+}
+</script>
+<style>
+.MC-IEmsgWrapper{width: 100%!important;top: 0!important;left: 0!important;right: 0!important;max-width: 100%!important;}
+.MC-IEmsgInnerWrapper.noty_bar{margin:0!important;border-radius: 0!important;position:relative!important;padding:0!important;}
+.MC-IEmsgBody.noty_body{background-color: #FF0000;color: #FFFFFF;font-family: Arial;text-align: center;font-weight:bold;padding:0px!important;}
+.MC-IEmsg{height: 50px;line-height:52px!important;}
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Search</title>
+<meta name="google-site-verification" content="E9UwC2oWaHr5tVuoQnaaWKQMsXo_NUtj9H8k6FcMB3o">	
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/assets/common/javascript/jQueryAddons/bootstrap/platformwide.bootstrap.extras.css" onerror="MCJSErrorReporting.cssLoadError(event)">
+<link rel="stylesheet" href="/assets/common/javascript/jQueryAddons/bootstrap/css/bootstrap.min.css" onerror="MCJSErrorReporting.cssLoadError(event)">
+<link rel="stylesheet" href="/assets/common/javascript/jQueryAddons/bootstrap/platformwide.bootstrap.overrides.css" onerror="MCJSErrorReporting.cssLoadError(event)">
+<script type="text/javascript" src="/assets/common/javascript/jQueryAddons/bootstrap/js/bootstrap.min.js" onerror="MCJSErrorReporting.scriptLoadError(event)"></script>
+<link rel="stylesheet" href="/assets/common/javascript/jQueryAddons/bootstrap/css/bootstrap-responsive.min.css" onerror="MCJSErrorReporting.cssLoadError(event)">
+<link href="https://fonts.googleapis.com/css?family=Montserrat:400,700|Droid+Sans:400,700" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="/css/main.css">
+<link rel="stylesheet" href="/css/print.css" media="print">
+<link href="/assets/common/javascript/owlCarousel/234/owl.carousel.min.css" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="/css/animate.css">
+<link rel="stylesheet" href="/css/magnific-popup.css">
+<link rel="stylesheet" href="/css/jquery.fs.shifter.css">
+<!-- Icon Fonts CSS -->
+<link rel="stylesheet" href="/css/knight-iconfont.css">
+<!-- Vendor CSS -->
+<link rel="stylesheet" href="/css/reset.css">
+<!-- Plugins CSS -->
+<link rel="stylesheet" href="/css/animate.css">
+<link rel="stylesheet" href="/css/magnific-popup.css">
+<link rel="stylesheet" href="/css/jquery.fs.shifter.css">
+<!-- Template CSS -->
+<link rel="stylesheet" href="/css/main_new.css">
+<link rel="stylesheet" href="/css/shortcodes.css">
+<link rel="stylesheet" href="/css/custom-bg.css">
+<link rel="stylesheet" href="/css/style.css">
+<meta name="description" content="Search">
+<link rel="stylesheet" type="text/css" href="/assets/common/javascript/jQueryAddons/mmenu/jquery.mmenu.all.css">	
+<link rel="stylesheet" href="/assets/common/css/commonBootstrapMobile.css">
+<link rel="stylesheet" href="/css/slideshow.css">
+<script type="text/javascript" src="/assets/common/javascript/jQueryAddons/mmenu/jquery.mmenu.min.all.js"></script>
+<script type="text/javascript" src="/assets/common/javascript/hideaddrbar.js"></script>
+<script type="text/javascript" src="/assets/common/javascript/commonBootstrapMobile.js"></script>
+<script type="text/javascript" src="/javascript/jquery.slideshow.js"></script>	
+<link rel="shortcut icon" href="/images/favicon.ico">
+<style type="text/css">
+#noRightsLoggedOut{display:none;}
+#noRightsLoggedIn{display:block;}
+</style>
+<script type="text/javascript">
+$(document).ready(function() {
+iOS_hoverFix($('#menuLeft').siblings('a'));
+iOS_hoverFix($('#menuRight').siblings('a'));
+});
+</script>
+<link rel="stylesheet" href="/css/latestNews.css">
+<link rel="stylesheet" href="/usercss/custom.css?mcts=20251029104039&amp;cssmod=20250129152127" media="all" type="text/css" onerror="MCJSErrorReporting.cssLoadError(event)">
+ <script language="javascript"> b_18695374_bcounts = new Object(); </script>  <style type="text/css"> input.cal { background:#fff url(/assets/common/images/search/calendar.png) no-repeat right center; padding-right:18px; border:1px solid #7f9db9; font-size:9pt; width:100px; } div.s_rbnm { padding:0 0 4px 0; } div.s_rnfne { padding:10px 0; font-weight:bold; } div.s_row { padding:6px; } div.s_row_alt { background-color:#DEDEDE; } div.s_dtl { margin-left:20px; margin-top:4px; } div.s_opt { padding:3px; } div.s_act { float:right; padding:0 0 5px 5px; } a.ctv { text-decoration:none; } div.s_pgbtm { padding:6px 3px 0px 3px;text-align:right; } div.s_pgtop { padding:3px 3px 6px 3px; } div.s_rhrd { background-color:#DEDEDE;padding:3px;margin-bottom:3px; min-height:18px; line-height:20px; } tr.s_rhrdtr { background-color:#DEDEDE;padding:3px; } div.s_nli { margin:10px 10px 0 0;padding:6px;border:1px solid #ccc; } div.s_nliint { margin-bottom:10px; } div.s_options { margin-top:10px; clear:both;overflow:hidden;} div.s_err { font-weight:bold; color:#f00; } div.s_lh2 { padding:2px 0; } div#atcdiv { visibility:hidden; position:absolute; left:-300px; z-index:10000; } div.modalpopup { width:410px; } div#modalpopuphead { font-weight:bold; margin-bottom:6px; } div.modalpopupcontent { background-color:#BBB; border:1px solid #666; border-bottom:3px solid #666; color:#000; padding:10px; } select#modalpopupSuggestResults { position:absolute; visibility:hidden; } div.modalpopupinput { margin-top:6px; } div.modalpopuparrow { background-image:url(/assets/common/images/search/modal_triangler.gif); background-repeat:no-repeat; height:12px; position:relative; top:1px; left:385px; } div.modalpopuparrow span { display:none; } span#modalpopupreq { float:right; color:#f00; font-style:italic; font-weight:bold; } a.currSort { text-decoration:none; font-weight:bold; } div#s_caldiv { position:absolute;visibility:hidden;background-color:white;layer-background-color:white; } ul#s_tabs { border-bottom:1px solid #ccc; margin:0; padding-bottom:21px; padding-left:10px; } ul#s_tabs ul, ul#s_tabs li { display:inline; list-style-type:none; margin:0; padding:0; } ul#s_tabs a:link, ul#s_tabs a:visited { background:#E8EBF0; border:1px solid #ccc; color:#666; float:left; line-height:14px; margin-right:8px; padding:2px 10px; text-decoration:none; } ul#s_tabs a:link.active, ul#s_tabs a:visited.active { border-bottom:1px solid #fff; color:#000; } ul#s_tabs a:hover { color:#f00; } div#s_tabsetSM ul#s_tabs li#nav_SM a, div#s_tabsetSR ul#s_tabs li#nav_SR a, div#s_tabsetNS ul#s_tabs li#nav_NS a, div#s_tabsetRS ul#s_tabs li#nav_RS a, div#s_tabsetAD ul#s_tabs li#nav_AD a, div#s_tabsetVC ul#s_tabs li#nav_VC a { background:#fff; border-bottom:1px solid #fff; color:#000; } ul#s_tabs ul a:hover { color:#f00 !important; } div#s_listing { /*border:1px solid #ccc; */ border-top:none; clear:both; margin:0px; padding:5px 0; } .bucketHeaderButton {-webkit-border-radius: 4px;-moz-border-radius: 4px;border-radius: 4px; padding: 2px;} .bucketListButton {-webkit-border-radius: 4px;-moz-border-radius: 4px;border-radius: 4px;width:100%; margin-bottom:10px;background-color:#a0ce67;color:#000000;font-size:9px;} .hiddenButton {display:none;} a.ctv{white-space: nowrap;} #searchSponsorRightSideContainer {float: right;text-align:center;} #searchSponsorRightSideContainer a {display:block;margin-top:12px;} #searchSponsorRightSideContainer img {max-width:125px;} #searchSponsorRightSideContainer ~ div.s_row {float:left;} #viewDocPromptModal .modal-header { border-bottom:0px !important; } #viewDocPromptModal .modal-body { margin: 0px 20px; background-color: #f5f5f5; } #viewDocPromptModal .modal-footer { border-top: 0px; background: #fff !important; } #viewDocPromptModal .viewDocPromptModalHeader{ margin: 0px; color: #000; font-size: 15px; } #viewDocPromptModal .close { font-size: 15px !important; opacity: 0.8 !important; } .modal-backdrop.fade.in { opacity: 0.4 !important; } .wizard.vertical > .steps { width: 70px!important; } .wizard.vertical > .content { margin: 0 0 0.5em 0!important; width: calc(100% - 75px)!important; } .wizard > .actions a, .wizard > .actions a:hover, .wizard > .actions a:active { color: #fff!important; } .wizard > .content { min-height: 18em!important; background: #fff!important; -webkit-border-radius: 0!important; -moz-border-radius: 0!important; border-radius: 0!important; border-left: 1px solid rgba(122,123,151,.2)!important; } .wizard > .content > .body { position: relative!important; padding-top: 0.5em!important; } .wizard > .steps a { text-align:center; } .wizard > .steps .number { font-size: 1em!important; } .dt-cell-exclude { background-color:#fff8f8!important;color:#d3d3d3!important; } .mc-modal-overlay {position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0, 0, 0, 0.5);opacity:0;visibility:hidden;transition:opacity 0.3s ease;z-index:1040;} .mc-modal-overlay.active {opacity:1;visibility:visible;} .mc-modal {position:fixed;top:0;right:-100%;width:100%;max-width:100%;height:100%;background:white;box-shadow:-2px 0 10px rgba(0, 0, 0, 0.3);transition:right 0.3s ease;z-index:1050; display:flex;flex-direction:column;} .mc-modal.active {right:0;} .mc-modal-header {position:sticky;top:0;z-index:1;padding:15px;} .mc-modal-title{margin:0!important;padding:0!important;} .mc-modal-body {height:100%;flex:1;overflow-y:auto;padding:10px;} .mc-modal-close {position:absolute;top:10px;right:20px;font-size:25px;cursor:pointer;} @media (min-width: 600px) {.mc-modal {width: 450px;max-width: 450px;}} </style> <script language="javascript"> var strSearchReportBucketTypes = '3,5,8,10,12,15,35'; var arrSearchReportBucketTypes = strSearchReportBucketTypes.split(","); var mc_emailregex="^[a-zA-Z_0-9-'\\&\\+~]+(\\.[a-zA-Z_0-9-'\\&\\+~]+)*@([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,63}$"; var tsStatesArray = JSON.parse('{\"COLUMNS\":[\"CODE\",\"NAME\"],\"DATA\":[[\"AL\",\"Alabama\"],[\"AK\",\"Alaska\"],[\"AZ\",\"Arizona\"],[\"AR\",\"Arkansas\"],[\"CA\",\"California\"],[\"CO\",\"Colorado\"],[\"CT\",\"Connecticut\"],[\"DE\",\"Delaware\"],[\"DC\",\"District Of Columbia\"],[\"FL\",\"Florida\"],[\"GA\",\"Georgia\"],[\"HI\",\"Hawaii\"],[\"ID\",\"Idaho\"],[\"IL\",\"Illinois\"],[\"IN\",\"Indiana\"],[\"IA\",\"Iowa\"],[\"KS\",\"Kansas\"],[\"KY\",\"Kentucky\"],[\"LA\",\"Louisiana\"],[\"ME\",\"Maine\"],[\"MD\",\"Maryland\"],[\"MA\",\"Massachusetts\"],[\"MI\",\"Michigan\"],[\"MN\",\"Minnesota\"],[\"MS\",\"Mississippi\"],[\"MO\",\"Missouri\"],[\"MT\",\"Montana\"],[\"NE\",\"Nebraska\"],[\"NV\",\"Nevada\"],[\"NH\",\"New Hampshire\"],[\"NJ\",\"New Jersey\"],[\"NM\",\"New Mexico\"],[\"NY\",\"New York\"],[\"NC\",\"North Carolina\"],[\"ND\",\"North Dakota\"],[\"OH\",\"Ohio\"],[\"OK\",\"Oklahoma\"],[\"OR\",\"Oregon\"],[\"PA\",\"Pennsylvania\"],[\"RI\",\"Rhode Island\"],[\"SC\",\"South Carolina\"],[\"SD\",\"South Dakota\"],[\"TN\",\"Tennessee\"],[\"TX\",\"Texas\"],[\"UT\",\"Utah\"],[\"VT\",\"Vermont\"],[\"VA\",\"Virginia\"],[\"WA\",\"Washington\"],[\"WV\",\"West Virginia\"],[\"WI\",\"Wisconsin\"],[\"WY\",\"Wyoming\"],[\"AE\",\"Armed Forces Europe\"],[\"GU\",\"Guam\"],[\"MP\",\"Northern Mariana Islands\"],[\"PR\",\"Puerto Rico\"],[\"VI\",\"Virgin Islands\"],[\"AB\",\"Alberta\"],[\"BC\",\"British Columbia\"],[\"MB\",\"Manitoba\"],[\"NB\",\"New Brunswick\"],[\"NL\",\"Newfoundland and Labrador\"],[\"NW\",\"Northwest Territories\"],[\"NS\",\"Nova Scotia\"],[\"NU\",\"Nunavut\"],[\"ON\",\"Ontario\"],[\"PE\",\"Prince Edward Island\"],[\"QC\",\"Quebec\"],[\"SK\",\"Saskatchewan\"],[\"YT\",\"Yukon Territory\"],[\"AGS\",\"Aguascalientes\"],[\"BCN\",\"Baja California\"],[\"BCS\",\"Baja California Sur\"],[\"CAM\",\"Campeche\"],[\"CHP\",\"Chiapas\"],[\"CHI\",\"Chihuahua\"],[\"COA\",\"Coahuila de Zaragoza\"],[\"COL\",\"Colima\"],[\"DF\",\"Distrito Federal\"],[\"DGO\",\"Durango\"],[\"GTO\",\"Guanajuato\"],[\"GRO\",\"Guerrero\"],[\"HGO\",\"Hidalgo\"],[\"JAL\",\"Jalisco\"],[\"MEX\",\"México\"],[\"MIC\",\"Michoacán de Ocampo\"],[\"MOR\",\"Morelos\"],[\"NAY\",\"Nayarit\"],[\"NUL\",\"Nuevo León\"],[\"OAX\",\"Oaxaca\"],[\"PUE\",\"Puebla\"],[\"QRO\",\"Querétaro Arteaga\"],[\"QR\",\"Quintana Roo\"],[\"SLP\",\"San Luís Potosí\"],[\"SIN\",\"Sinalóa\"],[\"SON\",\"Sonora\"],[\"TAB\",\"Tabasco\"],[\"TAM\",\"Tamaulipas\"],[\"TLA\",\"Tlaxcala\"],[\"VER\",\"Veracruz\"],[\"YUC\",\"Yucatán\"],[\"ZAC\",\"Zacatecas\"],[\"NSW\",\"New South Wales\"],[\"QLD\",\"Queensland\"],[\"SA\",\"South Australia\"],[\"TAS\",\"Tasmania\"],[\"VIC\",\"Victoria\"],[\"WAU\",\"Western Australia\"],[\"AF\",\"Afghanistan\"],[\"AX\",\"Aland Islands\"],[\"ALC\",\"Albania\"],[\"DZ\",\"Algeria\"],[\"AS\",\"American Samoa\"],[\"AD\",\"Andorra\"],[\"AO\",\"Angola\"],[\"AI\",\"Anguilla\"],[\"AQ\",\"Antarctica\"],[\"AG\",\"Antigua and Barbuda\"],[\"ARC\",\"Argentina\"],[\"AM\",\"Armenia\"],[\"AW\",\"Aruba\"],[\"AT\",\"Austria\"],[\"AZC\",\"Azerbaijan\"],[\"BS\",\"Bahamas\"],[\"BH\",\"Bahrain\"],[\"BD\",\"Bangladesh\"],[\"BB\",\"Barbados\"],[\"BY\",\"Belarus\"],[\"BE\",\"Belgium\"],[\"BZ\",\"Belize\"],[\"BJ\",\"Benin\"],[\"BM\",\"Bermuda\"],[\"BT\",\"Bhutan\"],[\"BO\",\"Bolivia, Plurinational State of\"],[\"BQ\",\"Bonaire, Sint Eustatius and Saba\"],[\"BA\",\"Bosnia and Herzegovina\"],[\"BW\",\"Botswana\"],[\"BV\",\"Bouvet Island\"],[\"BR\",\"Brazil\"],[\"IO\",\"British Indian Ocean Territory\"],[\"BN\",\"Brunei Darussalam\"],[\"BG\",\"Bulgaria\"],[\"BF\",\"Burkina Faso\"],[\"BI\",\"Burundi\"],[\"KH\",\"Cambodia\"],[\"CM\",\"Cameroon\"],[\"CV\",\"Cape Verde\"],[\"KYC\",\"Cayman Islands\"],[\"CF\",\"Central African Republic\"],[\"TD\",\"Chad\"],[\"CL\",\"Chile\"],[\"CN\",\"China\"],[\"CX\",\"Christmas Island\"],[\"CC\",\"Cocos (Keeling) Islands\"],[\"CLM\",\"Colombia\"],[\"KM\",\"Comoros\"],[\"CG\",\"Congo\"],[\"CD\",\"Congo, The Democratic Republic of the\"],[\"CK\",\"Cook Islands\"],[\"CR\",\"Costa Rica\"],[\"CI\",\"Côte D\'Ivoire\"],[\"HR\",\"Croatia\"],[\"CW\",\"Curaçao\"],[\"CY\",\"Cyprus\"],[\"CZ\",\"Czech Republic\"],[\"DK\",\"Denmark\"],[\"DJ\",\"Djibouti\"],[\"DM\",\"Dominica\"],[\"DO\",\"Dominican Republic\"],[\"EC\",\"Ecuador\"],[\"EG\",\"Egypt\"],[\"SV\",\"El Salvador\"],[\"GQ\",\"Equatorial Guinea\"],[\"ER\",\"Eritrea\"],[\"EE\",\"Estonia\"],[\"ET\",\"Ethiopia\"],[\"FK\",\"Falkland Islands (Malvinas)\"],[\"FO\",\"Faroe Islands\"],[\"FJ\",\"Fiji\"],[\"FI\",\"Finland\"],[\"FR\",\"France\"],[\"GF\",\"French Guiana\"],[\"PF\",\"French Polynesia\"],[\"TF\",\"French Southern Territories\"],[\"GAC\",\"Gabon\"],[\"GM\",\"Gambia\"],[\"GE\",\"Georgia\"],[\"GER\",\"Germany\"],[\"GH\",\"Ghana\"],[\"GI\",\"Gibraltar\"],[\"GR\",\"Greece\"],[\"GL\",\"Greenland\"],[\"GD\",\"Grenada\"],[\"GP\",\"Guadeloupe\"],[\"GUC\",\"Guam\"],[\"GT\",\"Guatemala\"],[\"GG\",\"Guernsey\"],[\"GN\",\"Guinea\"],[\"GW\",\"Guinea-Bissau\"],[\"GY\",\"Guyana\"],[\"HT\",\"Haiti\"],[\"HM\",\"Heard Island and Mcdonald Islands\"],[\"VAC\",\"Holy See (Vatican City State)\"],[\"HN\",\"Honduras\"],[\"HK\",\"Hong Kong\"],[\"HU\",\"Hungary\"],[\"IS\",\"Iceland\"],[\"IND\",\"India\"],[\"IDC\",\"Indonesia\"],[\"IQ\",\"Iraq\"],[\"IE\",\"Ireland\"],[\"IM\",\"Isle Of Man\"],[\"ILC\",\"Israel\"],[\"JM\",\"Jamaica\"],[\"JP\",\"Japan\"],[\"JE\",\"Jersey\"],[\"JO\",\"Jordan\"],[\"KZ\",\"Kazakhstan\"],[\"KE\",\"Kenya\"],[\"KI\",\"Kiribati\"],[\"KP\",\"Korea, Democratic People\'s Republic of\"],[\"KR\",\"Korea, Republic Of\"],[\"KW\",\"Kuwait\"],[\"KG\",\"Kyrgyzstan\"],[\"LAC\",\"Lao People\'s Democratic Republic\"],[\"LV\",\"Latvia\"],[\"LB\",\"Lebanon\"],[\"LS\",\"Lesotho\"],[\"LR\",\"Liberia\"],[\"LY\",\"Libya\"],[\"LI\",\"Liechtenstein\"],[\"LT\",\"Lithuania\"],[\"LU\",\"Luxembourg\"],[\"MOC\",\"Macao\"],[\"MK\",\"Macedonia, The Former Yugoslav Republic \"],[\"MG\",\"Madagascar\"],[\"MW\",\"Malawi\"],[\"MY\",\"Malaysia\"],[\"MV\",\"Maldives\"],[\"ML\",\"Mali\"],[\"MTC\",\"Malta\"],[\"MH\",\"Marshall Islands\"],[\"MQ\",\"Martinique\"],[\"MR\",\"Mauritania\"],[\"MU\",\"Mauritius\"],[\"YTC\",\"Mayotte\"],[\"FM\",\"Micronesia, Federated States of\"],[\"MDC\",\"Moldova, Republic of\"],[\"MC\",\"Monaco\"],[\"MNC\",\"Mongolia\"],[\"MEC\",\"Montenegro\"],[\"MSC\",\"Montserrat\"],[\"MAC\",\"Morocco\"],[\"MZ\",\"Mozambique\"],[\"NA\",\"Namibia\"],[\"NR\",\"Nauru\"],[\"NP\",\"Nepal\"],[\"NLC\",\"Netherlands\"],[\"NCC\",\"New Caledonia\"],[\"NZ\",\"New Zealand\"],[\"NI\",\"Nicaragua\"],[\"NEC\",\"Niger\"],[\"NG\",\"Nigeria\"],[\"NUC\",\"Niue\"],[\"NF\",\"Norfolk Island\"],[\"MPC\",\"Northern Mariana Islands\"],[\"NO\",\"Norway\"],[\"OM\",\"Oman\"],[\"PK\",\"Pakistan\"],[\"PW\",\"Palau\"],[\"PS\",\"Palestinian Territory, Occupied\"],[\"PAC\",\"Panama\"],[\"PG\",\"Papua New Guinea\"],[\"PY\",\"Paraguay\"],[\"PEC\",\"Peru\"],[\"PH\",\"Philippines\"],[\"PN\",\"Pitcairn\"],[\"PL\",\"Poland\"],[\"PT\",\"Portugal\"],[\"PRC\",\"Puerto Rico\"],[\"QA\",\"Qatar\"],[\"RE\",\"Réunion\"],[\"RO\",\"Romania\"],[\"RU\",\"Russian Federation\"],[\"RW\",\"Rwanda\"],[\"BL\",\"Saint Barthélemy\"],[\"SH\",\"Saint Helena, Ascension and Tristan Da C\"],[\"KN\",\"Saint Kitts and Nevis\"],[\"LC\",\"Saint Lucia\"],[\"MF\",\"Saint Martin (French Part)\"],[\"PM\",\"Saint Pierre and Miquelon\"],[\"VC\",\"Saint Vincent and the Grenadines\"],[\"WS\",\"Samoa\"],[\"SM\",\"San Marino\"],[\"ST\",\"Sao Tome and Principe\"],[\"SAC\",\"Saudi Arabia\"],[\"SN\",\"Senegal\"],[\"RS\",\"Serbia\"],[\"SCC\",\"Seychelles\"],[\"SL\",\"Sierra Leone\"],[\"SG\",\"Singapore\"],[\"SX\",\"Sint Maarten (Dutch Part)\"],[\"SKC\",\"Slovakia\"],[\"SI\",\"Slovenia\"],[\"SB\",\"Solomon Islands\"],[\"SO\",\"Somalia\"],[\"ZA\",\"South Africa\"],[\"GS\",\"South Georgia and the South Sandwich Isl\"],[\"SS\",\"South Sudan\"],[\"ES\",\"Spain\"],[\"LK\",\"Sri Lanka\"],[\"SR\",\"Suriname\"],[\"SJ\",\"Svalbard and Jan Mayen\"],[\"SZ\",\"Swaziland\"],[\"SE\",\"Sweden\"],[\"CH\",\"Switzerland\"],[\"TW\",\"Taiwan, Province of China\"],[\"TJ\",\"Tajikistan\"],[\"TZ\",\"Tanzania, United Republic of\"],[\"TH\",\"Thailand\"],[\"TL\",\"Timor-Leste\"],[\"TG\",\"Togo\"],[\"TK\",\"Tokelau\"],[\"TO\",\"Tonga\"],[\"TT\",\"Trinidad and Tobago\"],[\"TNC\",\"Tunisia\"],[\"TR\",\"Turkey\"],[\"TM\",\"Turkmenistan\"],[\"TC\",\"Turks and Caicos Islands\"],[\"TV\",\"Tuvalu\"],[\"UG\",\"Uganda\"],[\"UA\",\"Ukraine\"],[\"AEC\",\"United Arab Emirates\"],[\"GB\",\"United Kingdom\"],[\"UM\",\"United States Minor Outlying Islands\"],[\"UY\",\"Uruguay\"],[\"UZ\",\"Uzbekistan\"],[\"VU\",\"Vanuatu\"],[\"VE\",\"Venezuela, Bolivarian Republic of\"],[\"VN\",\"Viet Nam\"],[\"VG\",\"Virgin Islands, British\"],[\"VIU\",\"Virgin Islands, U.S.\"],[\"WF\",\"Wallis and Futuna\"],[\"EH\",\"Western Sahara\"],[\"YE\",\"Yemen\"],[\"ZM\",\"Zambia\"],[\"ZW\",\"Zimbabwe\"]]}').DATA; var vars_user_billingstate = 'CA'; var vars_user_billingzip = '90024'; function showReport() { window.open('/?pg=searchReport&sid=18695374&mode=stream','searchReport','width=780,height=500'); } </script>  <style type="text/css"> #tsSearchAppWrapper .bk-text-light {color:#fff !important;} #tsSearchAppWrapper .bk-text-danger {color:#f83245!important} #tsSearchAppWrapper .bk-text-dim {color:#808080!important} #tsSearchAppWrapper .bk-text-center {text-align:center !important;} #tsSearchAppWrapper .bk-text-right {text-align:right !important;} #tsSearchAppWrapper .bk-align-baseline {vertical-align:baseline !important;} #tsSearchAppWrapper .bk-w-100 {width:100% !important;} #tsSearchAppWrapper .bk-h-100 {height:100% !important;} #tsSearchAppWrapper .bk-d-block {display:block !important;} #tsSearchAppWrapper .bk-d-flex {display:flex !important;} #tsSearchAppWrapper .bk-d-none {display:none !important;} #tsSearchAppWrapper .bk-flex-wrap {flex-wrap:wrap !important;} #tsSearchAppWrapper .bk-flex-column {flex-direction:column !important;} #tsSearchAppWrapper .bk-flex-grow {flex-grow:1 !important;} #tsSearchAppWrapper .bk-flex-align-center {align-items:center !important;} #tsSearchAppWrapper .bk-col {flex-basis:0;flex-grow:1;max-width:100%;padding-right:5px;padding-left:5px;} #tsSearchAppWrapper .bk-col-auto {flex:0 0 auto;width:auto;max-width:100%;padding-right:5px;padding-left:5px;} #tsSearchAppWrapper .bk-align-self-center{align-self:center !important;} #tsSearchAppWrapper .bk-justify-content-center{justify-content:center!important;} #tsSearchAppWrapper .bk-pt-0 {padding-top:0!important;} #tsSearchAppWrapper .bk-pt-1 {padding-top:0.5rem!important;} #tsSearchAppWrapper .bk-pb-2 {padding-bottom:.5em!important;} #tsSearchAppWrapper .bk-pr-0 {padding-right:0!important;} #tsSearchAppWrapper .bk-p-0 {padding:0!important;} #tsSearchAppWrapper .bk-p-1 {padding:.25em!important;} #tsSearchAppWrapper .bk-p-2 {padding:.5em!important;} #tsSearchAppWrapper .bk-p-2 {padding:.5em!important;} #tsSearchAppWrapper .bk-p-3 {padding:1em!important;} #tsSearchAppWrapper .bk-pr-3 {padding-right:1em!important;} #tsSearchAppWrapper .bk-pr-4 {padding-right:1.5em!important;} #tsSearchAppWrapper .bk-pl-3 {padding-left:1em!important;} #tsSearchAppWrapper .bk-pl-5 {padding-left:2em!important;} #tsSearchAppWrapper .bk-pb-0 {padding-bottom:0!important;} #tsSearchAppWrapper .bk-m-0 {margin:0!important;} #tsSearchAppWrapper .bk-m-1 {margin:.25em!important;} #tsSearchAppWrapper .bk-m-2 {margin:.5em!important;} #tsSearchAppWrapper .bk-mt-auto {margin-top:auto!important;} #tsSearchAppWrapper .bk-mt-0 {margin-top:0!important;} #tsSearchAppWrapper .bk-mt-1 {margin-top:.25em!important;} #tsSearchAppWrapper .bk-mt-2 {margin-top:.5em!important;} #tsSearchAppWrapper .bk-mt-3 {margin-top:1em!important;} #tsSearchAppWrapper .bk-mt-4 {margin-top:1.5em!important;} #tsSearchAppWrapper .bk-mt-5 {margin-top:2em!important;} #tsSearchAppWrapper .bk-mb-0 {margin-bottom:0!important;} #tsSearchAppWrapper .bk-mb-1 {margin-bottom:.25em!important;} #tsSearchAppWrapper .bk-mb-2 {margin-bottom:.5em!important;} #tsSearchAppWrapper .bk-mb-3 {margin-bottom:1em!important;} #tsSearchAppWrapper .bk-mb-4 {margin-bottom:1.5em!important;} #tsSearchAppWrapper .bk-mb-5 {margin-bottom:2em!important;} #tsSearchAppWrapper .bk-ml-2 {margin-left:.5em!important;} #tsSearchAppWrapper .bk-mr-1 {margin-right:.25em!important;} #tsSearchAppWrapper .bk-mr-2 {margin-right:.5em!important;} #tsSearchAppWrapper .bk-mr-3 {margin-right:1em!important;} #tsSearchAppWrapper .bk-mr-4 {margin-right:1.5em!important;} #tsSearchAppWrapper .bk-mr-5 {margin-right:2em!important;} #tsSearchAppWrapper .bk-font-size-xs { font-size:.79em; } #tsSearchAppWrapper .bk-font-size-sm { font-size:.85em; } #tsSearchAppWrapper .bk-font-size-md {font-size:.95em} #tsSearchAppWrapper .bk-font-weight-bold {font-weight:bold;} #tsSearchAppWrapper .bk-ml-auto {margin-left:auto !important;} #tsSearchAppWrapper .bk-mr-auto {margin-right:auto !important;} #tsSearchAppWrapper .bk-mx-auto {margin-left:auto !important;margin-right:auto !important;} #tsSearchAppWrapper .bk-border-gray {border-color:gray;} #tsSearchAppWrapper .bk-align-top {vertical-align:top;} #tsSearchAppWrapper .bk-text-nowrap {white-space:nowrap !important;} #tsSearchAppWrapper .bk-minh-104 {min-height:104px !important;} #tsSearchAppWrapper .bk-border-1 {border-width:1px!important;border-style:solid!important;} #tsSearchAppWrapper .bk-border-2 {border-width:2px !important;border-style:solid!important;} #tsSearchAppWrapper .bk-border-bottom {border-bottom: 1px solid #eeeff8 !important;} #tsSearchAppWrapper .bk-price-card-selected { border-color: rgb(60, 115, 205) !important;border-width: 2px !important; } #tsSearchAppWrapper .bk-formcontrol {height:35px!important;box-sizing:border-box!important;margin:0!important;} #tsSearchAppWrapper .bk-card-box { position: relative; display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column;flex-direction: column; min-width: 0; word-wrap: break-word; background-color: #fff; background-clip: border-box; box-sizing:border-box!important; border: 0 solid rgba(122, 123, 151, 0.3); border-radius: 0.65em; box-shadow: 0 .46875em 2.1875em rgba(0,0,0,.03),0 .9375em 1.40625em rgba(0,0,0,.03),0 .25em .53125em rgba(0,0,0,.05),0 .125em .1875em rgba(0,0,0,.03); } #tsSearchAppWrapper .bk-card-header { padding:.75em;margin-bottom:0; } #tsSearchAppWrapper .bk-card-body {padding:1.25em;} #tsSearchAppWrapper .bk-card-selected { border-color:rgb(214, 214, 214) !important;border-width:3px !important;} #tsSearchAppWrapper .bk-bg-secondary {background-color: #f8f9ff !important;} #tsSearchAppWrapper .bk-shadow-none {-webkit-box-shadow: none !important;box-shadow: none !important;} #tsSearchAppWrapper .bk-price-badge {position:absolute;top:-12px;right:10px;background-color:#0073f7;border: 1px solid #e0e0e0;border-radius: 999px;padding:6px 14px;font-size:10px !important; font-weight:500;color:white;box-shadow:0 2px 6px rgba(0, 0, 0, 0.1);font-size:10px;} #tsSearchAppWrapper .bk-dashed-container {background-color:#f0f8ff;border-style:dashed;border-width:1px;border-color:#7aa9d6;} #tsSearchAppWrapper .mc_add_link {display:inline-block !important;color:#007bff !important;text-decoration:underline !important;font-weight:500 !important;} #tsSearchAppWrapper .mc_add_link:hover {text-decoration:none !important;color: #0056b3 !important;} #bk_content .bk-summary-circle { background-color:#4472c4; height:90px; width:90px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; text-align:center; line-height:24px; text-transform:uppercase; } #bk_content .bk-bg-chartblue { fill:#4472c4; } #bk_content .state{ fill: none; stroke: #a9a9a9; stroke-width: 1;	} #bk_content .state:hover{ fill-opacity:0.5; } #bk_content #MCSearchSummaryContainer {position:relative!important;} #bk_content #bk_tooltip { position: absolute; text-align: center; padding: 20px; margin: 10px; font: 12px sans-serif; background-color: #ffffff; border-radius: 2px; pointer-events: none; border: 1px solid #ccc; border: 1px solid rgba(0, 0, 0, 0.2); border-radius:6px; width:auto; padding:4px; opacity:0; } #bk_content .bk-similar-search-circle {width:280px;} #bk_content .bk-list-search-circle {width:340px;} #bk_content .cursor-auto{ cursor:auto!important; } #bk_content .text-decoration-none{ text-decoration:none!important; } #tsSearchAppWrapper .mc_flexbox { display:-webkit-flex; display:-ms-flexbox; display:flex; flex-direction:row; } #tsSearchAppWrapper .mc_flexbox .mc_flexbox_col { flex:1; padding:20px; background:#eee } #tsSearchAppWrapper .bk-mc-tag { display:inline-flex; margin:0 8px 8px 0; align-items:center; border-radius:0.5em; border:1px solid #dadce0; background-color:#fff; height:2em; transition:all .2s cubic-bezier(0.4,0,0.2,1) 0s; padding:0.45em; font-size:15px; } #tsSearchAppWrapper .bk-mc-tag:hover { box-shadow:0 1px 5px 0 rgba(0,0,0,.1); color:#3c4043; border-color:#b2b3b5; text-decoration:none; } #tsSearchAppWrapper .bk-overlay {position: fixed;top: 0%;left: 0%;width: 100%;height: 100%;background-color:black;z-index:1001;opacity:.2;} #tsSearchAppWrapper .bk-active-card {z-index:1002;border:4px solid #c1c1c1;} #searchSponsorRightSideContainer ~ div.s_row {width:83%;} @media screen and (min-width:1401px){ #searchSponsorRightSideContainer {width:25% !important;} #searchSponsorRightSideContainer ~ div.s_row {width:72% !important;} } @media screen and (max-width:1400px){ #searchSponsorRightSideContainer {width:25% !important;} #searchSponsorRightSideContainer ~ div.s_row {width:72% !important;} } @media screen and (max-width:1199px){ #searchSponsorRightSideContainer {width:21% !important;} #searchSponsorRightSideContainer ~ div.s_row {width:75% !important;} } @media screen and (max-width:1024px){ #searchSponsorRightSideContainer ~ div.s_row {width:100% !important;} } @media screen and (min-width:978px) and (max-width:1024px){ #searchSponsorRightSideContainer{display:none !important;} } @media screen and (max-width:979px){ div#searchSponsorRightSideContainer {float:none;width:100%} #searchSponsorRightSideContainer ~ div.s_row {width:100%;} } @media (max-width: 992px) { #tsSearchAppWrapper .bk-flex-lg-row {flex-direction: row !important;} #tsSearchAppWrapper .bk-flex-lg-column {flex-direction: column !important;} #tsSearchAppWrapper .bk-mt-lg-2 {margin-top: 0.5em !important;} } @media (max-width: 576px) { #tsSearchAppWrapper .bk-flex-sm-column {flex-direction: column !important;} #tsSearchAppWrapper .bk-w-sm-100 {width:100% !important;} } /*default bootstrap style (to override tsApps style for now)*/ #bk_content .form-horizontal input:not(.mc_inlinecheckbox):not(.datecontrol) {width: 206px;} #bk_content .form-horizontal select {width: 220px;} /*default bootstrap style (to override custom styles)*/ #bk_content li {line-height: 20px;} #bk_content #seachResultsPaginationBar .pagination ul {margin:0px;} #bk_content ul.breadcrumb {margin: 0 0 20px;} div#tsSearchAppWrapper a.btn i[class^="fa-"] {vertical-align:middle;} div#s_listing .nav-list>.active>a {color: #fff!important;} div#bk_content {padding:12px 8px 8px 10px;} div#bk_content form input.datecontrol {background-color:#fff;cursor:pointer; width:100px;} div#mobileViewOptionsHolder {padding-left:5px;} span#docCartCountDisplay {padding:1px 7px;} div#bk_content .bk_appIcons i[class^="fa-"] {margin-right:7px;} div#bk_content div.bk_subContent {margin-left: 20px;margin-top: 4px;} div#bk_content div.bk_smallfont {font-size:11pt;} #bk_content #seachResultsPaginationBar .pager {margin: 2px;} #bk_content #seachResultsPaginationBar .pager li>a, .pager li>span {padding: 2px 10px; font-size:13px;} #bk_content #seachResultsPaginationBar .mobileViewPager .pager li {display: block;} #bk_content .bk-controls-large select {width: 300px;} #bk_content .bk-input-prepend .bk-add-on {height:100%!important;padding:8px 6px!important;} #bk_content .dataTables_wrapper input {box-sizing: unset!important;} #bk_content .dataTables_wrapper select, #bk_content .dataTables_wrapper input {width:auto!important;} #tsSearchAppWrapper .m-10 { margin:10px; } #tsSearchAppWrapper .mb-10 { margin-bottom:10px; } #tsSearchAppWrapper .ml-10 { margin-left:10px; } #tsSearchAppWrapper .p-10 { padding:10px; } #tsSearchAppWrapper .py-10 { padding-bottom:10px; padding-top:10px; } #tsSearchAppWrapper .p-3 { padding:3px; } #tsSearchAppWrapper .p-0 { padding:0px; } @media (min-width: 480px){ .form-medium .control-label {width:220px;} .form-medium .controls {margin-left:240px;} } @media (max-width: 600px) { #seachResultsPaginationBar .pagination ul>li>a, #seachResultsPaginationBar .pagination ul>li>span {padding: 2px 7px; font-size: 15px;} #tsSearchAppWrapper .mc_flexbox { flex-direction:column; } } @media (max-width: 767px) { div#bk_content div.bk_subContent {margin-left: 5px;} #bk_content .bk-controls-large select {width: 255px;} } @media (min-width: 768px) and (max-width: 979px) { #bk_content .form-horizontal input:not(.mc_inlinecheckbox):not(.datecontrol) {width: 125px!important;} #bk_content .form-horizontal select {width: 139px!important;} } @media (min-width: 768px) and (max-width: 991px){ div#s_listing div#bk_list{width: 44%;} div#s_listing div#bk_content{width: 53%;} div#s_listing div#bk_list .nav li a{font-size:small;} } @media (min-width: 768px) and (max-width: 1199px) { #bk_content .row-fluid .tablet-fullwidth [class*="span"] {float: none;width: 100%;} #bk_content .bk-controls-large select {width: 175px!important;} } @media (min-width: 992px){ .form-medium-lg .control-label {width:220px;} .form-medium-lg .controls {margin-left:240px;} #bk_content .text-lg-center{text-align:center;} } </style>  <script language="javascript"> function toggleBKList(isPostSearchOp){ var isExpand = $('#toggleBKListIcon').hasClass('fa-circle-plus'); $('#toggleBKListText').text(isExpand ? 'Collapse Databases' : $('#toggleBKListText').data('initbuttontext')); $('#toggleBKListIcon').toggleClass('fa-circle-plus').toggleClass('fa-circle-minus'); $('#bk_list').toggleClass('hidden-phone'); $('#bk_content').toggleClass('hidden-phone'); if(isPostSearchOp){ $('#resultTotalCountHolder').toggle(isExpand ? true : false); $('#toggleBKListCountDisplay').toggle(isExpand ? false : true); } } function gotoBKContainer(bkContainerID) { let bkContainer = $('#'+bkContainerID); if(bkContainer.length && bkContainer.is(':visible')) { $('html, body').animate({ scrollTop: bkContainer.offset().top - 300 }, 750); } } function bk_slideToggle(id,p,el) { $('#'+id).slideToggle(500); gotoBKContainer(id); $(el).find('.fa-chevron-down').toggle(); $(el).find('.fa-chevron-up').toggle(); } </script> <meta name="ROBOTS" content="INDEX,NOFOLLOW">
+                                
+                                    <script type="text/javascript">
+                                        $().ready( function() {
+                                            MCPromises.BackendPlatformServices.then(function() {
+                                                var MCadlimit = 2;
+                                                var MCadContainer = $("#searchSponsorContainer");
+                                                var MCadSitecode = 'CAAA';
+                                                var MCadZoneType = 'search';
+                                                
+                                                var overrideCallback = function (adsArray) {
+                                                    if (adsArray != null && adsArray.length) {
+                                                        for (var i=0;i<Math.min(adsArray.length,MCadlimit);i++) {
+                                                            if (adsArray[i].ADLINK.length)
+                                                                $(MCadContainer).append('<a href="' + adsArray[i].ADLINK + '" title="Click for more information" target="_blank"><img style="width:' + adsArray[i].WIDTH + ';height:' + adsArray[i].HEIGHT + ';" src="' + adsArray[i].IMAGEURL + '" /></a><br/><br/>');
+                                                            else
+                                                                $(MCadContainer).append('<a href="/?pg=search&bid=3305&s_a=otherTools&adID=' + adsArray[i].ADID + '" title="Click for more information" target="_self"><img style="width:' + adsArray[i].WIDTH + ';height:' + adsArray[i].HEIGHT + ';" src="' + adsArray[i].IMAGEURL + '" /></a><br/><br/>');
+                                                        }
+                                                    } else {
+                                                        $(MCadContainer).remove();
+                                                    }
+                                                };
+                                                MCBackendPlatformServices.SponsorAdsService.MCIncludeAds(MCadContainer, MCadZoneType,MCadSitecode,MCadlimit,'_top',overrideCallback);
+                                            }).catch(error => {
+                                                let msg = 'Failed to get ads for listViewerSponsorContainer';
+                                                if (MCJSErrorReporting && MCJSErrorReporting.promiseRejectionHandler)
+                                                    MCJSErrorReporting.promiseRejectionHandler(msg)
+                                                else 
+                                                    console.error(`MCJSErrorReporting.promiseRejectionHandler not defined, falling back to console message: ${msg}`);
+                                            });
+                                        });
+                                    </script>
+                                
+                            
+                                
+                                    <script src="/sitecomponents/COMMON/javascript/webviewer/6.3.2/webviewer.min.js"></script>
+                                
+                            
+			
+			<script type="text/javascript">
+				var vars_btid = 3;
+				var local_siteid = '105';
+				var local_sitecode = 'CAAA';
+				var local_spiu = '/assets/common/';
+				var local_bid = 3305;
+				var local_caserefs = [];
+			</script>
+			<script type="text/javascript" src="/assets/common/javascript/polyfills/screenfull/screenfull.3.0.0.min.js"></script>
+			<script type="text/javascript" src="/assets/common/javascript/search.js?mcts=20251029104039"></script>
+			<script type="text/javascript" src="/assets/common/javascript/common.js?mcts=20251029104039"></script>
+			<script type="text/javascript">
+				loadSearchGlobals(local_siteid,local_bid,local_spiu,local_caserefs,local_sitecode);
+				
+					new searchbucket(vars_siteid,3304,35);
+				
+					new searchbucket(vars_siteid,3299,1);
+				
+					new searchbucket(vars_siteid,3300,1);
+				
+					new searchbucket(vars_siteid,3301,6);
+				
+					new searchbucket(vars_siteid,3302,23);
+				
+					new searchbucket(vars_siteid,3303,24);
+				
+					new searchbucket(vars_siteid,3326,23);
+				
+					new searchbucket(vars_siteid,3305,3);
+				
+					new searchbucket(vars_siteid,3318,34);
+				
+					new searchbucket(vars_siteid,3319,34);
+				
+					new searchbucket(vars_siteid,3320,34);
+				
+					new searchbucket(vars_siteid,3552,34);
+				
+					new searchbucket(vars_siteid,3981,25);
+				
+					new searchbucket(vars_siteid,3328,34);
+				
+					new searchbucket(vars_siteid,3459,34);
+				
+					new searchbucket(vars_siteid,3460,34);
+				
+					new searchbucket(vars_siteid,3461,34);
+				
+					new searchbucket(vars_siteid,3462,34);
+				
+					new searchbucket(vars_siteid,3577,34);
+				
+					new searchbucket(vars_siteid,3306,5);
+				
+					new searchbucket(vars_siteid,3314,5);
+				
+					new searchbucket(vars_siteid,4264,5);
+				
+					new searchbucket(vars_siteid,3310,10);
+				
+					new searchbucket(vars_siteid,4374,50);
+				
+					new searchbucket(vars_siteid,3316,15);
+				
+					new searchbucket(vars_siteid,3307,8);
+				
+					new searchbucket(vars_siteid,4028,48);
+				
+					new searchbucket(vars_siteid,3680,46);
+				
+					new searchbucket(vars_siteid,4565,51);
+				
+					new searchbucket(vars_siteid,3308,12);
+				
+					new searchbucket(vars_siteid,3313,14);
+				
+					new searchbucket(vars_siteid,3376,44);
+				
+			</script>
+			
+		 <script type="text/javascript" src="/assets/common/javascript/d3/6.5.0/d3.v6.min.js"></script> <script type="text/javascript" src="/assets/common/javascript/jQueryAddons/datatables/1.10.24/js/jquery.dataTables.min.js"></script> <script type="text/javascript" src="/assets/common/javascript/jQueryAddons/jQuerySteps/jquery.steps.js"></script> <script language="javascript"> function b_clearCounts() { for (var i=0; i < bucketarray.length; i++) b_clearCount(bucketarray[i]); } function b_clearCount(obj) { b_setCount(obj,''); } function b_showCountLoading(obj) { b_setCount(obj,b_getloadingicon(),true); } function b_setCount(obj,cnt,isIcon=false) { var countDisplay; if(cnt == '--' || cnt == '' || isIcon) countDisplay = cnt; else if(cnt == '0') countDisplay = '<span class="badge">'+ cnt +'</span>'; else countDisplay = '<span class="badge badge-success">'+ cnt +'</span>'; $('#bk_' + obj.bid + '_cnt').html(countDisplay); } function b_doSearch(sid) { b_clearCounts(); document.getElementById('bk_sid_holder').innerHTML = sid; setSearchID(sid); /*do current bucket actions first, then the others.*/ document.getElementById('bk_content').innerHTML = '<div align="center">' + b_getlgloadingicon() + '</div>'; var obj = b_getObjFromBid(vars_bid); isSearchReportReadyIntervalID = setInterval(isSearchReportReady,1000); if (obj) b_doSearchResults(obj,sid,1,''); /*now the others*/ for (i=0; i < bucketarray.length; i++) { if (bucketarray[i].bid != vars_bid) b_getBucketCount(bucketarray[i],sid); } } function b_getBucketCount(obj,sid) { try { var objCounts = eval('b_' + sid + '_bcounts'); var itemcount = (objCounts[obj.bid] == -1) ? 'N/A' : objCounts[obj.bid]; if (objCounts[obj.bid] == -1) { b_setCount(obj,b_addCommas(itemcount).replace(/N\/A/, "--")); } else if (objCounts[obj.bid] >= 0) { b_setCount(obj,b_addCommas(itemcount).replace(/N\/A/, "--")); } else { b_doSearchCountResults(obj,sid); } b_calculateAndSetTotalCount(itemcount); } catch(err) { b_doSearchCountResults(obj,sid); } } function b_doSearchCountResults(obj,sid) { var objParams = { searchid:sid, bucketid:obj.bid }; var showCountTimeout = function(r) { b_setCount(obj,'--'); obj.req = null; }; var showCountErr = function(r) { b_setCount(obj,b_geterroricon(),true); obj.req = null; }; var showCountResults = function(r) { var itemcount = ''; if (r.success && r.success == 'true') { itemcount = (r.itemcount == -1) ? 'N/A' : r.itemcount; b_calculateAndSetTotalCount(itemcount); b_setCount(obj,b_addCommas(itemcount).replace(/N\/A/, "--")); obj.req = null; } else showCountErr(r); }; obj.req = TS_AJX('SBT' + obj.btid,'getResultsCount',objParams,showCountResults,showCountErr,45000,showCountTimeout); b_showCountLoading(obj); } function b_doSearchResults(obj,sid,start,sorttype,filter,postfilter) { var bkcon = document.getElementById('bk_content'); var objParams = { searchID:sid, bucketID:obj.bid, startRow:start, sortType:sorttype, filter:filter, postFilter:postfilter, viewDirectory:'responsive' }; var showSearchTimeout = function(r) { b_setCount(obj,'--'); if (bkcon) bkcon.innerHTML = '<center><div align="left" style="margin:10px;border:1px solid #ccc;width:70%;padding:10px;"><div class="titleText">Search Cancelled</div><div class="bodyText"><br/>Your search has been cancelled. It may have timed out.<br/><br/>You may <a href="' + self.location.href + '">try your search again</a> or <a href="/?pg=search&bid=' + obj.bid + '">start a new search</a>.</div></div></center>'; obj.req = null; }; var showSearchErr = function(r,emsg) { b_setCount(obj,b_geterroricon(),true); if (bkcon) { var repeatSearchLink = 'You may <a href="' + self.location.href + '">try your search again</a> or <a href="/?pg=search&bid=' + obj.bid + '">start a new search</a>.'; if(emsg && emsg.length) bkcon.innerHTML = '<div class="alert alert-error"><h4>'+ emsg +'</h4><div class="bodyText"><br/>'+ repeatSearchLink +'</div>'; else bkcon.innerHTML = '<div class="alert alert-error"><h4>Sorry...</h4><div class="bodyText"><br/>We encountered an error while displaying your search results. We apologize for the inconvenience.<br/><br/>'+ repeatSearchLink +'</div><br><div class="bodyText">Message ID: SRCH.JS.GR</div></div>'; } obj.req = null; }; var showSearchResults = function(r) { var itemcount = ''; if (r.success && r.success == 'true') { if (r.thisbucketcartitemtypeid) defaultBucketCartItemTypeID = r.thisbucketcartitemtypeid; if (bkcon) bkcon.innerHTML = r.resulthtml; var elemFadeTR = document.getElementById('divFadeTR'); if (elemFadeTR) { elemFadeTR.style.display = ''; } window.setTimeout(introDivTimeout,5000); startFlash(); itemcount = (r.itemcount == -1) ? 'N/A' : r.itemcount; b_calculateAndSetTotalCount(itemcount); b_setCount(obj,b_addCommas(itemcount).replace(/N\/A/, "--")); if (r.resultmode && r.resultmode == 'summary') b_loadSearchSummary(r); if (typeof r.strsummaryindiv !="undefined" && typeof r.strsummaryindiv.arrexperts !="undefined" && r.strsummaryindiv.arrexperts.length && typeof r.strsummaryindiv.arrexperts[0].arrsummaryindiv !="undefined") { let arrexpertcharts = r.strsummaryindiv.arrexperts.flatMap(item => item.arrsummaryindiv); b_loadSummaryIndiv(arrexpertcharts,r.strsummaryindiv.arrusstates); } loadSearchSponsorRightSideContainer(); TSDocumentViewerCheckAutoShowDocument(); medlinePriceEstimates(); mcValidateLogins($('#bk_content')); obj.req = null; } else if (r.success && r.success.toLowerCase() == 'false' && r.errmsg) { showSearchErr(r, r.errmsg); } else showSearchErr(r); }; obj.req = TS_AJX('SBT' + obj.btid,'getResults',objParams,showSearchResults,showSearchErr,60000,showSearchTimeout); b_showCountLoading(obj); } function b_getlgloadingicon() { return '<img src="' + vars_spiu + 'images/indicator.gif" alt="Loading..." width="100" height="100">'; } function b_getloadingicon() { return '<img src="' + vars_spiu + 'images/search/loading_animation2.gif" alt="Loading..." width="16" height="16"> '; } function b_geterroricon() { return '<img src="' + vars_spiu + 'images/search/exclamation.png" title="Error" width="16" height="16"> '; } /*used by Introduction bucket to swap a div*/ var introMaxCount = 6; var introCurrCount = 0; function introDivTimeout() { var elemDivExp = document.getElementById("divExposition"); var elemDivNoMatch = document.getElementById("divNoMatches"); var elemForm = document.getElementById("divIntroSearch"); if (!elemDivExp && !elemDivNoMatch && !elemForm) { if (introCurrCount < introMaxCount) { introCurrCount++; window.setTimeout(introDivTimeout,5000); return; } } else { introCurrCount = introMaxCount + 1; } if (elemDivExp) { $('.resultMsgExposition').html('Click each database to view matching results.'); } if (elemDivNoMatch) { elemDivNoMatch.style.display = "block"; } if (elemForm) { elemForm.style.display = "block"; } } var currentSearchTotalCount = 0; function b_getTotalSearchCount() { return currentSearchTotalCount; } function b_calculateAndSetTotalCount(thisCount) { currentSearchTotalCount += $.isNumeric(thisCount) ? thisCount : 0; $('.resultTotalCountDisplay_cnt').text(b_addCommas(currentSearchTotalCount)); } function b_showLoginContainer() { $('#MCSearchSummaryContainer').hide(); $('#MCNotLoggedInContainer').show(300); $('html, body').animate({ scrollTop: $('#bk_content').offset().top - 450 }, 750); } function b_showInactiveUserInfo() { $('#MCInactiveUserSearchSummary').hide(); $('#MCInactiveUserInfo').show(300); $('html, body').animate({ scrollTop: $('#bk_content').offset().top - 450 }, 750); } function b_loadSearchSummary(r) { if (r.strchart) { if (r.strchart.arrsearchsummary && r.strchart.arrsearchsummary.length) b_loadSearchSummaryBarChart(r.strchart); if (r.strchart.arrlocation && r.strchart.arrlocation.length) b_loadSearchSummaryLocationChart(r.strchart); } } function b_loadSearchSummaryBarChart(strchart) { if (!$('#MCSearchSummaryBarChart').length) { return false; } var containerElement = ($('#MCSearchSummaryBarChart').width() == 0) ? $('#bk_content') : $('#MCSearchSummaryBarChart'); var chartWidth = (containerElement.width() < 375) ? containerElement.width() : 375; /*set the dimensions and margins of the graph*/ var margin = { top: 30, right: 15, bottom: 60, left: 60 }, width = chartWidth - margin.left - margin.right, height = 300 - margin.top - margin.bottom; var svg = d3.select("#MCSearchSummaryBarChart") .append("svg") .attr("width", width + margin.left + margin.right) .attr("height", height + margin.top + margin.bottom) .append("g") .attr("transform", "translate(" + margin.left + "," + margin.top + ")"); /*X axis*/ var x = d3.scaleBand() .range([ 0, width ]) .domain(strchart.arrsearchsummary.map(function(d) { return d.year; })) .padding(0.2); svg.append("g") .attr("transform", "translate(0," + height + ")") .call(d3.axisBottom(x)) .selectAll("text") .attr("transform", "translate(-10,0)rotate(-45)") .style("text-anchor", "end"); /*Y axis*/ var y = d3.scaleLinear() .domain([0, d3.max(strchart.arrsearchsummary, function(d) { return d.value; })]) .range([ height, 0]); svg.append("g") .call(d3.axisLeft(y).ticks(5)); /*Bars*/ svg.selectAll(".bk-bg-chartblue") .data(strchart.arrsearchsummary) .enter() .append("rect") .attr("class", "bk-bg-chartblue") .attr("x", function(d) { return x(d.year); }) .attr("y", function(d) { return y(d.value); }) .attr("width", x.bandwidth()) .attr("height", function(d) { return height - y(d.value); }); /*Title*/ if (strchart.searchsummaryobjtitle && strchart.searchsummaryobjtitle.length) svg.append("text") .attr("x", (width / 2)) .attr("y", 0 - (margin.top / 2)) .attr("text-anchor", "middle") .style("font-size", "16px") .style("font-weight", "bold") .text(strchart.searchsummaryobjtitle); } function b_loadSearchSummaryLocationChart(strchart) { if (!$('#MCSearchSummaryLocationChart').length) { return false; } var strData = {}; var containerElement = ($('#MCSearchSummaryLocationChart').width() == 0) ? $('#bk_content') : $('#MCSearchSummaryLocationChart'); var loc_chartWidth = (containerElement.width() - 10) > 500 ? 500 : (containerElement.width() - 10); var loc_chartHeight = 300; var scaleWidth = containerElement.width(); if(scaleWidth < 400) scaleWidth = 400; else if(scaleWidth > 500) scaleWidth = 500; strchart.arrusstates.forEach(function(d) { var value = 0; var arrFiltered = strchart.arrlocation.filter( function(obj,index) { return obj.statecode == d.statecode; } ); if (arrFiltered.length) { value = arrFiltered[0].value; } strData[d.statecode] = { value:value, statecode:d.statecode, statename:d.statename, color:value >= 1 ? '#5bb75b' : d3.interpolateBlues(0.2)}; }); var strToolTip = { id:'bk_tooltip', fn:b_tooltipHtml }; var b_onMouseOver = function(e,d) { var strFilteredState = { statename:'', value:'' }; for (var statecode in strData) { if (strData[statecode].statename.toLowerCase() == d.properties.name.toLowerCase()) { strFilteredState = strData[statecode]; break; } } d3.select("#"+strToolTip.id).transition().duration(200).style("opacity", .9); var relX = e.pageX - $("#MCSearchSummaryContainer").offset().left; var relY = e.pageY - $("#MCSearchSummaryContainer").offset().top-28; d3.select("#"+strToolTip.id).html(strToolTip.fn(strFilteredState.statename, strFilteredState.value)) .style("left", (relX) + "px") .style("top", (relY) + "px"); }; var b_onMouseOut = function(e,d) { d3.select("#"+strToolTip.id).transition().duration(500).style("opacity", 0); }; var b_getFillColor = function(d) { var fillColor = '#ccc'; for (var statecode in strData) { if (strData[statecode].statename.toLowerCase() == d.properties.name.toLowerCase()) { fillColor = strData[statecode].color; break; } } return fillColor; }; var projection = d3.geoAlbersUsa() .translate([loc_chartWidth/2, loc_chartHeight/2]) .scale([scaleWidth]); var path = d3.geoPath() .projection(projection); var svg = d3.select("#MCSearchSummaryLocationChart") .append("svg") .attr("width", loc_chartWidth) .attr("height", loc_chartHeight); d3.json("/assets/common/javascript/d3/6.5.0/us-states.json").then(function(json) { /*Bind data and create one path per GeoJSON feature*/ svg.selectAll("path") .data(json.features) .enter() .append("path") .attr("d", path) .style("stroke", "#fff") .style("stroke-width", "0.5") .style("fill", b_getFillColor) .on("mouseover", b_onMouseOver) .on("mouseout", b_onMouseOut); /*Title*/ if (strchart.locationobjtitle && strchart.locationobjtitle.length) svg.append('foreignObject') .attr('x', 0) .attr('y', 0) .attr('width', '100%') .attr('height', 40) .html('<div id="MC-d3-loccharttitle" style="width: 100%;font-size:16px;font-weight:bold;text-align:center;">'+strchart.locationobjtitle+'</div>'); }); } function b_loadSummaryIndiv(arrcharts,arrusstates) { $.each(arrcharts, function( chartIndex, chartItem ) { if (chartItem.charttype == "map" && chartItem.arrlocation && chartItem.arrlocation.length > 0){ b_loadUSStatesDataMap(chartItem.containerid, chartItem.charttitle, chartItem.arrlocation, arrusstates); } if (chartItem.charttype == "bar" && chartItem.arrdata && chartItem.arrdata.length > 0){ b_loadBarChart(chartItem.containerid, chartItem.charttitle, chartItem.arrdata); } }); } function b_loadUSStatesDataMap(containerid, charttitle, arrlocation, arrstates) { if (!$('#' + containerid).length) return false; var strData = {}, loc_chartWidth = 425, loc_chartHeight = 300; var strToolTip = { id:'bk_tooltip', fn:b_tooltipHtml }; arrstates.forEach(function(d) { var value = 0; var arrFiltered = arrlocation.filter( function(obj,index) { return obj.statename.toLowerCase() == d.statename.toLowerCase(); } ); if (arrFiltered.length) { value = arrFiltered[0].value; } strData[d.statecode] = { value:value, statecode:d.statecode, statename:d.statename, color: value > 0 ? d3.interpolateBlues( value/100 + 0.2 ) : d3.color("#d3d3d3")}; }); var b_onMouseOver = function(e,d) { var strFilteredState = { statename:'', value:'' }; for (var statecode in strData) { if (strData[statecode].statename.toLowerCase() == d.properties.name.toLowerCase()) { strFilteredState = strData[statecode]; break; } } d3.select("#"+strToolTip.id).transition().duration(200).style("opacity", .9); d3.select("#"+strToolTip.id).html(strToolTip.fn(strFilteredState.statename, strFilteredState.value)) .style("left", (e.pageX) + "px") .style("top", (e.pageY - 28) + "px"); }; var b_onMouseOut = function(e,d) { d3.select("#"+strToolTip.id).transition().duration(500).style("opacity", 0); }; var b_getFillColor = function(d) { var fillColor = '#ccc'; for (var statecode in strData) { if (strData[statecode].statename.toLowerCase() == d.properties.name.toLowerCase()) { fillColor = strData[statecode].color; break; } } return fillColor; }; var projection = d3.geoAlbersUsa() .translate([loc_chartWidth/2, loc_chartHeight/2]) .scale([500]); var path = d3.geoPath() .projection(projection); var svg = d3.select("#" + containerid) .append("svg") .attr("width", loc_chartWidth) .attr("height", loc_chartHeight); d3.json("/assets/common/javascript/d3/6.5.0/us-states.json").then(function(json) { /*bind data and create one path per GeoJSON feature*/ svg.selectAll("path") .data(json.features) .enter() .append("path") .attr("d", path) .style("stroke", "#fff") .style("stroke-width", "0.5") .style("fill", b_getFillColor) .on("mouseover", b_onMouseOver) .on("mouseout", b_onMouseOut); /*title*/ if (charttitle && charttitle.length) svg.append("text") .attr("x", (loc_chartWidth / 2)) .attr("y", 20) .attr("text-anchor", "middle") .style("font-size", "16px") .style("font-weight", "bold") .text(charttitle); /* Entries not being present on the states map */ var arrNonStateCodes = ["DC","AS","GU","MP","PR","VI"]; var resultArrNonStates = []; arrNonStateCodes.forEach(function(d) { var strThisEntry = strData[d]; if (strThisEntry && strThisEntry.value > 0) resultArrNonStates.push(strThisEntry.statename + " : " + strThisEntry.value); }); if(resultArrNonStates.length){ svg.append("text") .attr("x", (loc_chartWidth / 2)) .attr("y", 45) .attr("text-anchor", "middle") .style("font-size", "13px") .style("font-weight", "normal") .text("*" + resultArrNonStates.join(', ')); } }); } function b_loadBarChart(containerid, charttitle, arrdata) { if (!$('#' + containerid).length) return false; /*set the dimensions and margins of the graph*/ var margin = { top: 30, right: 30, bottom: 60, left: 100 }, width = 430 - margin.left - margin.right, height = 300 - margin.top - margin.bottom; const maxBarHeight = 40; var svg = d3.select('#' + containerid) .append("svg") .attr("width", width + margin.left + margin.right) .attr("height", height + margin.top + margin.bottom) .append("g") .attr("transform", "translate(" + margin.left + "," + margin.top + ")"); /*X axis*/ var x = d3.scaleLinear() .domain([0, d3.max(arrdata, function(d) { return d.value; })]) .range([ 0, width ]); var xAxisTicks = x.ticks().filter(Number.isInteger); svg.append("g") .attr("transform", "translate(0," + height + ")") .call(d3.axisBottom(x).tickValues(xAxisTicks).tickFormat(d3.format('d'))) .selectAll("text") .style("text-anchor", "end"); /*Y axis*/ var y = d3.scaleBand() .range([ 0, height]) .domain(arrdata.map(function(d) { return d.key; })) .padding(0.2); const barHeight = Math.min(y.bandwidth(), maxBarHeight); svg.append("g") .call(d3.axisLeft(y)); /*bars*/ var bars = svg.selectAll(".bk-bg-chartblue") .data(arrdata) .enter(); bars.append("rect") .attr("class", "bk-bg-chartblue") .attr("x", x(0)) .attr("y", function(d) { return y(d.key) + (y.bandwidth() - barHeight) / 2; }) .attr("width", function(d) { return x(d.value); }) .attr("height", barHeight); bars.append("text") .text(function(d) { return d.value;}) .attr("x", function(d) { return x(d.value) + 5; }) .attr("y", function(d) { return (y(d.key) + (y.bandwidth()/2)); }) .attr("fill", "black") .attr("font-family", "sans-serif") .style("font-size", "10px"); /*title*/ if (charttitle && charttitle.length) svg.append("text") .attr("x", (width / 2)) .attr("y", 0 - (margin.top / 2)) .attr("text-anchor", "middle") .style("font-size", "16px") .style("font-weight", "bold") .text(charttitle); } function b_tooltipHtml(title,value) { return '<h3 class="popover-title">'+title+'</h3><div class="popover-content">'+value+'</div>'; } function b_getExpertDepositions(pos,r) { let obj = b_getObjFromBid(vars_bid); let expertsDepoContainer = typeof r == "number" ? $('#MCExpertDepositions'+r) : $(r).closest('.MCExpertDepositionsContainer'); let encStr = expertsDepoContainer.data('encdepostr'); let showResults = function(r) { if (r.success && r.success == 'true') { expertsDepoContainer.html(r.depositionshtml); } else { expertsDepoContainer.html('<div class="alert alert-error">We were unable to load this lawyer depositions.</div>'); } }; expertsDepoContainer.html('<div class="bk-text-center bk-mb-5">' + b_getloadingicon() + '</div>').removeClass('hide'); gotoBKContainer(expertsDepoContainer.attr('id')); let objParams = { encodedString:encStr, startRow:pos, searchID:vars_sid, viewDirectory:'responsive' }; TS_AJX('SBT' + obj.btid,'getExpertDepositions',objParams,showResults,showResults,60000,showResults); } function downloadDocImmedate(docid,format) { if ($('#docDownloadIframe').length) { $('#docDownloadWaitingModal').modal('show'); document.getElementById('docDownloadIframe').src = '/?pg=tsDocDownload&da=download&mode=direct&immediate=1&t=' + format + '&did=' + docid; setTimeout(function(){ $('#docDownloadWaitingModal').modal('hide'); }, 3000); } else { self.location.href = '/?pg=tsDocDownload&da=download&mode=direct&immediate=1&t=' + format + '&did=' + docid; } } function oneClickPurchaseDepoDownload(docid, cr, filename,format, rowid, atype) { if(atype == "dbox"){ $("#s_addtocart"+docid).html("<span class='bk-font-size-xs bk-mb-2 bk-font-weight-bold bk-text-nowrap'><i class='fa-solid fa-square-check text-success' aria-hidden='true'></i> Purchased</span>"); } else if (atype == "dload"){ $("#s_addtocart"+docid).html("<span class='bk-font-size-xs bk-mb-2 bk-font-weight-bold bk-text-nowrap'><i class='fa-solid fa-square-check text-success' aria-hidden='true'></i> Purchased</span>"); } else{ alert('Error encountered. Please try again.'); return false; } if(atype == "dbox"){ doDropboxSave(docid,filename,format,rowid); if($("#pdf_btn_" + rowid).length){ $("#pdf_btn_" + rowid).attr("onclick","downloadDocImmedate('" + docid + "','pdf')"); } if($("#tif_btn_" + rowid).length){ $("#tif_btn_" + rowid).attr("onclick","downloadDocImmedate('" + docid + "','tif')"); } } else if (atype == "dload"){ downloadDocImmedate(docid,format); if($("#pdf_btn_" + rowid).length){ $("#pdf_btn_" + rowid).attr("onclick","downloadDocImmedate('" + docid + "','pdf')"); } if($("#tif_btn_" + rowid).length){ $("#tif_btn_" + rowid).attr("onclick","downloadDocImmedate('" + docid + "','tif')"); } if($("#dropb_btn_" + rowid).length){ $("#dropb_btn_" + rowid).attr("onclick","doDropboxSave('" + docid + "', '" + $("#dropb_btn_" + rowid).attr('data-elmname') + "', '" + $("#dropb_btn_" + rowid).attr('data-elmext') + "', '" + rowid + "')"); } if(!$("#pdf_btn_" + rowid).length && !$("#tif_btn_" + rowid).length){ $("#txt_" + docid).html('<button name="txt_btn_'+ rowid +'" type="button" class="btn btn-secondary btn-sm" onClick="downloadDocImmedate(' + docid + '\',\'txt\');" style="width:150px; margin-top:10px; text-align:center;"><i class="fa-regular fa-download" title="Download TEXT"></i> Download TEXT</button>'); } } else{ alert('Error encountered (oneClickPurchaseDepoDownload). Please try again.'); return false; } if (isTsDocumentViewerOpen() && tsDocumentViewerCurrentDocumentID && ['dbox','dload'].indexOf(atype) != -1) { tsDownloadableDocumentIDs[docid] = 1; rebuildViewerToolbar(tsDocumentViewerCurrentDocumentID); } } </script> <link rel="stylesheet" type="text/css" href="/assets/common/javascript/jQueryAddons/datatables/1.10.24/css/jquery.dataTables.min.css"> <link rel="stylesheet" type="text/css" href="/assets/common/javascript/jQueryAddons/jQuerySteps/jquery.steps.css">  <script type="text/javascript"> $(document).ready(function() { preloadSearchResultsImages(); window.setTimeout(function () { b_doSearch(18695374); },150); }); </script> <link type="text/css" rel="stylesheet" charset="UTF-8" href="https://www.gstatic.com/_/translate_http/_/ss/k=translate_http.tr.2f3WBw8L4SI.L.W.O/am=AMA/d=0/rs=AN8SPfqL6PS6PNiXkx_tGkEQOOALUonRKQ/m=el_main_css"><script type="text/javascript" charset="UTF-8" src="https://translate.googleapis.com/_/translate_http/_/js/k=translate_http.tr.en_US.SIR_5F35qMU.O/am=AAAE/d=1/exm=el_conf/ed=1/rs=AN8SPfq4eAcqZs2GSvTpVR6CGphy7bwlLw/m=el_main"></script></head>
+<body class="shifter shifter-left offcanvas-menu-left offcanvas-menu-white mobile-header-style2 sticky-header shifter-enabled" style="position: relative; min-height: 100%; top: 0px;">
+<style>
+.flexParent {
+padding: 0;
+margin: 0;
+list-style: none;
+display: -webkit-box;
+display: -moz-box;
+display: -ms-flexbox;
+display: -webkit-flex;
+display: flex;
+justify-content: space-between;
+align-items: baseline;
+}
+.flexChild {
+min-height: 10px;
+max-height: 200px;
+}
+#mobileNavButton {
+margin: 0 0 0 12px;
+padding: 0;
+display: inline;
+left: auto;
+position: relative;
+top: 8px;
+float: none;
+-webkit-transform: none;
+transform: none;
+}
+#logoCanvas {
+margin: 0;
+padding: 0;
+width: 220px;
+}
+@media (max-width: 480px) {
+a.search-form-trigger {
+position: relative!important;
+right: 12px!important;
+top: 2px!important;
+}
+}
+.main-header .nav > li:hover > ul, .sticky-main-nav .nav > li:hover > ul {
+top: 70px !important;
+}
+.pageTitle{
+text-align:center;
+}
+.eventImages img{
+max-width:60%!important
+}
+</style>	
+<div class="mobile-header-wrapper style2 shifter-header white-bg clearfix hidden-md hidden-lg">
+<div class="flexParent">
+<div class="flexChild" style="width: 12%;">
+<div id="mobileNavButton" class="shifter-handle style1">
+<a href="#" class="bars">
+<span></span>
+<span></span>
+<span></span>
+</a><!-- /bars -->
+</div>
+</div>
+<div class="flexChild">
+<div id="logoCanvas" class="logo-container small-logo">
+<div id="zoneI" class="zonewrapper">
+<div id="I269874" class="zoneresource"><p><a class="logo" href="/?pg=main"><img alt="" src="/userassets/CAAA/CAAA/userimages/caaabluelogo.png"></a></p></div>
+</div>
+</div>
+</div>
+<div class="flexChild" style="width: 15%; text-align: right;">
+<a class="search-form-trigger" href="#"><img alt="Search" src="images/misc/search-icon.png"></a>
+</div>
+</div>
+<div class="search-form-wrapper">
+<form name="searchbox" id="searchbox" action="/?pg=search" method="post" class="search-form"> 
+<input name="s_a" id="s_a" value="doSearch" type="hidden" style=""> 
+<input name="s_frm" id="s_frm" value="1" type="hidden" style="">
+<input class="dark-bg" name="s_key_all" id="s_key_all" placeholder="Type &amp; hit enter" type="search" style="">
+</form> 
+<span class="search-form-close-trigger">
+<a href="#"><i class="icon icon-knight-521"></i></a>
+</span> 
+</div><!-- /search-form-wrapper -->
+</div> 
+<div class="main-nav offcanvas-menu mobile-nav shifter-navigation fullwidth-items fullwidth-menu white-bg">
+<ul class="nav">
+<li class="active"><a class="menu-item" href="/?pg=main">HOME</a></li>
+<li><a class="menu-item" href="#">ABOUT</a>
+<ul>
+<li><a href="/?pg=About-Us">ABOUT US</a></li>
+<li><a href="/?pg=Executive-Board">EXECUTIVE COMMITTEE</a></li>
+<li><a href="/?pg=Consultants">CONSULTANTS</a></li>
+<li><a href="/?pg=Committees-Overview">COMMITTEES</a></li>
+<li><a href="/?pg=BenefitsOfMembership">BENEFITS OF MEMBERSHIP</a></li>
+<li style="box-sizing: border-box;"><a href="/?pg=JoinToday">JOIN US</a></li>
+<li><a href="/?pg=Staff-Contact">CONTACT US</a></li>
+</ul>
+</li>
+<li><a class="menu-item" href="#">FOR MEMBERS</a>
+<ul>
+<li><a href="/?pg=myCAAA">MYCAAA&nbsp;PROFILE</a></li>
+<li style="box-sizing: border-box;"><a href="https://www.caaa.org/?pg=listviewer&amp;lsAction=listBrowse">LISTSERVS</a></li>
+<li><a href="/?pg=Practice-Tips">PRACTICE TIPS</a></li>
+<li><a href="/?pg=myCE">MCLE CREDITS</a></li>
+<li><a href="https://www.caaa.org/?pg=myQME">QME CREDITS </a></li>
+<li><a href="https://www.caaa.org/?pg=MemberDirectoryLandingPage">MEMBER DIRECTORY</a></li>
+<li><a href="/?pg=ACAAAmplishments">ACAAAMPLISHMENTS ARCHIVE</a></li>
+<li style="box-sizing: border-box;"><a href="/?pg=WCIRBInsuranceCoverageInformation">WCIRB INSURANCE COVERAGE INFORMATION</a></li>
+</ul>
+</li>
+<li><a class="menu-item" href="#">EVENTS</a>
+<ul>
+<li><a href="/?pg=upcomingEvents">UPCOMING EDUCATIONAL EVENTS</a>
+<ul>
+<li><a href="https://www.caaa.org/?pg=events&amp;evAction=showDetail&amp;eid=309384">2025 RATING SEMINAR ATTENDEE REGISTRATION</a></li>
+<li><a href="https://www.caaa.org/?pg=events&amp;evAction=showDetail&amp;eid=309378">2025 RATING SEMINAR SPONSORSHIPS</a></li>
+<li><a href="https://www.caaa.org/?pg=events&amp;evAction=showDetail&amp;eid=310321">2026 WINTER CONVENTION</a></li>
+<li><a href="https://www.caaa.org/?pg=events&amp;evAction=showDetail&amp;eid=310321">ATTENDEE REGISTRATION</a></li>
+<li><a href="https://www.caaa.org/?pg=events&amp;evAction=showDetail&amp;eid=309867">EXHIBITOR APPLICATION</a></li>
+<li><a href="https://www.caaa.org/?pg=events&amp;evAction=showDetail&amp;eid=310899">SPONSORSHIP OPPORTUNITIES</a></li>
+<li><a href="https://www.caaa.org/?pg=events&amp;evAction=showDetail&amp;eid=311001">SYLLABUS ADVERTISING</a></li>
+<li><a href="https://www.caaa.org/?pg=events&amp;evAction=showDetail&amp;eid=307387">2026 HAWAII SEMINAR</a></li>
+</ul>
+</li>
+<li><a href="/?pg=events">ANNUAL CALENDAR</a><span style="display: none;">&nbsp;</span></li>
+</ul>
+</li>
+<li><a class="menu-item" href="#">ADVOCACY</a>
+<ul>
+<li><a href="/?pg=OurIssues">OUR ISSUES</a></li>
+</ul>
+</li>
+<li><a class="menu-item" href="#">CHAPTERS</a>
+<ul>
+<li><a href="https://www.caaa.org/?pg=ChaptersOverview">OVERVIEW</a></li>
+<li><a href="/?pg=events">EVENTS</a></li>
+<li><a href="https://www.caaa.org/?pg=CHAPTERPRESIDENTS">CHAPTER OFFICERS PAGE</a></li>
+</ul>
+</li>
+<li><a class="menu-item" href="#">NEWS</a>
+<ul>
+<li><a href="/?pg=latestNewsTemplate">YOUR WORK COMP BRIEFING</a></li>
+<li><a href="/?pg=Covid-19-Updates">COVID-19 NEWS &amp; UPDATES</a></li>
+</ul>
+</li>
+<li><a class="menu-item" href="#">MCLE CATALOG</a>
+<ul>
+<li><a href="https://www.caaa.org/?pg=semwebCatalog">MCLE CATALOG</a></li>
+<li style="box-sizing: border-box;"><a href="/?pg=Pearls">PEARLS OF THE AMA</a></li>
+</ul>
+</li>
+<li><a class="menu-item" href="#">FOR INJURED WORKERS</a>
+<ul>
+<li><a href="/?pg=FindaLawyerDirectory">FIND AN ATTORNEY</a></li>
+<li><a href="/?pg=InjuredWorkers">KNOW YOUR RIGHTS</a></li>
+<li><a href="http://www.dir.ca.gov/RTWSP/RTWSP.html" target="_blank">RETURN TO WORK FUND</a></li>
+<li><a href="/?pg=CommunityResourceGuide">COMMUNITY RESOURCE GUIDE</a></li>
+<li><a href="http://www.courts.ca.gov/immigration.htm?rdeLocaleAttr=en" target="_blank">IMMIGRATION RESOURCE DIRECTORY</a></li>
+</ul>
+</li>
+</ul><ul class="nav">
+<li>
+<a class="menu-item" href="/?logout">Logout</a>
+</li>
+</ul><ul class="clearfix nav serach-icon1">
+<li class="fa-solid fa-magnifying-glass dropdown">
+<a class="dropdown-toggle menu-item" data-toggle="dropdown" href="#"><img alt="Search" src="/images/misc/search-icon.png"></a>
+<div class="sub-menu dropdown-menu dropdown-search-form">
+<form name="searchbox" id="searchbox" action="/?pg=search" method="post" class="search-form">
+<input name="s_a" id="s_a" type="hidden" value="doSearch" style="">
+<input name="s_frm" id="s_frm" type="hidden" value="1" style="">
+<input class="dark-bg" type="text" name="s_key_all" id="s_key_all" placeholder="Search" style="">
+<input type="submit" value=">" style="">
+</form>
+</div><!-- /sub-menu -->
+</li>
+</ul><form action="" class="search-form">
+<input type="search" name="mobile-search-form" id="mobile-search-form" placeholder="Search" style="">
+<input type="submit" value=">" style="">
+</form>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){
+$( ".main-nav .dropdown-toggle" ).hover(function() {
+$(".main-nav .dropdown-search-form").css({'opacity' :'1','visibility':'visible'});
+}, function() {
+$(".main-nav .dropdown-search-form").css({'opacity' :'0','visibility':'hidden'});
+});
+$( ".main-nav .dropdown-search-form" ).hover(function() {
+$(".main-nav .dropdown-search-form").css({'opacity' :'1','visibility':'visible'});
+}, function() {
+$(".main-nav .dropdown-search-form").css({'opacity' :'0','visibility':'hidden'});
+});
+$(window).scroll(function() {
+if ($(this).scrollTop() > 200) {
+$('div#logInLogOutLink').fadeOut(125);
+} else {
+$('div#logInLogOutLink').fadeIn(125);
+}
+});
+});
+</script>
+<div class="sticky-menu"><div class="container-fluid"><div class="sticky-logo-container"><a class="logo" href="/?pg=main"><img alt="" src="/userassets/CAAA/CAAA/userimages/caaabluelogo.png"></a></div><div class="sticky-menu-container clearfix"><div class="sticky-main-nav main-nav clearfix"><ul class="nav">
+<li class="active"><a class="menu-item" href="/?pg=main">HOME</a></li>
+<li><a class="menu-item" href="#">ABOUT</a>
+<ul>
+<li><a href="/?pg=About-Us">ABOUT US</a></li>
+<li><a href="/?pg=Executive-Board">EXECUTIVE COMMITTEE</a></li>
+<li><a href="/?pg=Consultants">CONSULTANTS</a></li>
+<li><a href="/?pg=Committees-Overview">COMMITTEES</a></li>
+<li><a href="/?pg=BenefitsOfMembership">BENEFITS OF MEMBERSHIP</a></li>
+<li style="box-sizing: border-box;"><a href="/?pg=JoinToday">JOIN US</a></li>
+<li><a href="/?pg=Staff-Contact">CONTACT US</a></li>
+</ul>
+</li>
+<li><a class="menu-item" href="#">FOR MEMBERS</a>
+<ul>
+<li><a href="/?pg=myCAAA">MYCAAA&nbsp;PROFILE</a></li>
+<li style="box-sizing: border-box;"><a href="https://www.caaa.org/?pg=listviewer&amp;lsAction=listBrowse">LISTSERVS</a></li>
+<li><a href="/?pg=Practice-Tips">PRACTICE TIPS</a></li>
+<li><a href="/?pg=myCE">MCLE CREDITS</a></li>
+<li><a href="https://www.caaa.org/?pg=myQME">QME CREDITS </a></li>
+<li><a href="https://www.caaa.org/?pg=MemberDirectoryLandingPage">MEMBER DIRECTORY</a></li>
+<li><a href="/?pg=ACAAAmplishments">ACAAAMPLISHMENTS ARCHIVE</a></li>
+<li style="box-sizing: border-box;"><a href="/?pg=WCIRBInsuranceCoverageInformation">WCIRB INSURANCE COVERAGE INFORMATION</a></li>
+</ul>
+</li>
+<li><a class="menu-item" href="#">EVENTS</a>
+<ul>
+<li><a href="/?pg=upcomingEvents">UPCOMING EDUCATIONAL EVENTS</a>
+<ul>
+<li><a href="https://www.caaa.org/?pg=events&amp;evAction=showDetail&amp;eid=309384">2025 RATING SEMINAR ATTENDEE REGISTRATION</a></li>
+<li><a href="https://www.caaa.org/?pg=events&amp;evAction=showDetail&amp;eid=309378">2025 RATING SEMINAR SPONSORSHIPS</a></li>
+<li><a href="https://www.caaa.org/?pg=events&amp;evAction=showDetail&amp;eid=310321">2026 WINTER CONVENTION</a></li>
+<li><a href="https://www.caaa.org/?pg=events&amp;evAction=showDetail&amp;eid=310321">ATTENDEE REGISTRATION</a></li>
+<li><a href="https://www.caaa.org/?pg=events&amp;evAction=showDetail&amp;eid=309867">EXHIBITOR APPLICATION</a></li>
+<li><a href="https://www.caaa.org/?pg=events&amp;evAction=showDetail&amp;eid=310899">SPONSORSHIP OPPORTUNITIES</a></li>
+<li><a href="https://www.caaa.org/?pg=events&amp;evAction=showDetail&amp;eid=311001">SYLLABUS ADVERTISING</a></li>
+<li><a href="https://www.caaa.org/?pg=events&amp;evAction=showDetail&amp;eid=307387">2026 HAWAII SEMINAR</a></li>
+</ul>
+</li>
+<li><a href="/?pg=events">ANNUAL CALENDAR</a><span style="display: none;">&nbsp;</span></li>
+</ul>
+</li>
+<li><a class="menu-item" href="#">ADVOCACY</a>
+<ul>
+<li><a href="/?pg=OurIssues">OUR ISSUES</a></li>
+</ul>
+</li>
+<li><a class="menu-item" href="#">CHAPTERS</a>
+<ul>
+<li><a href="https://www.caaa.org/?pg=ChaptersOverview">OVERVIEW</a></li>
+<li><a href="/?pg=events">EVENTS</a></li>
+<li><a href="https://www.caaa.org/?pg=CHAPTERPRESIDENTS">CHAPTER OFFICERS PAGE</a></li>
+</ul>
+</li>
+<li><a class="menu-item" href="#">NEWS</a>
+<ul>
+<li><a href="/?pg=latestNewsTemplate">YOUR WORK COMP BRIEFING</a></li>
+<li><a href="/?pg=Covid-19-Updates">COVID-19 NEWS &amp; UPDATES</a></li>
+</ul>
+</li>
+<li><a class="menu-item" href="#">MCLE CATALOG</a>
+<ul>
+<li><a href="https://www.caaa.org/?pg=semwebCatalog">MCLE CATALOG</a></li>
+<li style="box-sizing: border-box;"><a href="/?pg=Pearls">PEARLS OF THE AMA</a></li>
+</ul>
+</li>
+<li><a class="menu-item" href="#">FOR INJURED WORKERS</a>
+<ul>
+<li><a href="/?pg=FindaLawyerDirectory">FIND AN ATTORNEY</a></li>
+<li><a href="/?pg=InjuredWorkers">KNOW YOUR RIGHTS</a></li>
+<li><a href="http://www.dir.ca.gov/RTWSP/RTWSP.html" target="_blank">RETURN TO WORK FUND</a></li>
+<li><a href="/?pg=CommunityResourceGuide">COMMUNITY RESOURCE GUIDE</a></li>
+<li><a href="http://www.courts.ca.gov/immigration.htm?rdeLocaleAttr=en" target="_blank">IMMIGRATION RESOURCE DIRECTORY</a></li>
+</ul>
+</li>
+</ul><ul class="nav">
+<li>
+<a class="menu-item" href="/?logout">Logout</a>
+</li>
+</ul><ul class="clearfix nav serach-icon1">
+<li class="fa-solid fa-magnifying-glass dropdown">
+<a class="dropdown-toggle menu-item" data-toggle="dropdown" href="#"><img alt="Search" src="/images/misc/search-icon.png"></a>
+<div class="sub-menu dropdown-menu dropdown-search-form">
+<form name="searchbox" id="searchbox" action="/?pg=search" method="post" class="search-form">
+<input name="s_a" id="s_a" type="hidden" value="doSearch" style="">
+<input name="s_frm" id="s_frm" type="hidden" value="1" style="">
+<input class="dark-bg" type="text" name="s_key_all" id="s_key_all" placeholder="Search" style="">
+<input type="submit" value=">" style="">
+</form>
+</div><!-- /sub-menu -->
+</li>
+</ul></div></div></div></div><div class="main-wrapper shifter-page">
+<div class="main-header style2 fixed-header">
+<div class="main-header-inner">
+<div class="main-bar style2 padding-15 white-bg" style="padding-bottom: 0px; padding-top: 0px;">
+<div class="container-fluid">
+<div class="row-fluid">
+<div class="logo-container" style="padding-top: 15px; padding-bottom: 15px;">
+<div id="zoneI" class="zonewrapper">
+<div id="I269874" class="zoneresource"><p><a class="logo" href="/?pg=main"><img alt="" src="/userassets/CAAA/CAAA/userimages/caaabluelogo.png"></a></p></div>
+</div>
+</div><!-- /logo-container -->
+<div class="menu-container clearfix nav-collapse collapse">
+<div class="main-nav active-style1 style1" id="main-nav" style="min-height: 92px; opacity: 1; visibility: visible;">
+<ul class="nav">
+<li class="active"><a class="menu-item" href="/?pg=main" style="height: 115px;">HOME</a></li>
+<li><a class="menu-item" href="#" style="height: 115px;">ABOUT</a>
+<ul>
+<li><a href="/?pg=About-Us">ABOUT US</a></li>
+<li><a href="/?pg=Executive-Board">EXECUTIVE COMMITTEE</a></li>
+<li><a href="/?pg=Consultants">CONSULTANTS</a></li>
+<li><a href="/?pg=Committees-Overview">COMMITTEES</a></li>
+<li><a href="/?pg=BenefitsOfMembership">BENEFITS OF MEMBERSHIP</a></li>
+<li style="box-sizing: border-box;"><a href="/?pg=JoinToday">JOIN US</a></li>
+<li><a href="/?pg=Staff-Contact">CONTACT US</a></li>
+</ul>
+</li>
+<li><a class="menu-item" href="#" style="height: 115px;">FOR MEMBERS</a>
+<ul>
+<li><a href="/?pg=myCAAA">MYCAAA&nbsp;PROFILE</a></li>
+<li style="box-sizing: border-box;"><a href="https://www.caaa.org/?pg=listviewer&amp;lsAction=listBrowse">LISTSERVS</a></li>
+<li><a href="/?pg=Practice-Tips">PRACTICE TIPS</a></li>
+<li><a href="/?pg=myCE">MCLE CREDITS</a></li>
+<li><a href="https://www.caaa.org/?pg=myQME">QME CREDITS </a></li>
+<li><a href="https://www.caaa.org/?pg=MemberDirectoryLandingPage">MEMBER DIRECTORY</a></li>
+<li><a href="/?pg=ACAAAmplishments">ACAAAMPLISHMENTS ARCHIVE</a></li>
+<li style="box-sizing: border-box;"><a href="/?pg=WCIRBInsuranceCoverageInformation">WCIRB INSURANCE COVERAGE INFORMATION</a></li>
+</ul>
+</li>
+<li><a class="menu-item" href="#" style="height: 115px;">EVENTS</a>
+<ul>
+<li><a href="/?pg=upcomingEvents">UPCOMING EDUCATIONAL EVENTS</a>
+<ul>
+<li><a href="https://www.caaa.org/?pg=events&amp;evAction=showDetail&amp;eid=309384">2025 RATING SEMINAR ATTENDEE REGISTRATION</a></li>
+<li><a href="https://www.caaa.org/?pg=events&amp;evAction=showDetail&amp;eid=309378">2025 RATING SEMINAR SPONSORSHIPS</a></li>
+<li><a href="https://www.caaa.org/?pg=events&amp;evAction=showDetail&amp;eid=310321">2026 WINTER CONVENTION</a></li>
+<li><a href="https://www.caaa.org/?pg=events&amp;evAction=showDetail&amp;eid=310321">ATTENDEE REGISTRATION</a></li>
+<li><a href="https://www.caaa.org/?pg=events&amp;evAction=showDetail&amp;eid=309867">EXHIBITOR APPLICATION</a></li>
+<li><a href="https://www.caaa.org/?pg=events&amp;evAction=showDetail&amp;eid=310899">SPONSORSHIP OPPORTUNITIES</a></li>
+<li><a href="https://www.caaa.org/?pg=events&amp;evAction=showDetail&amp;eid=311001">SYLLABUS ADVERTISING</a></li>
+<li><a href="https://www.caaa.org/?pg=events&amp;evAction=showDetail&amp;eid=307387">2026 HAWAII SEMINAR</a></li>
+</ul>
+</li>
+<li><a href="/?pg=events">ANNUAL CALENDAR</a><span style="display: none;">&nbsp;</span></li>
+</ul>
+</li>
+<li><a class="menu-item" href="#" style="height: 115px;">ADVOCACY</a>
+<ul>
+<li><a href="/?pg=OurIssues">OUR ISSUES</a></li>
+</ul>
+</li>
+<li><a class="menu-item" href="#" style="height: 115px;">CHAPTERS</a>
+<ul>
+<li><a href="https://www.caaa.org/?pg=ChaptersOverview">OVERVIEW</a></li>
+<li><a href="/?pg=events">EVENTS</a></li>
+<li><a href="https://www.caaa.org/?pg=CHAPTERPRESIDENTS">CHAPTER OFFICERS PAGE</a></li>
+</ul>
+</li>
+<li><a class="menu-item" href="#" style="height: 115px;">NEWS</a>
+<ul>
+<li><a href="/?pg=latestNewsTemplate">YOUR WORK COMP BRIEFING</a></li>
+<li><a href="/?pg=Covid-19-Updates">COVID-19 NEWS &amp; UPDATES</a></li>
+</ul>
+</li>
+<li><a class="menu-item" href="#" style="height: 115px;">MCLE CATALOG</a>
+<ul>
+<li><a href="https://www.caaa.org/?pg=semwebCatalog">MCLE CATALOG</a></li>
+<li style="box-sizing: border-box;"><a href="/?pg=Pearls">PEARLS OF THE AMA</a></li>
+</ul>
+</li>
+<li><a class="menu-item" href="#" style="height: 115px;">FOR INJURED WORKERS</a>
+<ul>
+<li><a href="/?pg=FindaLawyerDirectory">FIND AN ATTORNEY</a></li>
+<li><a href="/?pg=InjuredWorkers">KNOW YOUR RIGHTS</a></li>
+<li><a href="http://www.dir.ca.gov/RTWSP/RTWSP.html" target="_blank">RETURN TO WORK FUND</a></li>
+<li><a href="/?pg=CommunityResourceGuide">COMMUNITY RESOURCE GUIDE</a></li>
+<li><a href="http://www.courts.ca.gov/immigration.htm?rdeLocaleAttr=en" target="_blank">IMMIGRATION RESOURCE DIRECTORY</a></li>
+</ul>
+</li>
+</ul>
+<ul class="nav">
+<li>
+<a class="menu-item" href="/?logout" style="height: 115px;">Logout</a>
+</li>
+</ul>
+<ul class="clearfix nav serach-icon1">
+<li class="fa-solid fa-magnifying-glass dropdown">
+<a class="dropdown-toggle menu-item" data-toggle="dropdown" href="#" style="height: 115px;"><img alt="Search" src="/images/misc/search-icon.png"></a>
+<div class="sub-menu dropdown-menu dropdown-search-form">
+<form name="searchbox" id="searchbox" action="/?pg=search" method="post" class="search-form">
+<input name="s_a" id="s_a" type="hidden" value="doSearch" style="">
+<input name="s_frm" id="s_frm" type="hidden" value="1" style="">
+<input class="dark-bg" type="text" name="s_key_all" id="s_key_all" placeholder="Search" style="">
+<input type="submit" value=">" style="">
+</form>
+</div><!-- /sub-menu -->
+</li>
+</ul>
+</div>
+</div><!-- /menu-container -->
+</div>
+</div><!-- /container -->
+</div><!-- /main-bar -->
+</div><!-- /main-header-inner -->
+<div class="title-barBF ">
+<div class="title-barBF-imageless"></div>
+<div class="container">
+<div id="zoneA" class="zonewrapper">
+</div>
+</div><!-- /container -->
+</div>
+</div>
+<div class="main-contents margin-top30">
+<div class="container">
+<div class="row">
+<div class="span10 offset1">
+<div class="row-fluid align-center">
+<div id="zoneB" class="zonewrapper">
+</div>
+</div><!-- /row -->
+<div class="abt-detail">
+<!-- /row -->
+<div id="zoneMain" class="zonewrapper">
+<div id="Main290947" class="zoneresource">
+<div id="bk_sid_holder" style="display:none;">18695374</div>
+<div id="tsSearchAppWrapper">
+<div>
+<div id="searchBarTopNav">
+<div class="hidden-phone">
+<div class="navbar">
+<div class="navbar-inner">
+<ul class="nav" id="tssearchbar">
+<li id="nav_SR"><a href="/?pg=search&amp;bid=3305&amp;s_a=doSearch&amp;sid=18695374"><img src="/assets/common/images/search/page_white_text.png" width="16" height="16" border="0" align="absmiddle"> Search Results</a></li>
+<li id="nav_NS"><a href="/?pg=search&amp;bid=3305"><img src="/assets/common/images/search/magnifier.png" width="16" height="16" border="0" align="absmiddle"> New Search</a></li>
+<li id="nav_RS"><a href="/?pg=search&amp;bid=3305&amp;sid=18695374&amp;s_a=refineSearch"><img src="/assets/common/images/search/magnifier_zoom_in.png" width="16" height="16" border="0" align="absmiddle"> Refine Search</a></li>
+<li id="nav_MD"><a href="/?pg=myDocuments&amp;tab=PD"><i class="fa-solid fa-file-lines" style="vertical-align: inherit;"></i> My Purchased Docs</a></li>
+</ul>
+<ul id="tsdocumentviewerbar" class="nav" style="display:none;margin-bottom:10px;"></ul>
+<ul id="tsinlinecartbar" class="nav" style="display:none;margin-bottom:10px;">
+<li id="cartnav_checkout"><a href="javascript:doCheckoutDocumentCart(500175, false);"><i class="fa-solid fa-cart-shopping" style="vertical-align: inherit;"></i> Checkout</a></li>
+<li id="cartnav_close"><a href="javascript:cart_closeInlineCart();"><i class="fa-regular fa-circle-xmark" style="vertical-align: inherit;"></i> Close Cart</a></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="visible-phone text-center">
+<div id="searchBarMobile" class="btn-group" style="margin-bottom:20px;">
+<a class="btn btn-info" href="javascript:toggleBKList(true);">
+<i id="toggleBKListIcon" class="fa-solid fa-circle-plus fa-lg"></i>
+<span id="toggleBKListText" style="font-weight:bold;" data-initbuttontext="Back to ">Back to </span>
+<span id="toggleBKListCountDisplay"><strong><span class="resultTotalCountDisplay_cnt">420,860</span></strong> Results</span>
+</a>
+<a id="RS" class="btn" href="/?pg=search&amp;bid=3305&amp;sid=18695374&amp;s_a=refineSearch">
+<i class="fa-regular fa-filter fa-lg"></i> Refine
+</a>
+</div>
+<div id="documentViewerBarMobile" class="btn-group hide" style="margin-bottom:20px;"></div>
+</div>
+</div>
+<div id="s_listing">
+<div class="row-fluid visible-phone">
+<div id="resultTotalCountHolder" class="row-fluid hide">
+<div class="span12 well well-small" style="margin:0;">
+<strong><span class="resultTotalCountDisplay_cnt">420,860</span></strong> items match your search.
+<div class="muted" style="margin-top:3px;">Choose a database below.</div>
+</div>
+</div>
+</div>
+<div class="row-fluid">
+<div id="bk_list" class="well well-small span4 hidden-phone">
+<ul class="nav nav-list">
+<li class="nav-header" id="bk_3304_grpnum">
+<h5>CAAA.ORG DOCUMENTS</h5>
+</li>
+<li id="bk_3304_" style="padding:1px 0;display:none;">
+<a href="/?pg=search&amp;bid=3304&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3304_cnt" style="height:18px;">--</span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>Introduction</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3299_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3299&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3299_cnt" style="height:18px;"><span class="badge badge-success">93</span></span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>Website Documents</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3300_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3300&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3300_cnt" style="height:18px;"><span class="badge">0</span></span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>e-Communities</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3301_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3301&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3301_cnt" style="height:18px;">--</span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>Store</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3302_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3302&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3302_cnt" style="height:18px;"><span class="badge badge-success">9</span></span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>Regular Members</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3303_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3303&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3303_cnt" style="height:18px;"><span class="badge">0</span></span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>Events</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3326_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3326&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3326_cnt" style="height:18px;"><span class="badge badge-success">1</span></span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>Associate Members</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3305_" style="padding:1px 0;" class="active">
+<a href="/?pg=search&amp;bid=3305&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3305_cnt" style="height:18px;"><span class="badge badge-success">10,000</span></span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_open.png" width="19" height="16" align="absmiddle" border="0">
+<span>Listserve Messages</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3318_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3318&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3318_cnt" style="height:18px;"><span class="badge">0</span></span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>AMA Guides</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3319_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3319&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3319_cnt" style="height:18px;"><span class="badge">0</span></span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>Case Index</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3320_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3320&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3320_cnt" style="height:18px;"><span class="badge badge-success">4</span></span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>Practice Tips</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3552_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3552&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3552_cnt" style="height:18px;"><span class="badge">0</span></span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>MTUS Practice Tips</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3981_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3981&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3981_cnt" style="height:18px;"><span class="badge badge-success">440</span></span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>Latest News</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3328_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3328&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3328_cnt" style="height:18px;"><span class="badge">0</span></span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>Forms &amp; Fees</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3459_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3459&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3459_cnt" style="height:18px;">--</span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_locked.png" width="19" height="16" align="absmiddle" border="0">
+<span>ConsultantFS-Legislative</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3460_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3460&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3460_cnt" style="height:18px;">--</span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_locked.png" width="19" height="16" align="absmiddle" border="0">
+<span>ConsultantFS-Political</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3461_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3461&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3461_cnt" style="height:18px;">--</span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_locked.png" width="19" height="16" align="absmiddle" border="0">
+<span>ConsultantFS-Policy</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3462_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3462&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3462_cnt" style="height:18px;">--</span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_locked.png" width="19" height="16" align="absmiddle" border="0">
+<span>ConsultantFS-Media</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3577_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3577&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3577_cnt" style="height:18px;"><span class="badge">0</span></span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>AB 1244</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+</ul>
+<br>
+<ul class="nav nav-list">
+<li class="nav-header" id="bk_3306_grpnum">
+<h5>TRIALSMITH DOCUMENTS</h5>
+</li>
+<li>
+<button class="btn btn-success btn-small searchReportButton" onclick="showReport();" style="margin-bottom:10px;"><i class="fa-solid fa-file"></i> Download Search Report</button>
+</li>
+<li id="bk_3306_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3306&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3306_cnt" style="height:18px;"><span class="badge badge-success">23,072</span></span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>Deposition Testimony</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3314_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3314&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3314_cnt" style="height:18px;"><span class="badge badge-success">220,543</span></span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>Related Testimony</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_4264_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=4264&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_4264_cnt" style="height:18px;">--</span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>Lawyers Who Deposed Expert</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3310_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3310&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3310_cnt" style="height:18px;"><span class="badge badge-success">125,092</span></span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>Similar Searches</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_4374_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=4374&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_4374_cnt" style="height:18px;"><span class="badge badge-success">2,683</span></span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>DepoConnect (New!)</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3316_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3316&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3316_cnt" style="height:18px;"><span class="badge badge-success">12,443</span></span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>Disciplinary Actions</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3307_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3307&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3307_cnt" style="height:18px;"><span class="badge badge-success">14</span></span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>Published Expert Challenges</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_4028_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=4028&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_4028_cnt" style="height:18px;"><span class="badge badge-success">13</span></span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>Challenge Study &amp; Expert Profile</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3680_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3680&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3680_cnt" style="height:18px;"><span class="badge badge-success">21,273</span></span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>Medline-PubMed</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_4565_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=4565&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_4565_cnt" style="height:18px;">--</span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>State &amp; Federal Case Law</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3308_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3308&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3308_cnt" style="height:18px;"><span class="badge badge-success">5,180</span></span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>Briefs &amp; Motions</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3313_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3313&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3313_cnt" style="height:18px;"><span class="badge">0</span></span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>My Documents</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+<li id="bk_3376_" style="padding:1px 0;">
+<a href="/?pg=search&amp;bid=3376&amp;sid=18695374&amp;s_a=doSearch">
+<div class="pull-right">
+<span id="bk_3376_cnt" style="height:18px;">--</span>
+<i class="fa-solid fa-chevron-right hidden-phone" style="margin-left:8px;"></i>
+</div>
+<div>
+<img src="/assets/common/images/search/folder_close.png" width="19" height="16" align="absmiddle" border="0">
+<span>AAJ Litigation Packets</span>
+</div>
+<div style="clear:both;"></div>
+</a>
+</li>
+</ul>
+<br>
+<div id="searchSponsorContainer" style="text-align:center;"><a href="http://services.membercentral.com/?event=ads.click&amp;cid=0&amp;d=QWRJRD05JkFkTmFtZT1FeHBlcnQlMjBXaXRuZXNzJTIwS25vd2xlZGdlJTIwTWFwJlVBQ29kZT1VQS00ODk3Mzc3NS0xJmVsPUV4cGVydCUyMFdpdG5lc3MlMjBLbm93bGVkZ2UlMjBNYXAmem9uZVR5cGVOYW1lPVNlYXJjaCZ6b25lTmFtZT1TZWFyY2gmaW1hZ2VVcmw9JTJGYXNzZXRzJTJGY29tbW9uJTJGc2VhcmNoQWRzJTJGOSUyRWpwZyUzRmNiJTNEMjAyNTEwMjkmb3JnbmFtZT1DYWxpZm9ybmlhJTIwQXBwbGljYW50cyUyMEF0dG9ybmV5cyUyMEFzc29jaWF0aW9uJmRlc3RVUkw9aHR0cHMlM0ElMkYlMkZ3d3clMkV0cmlhbHNtaXRoJTJFY29tJTJGVFMlMkYlM0ZldmVudCUzRHNob3dQYWdlJTI2cGclM0RFeHBlcnRLbm93bGVkZ2VNYXA=" title="Click for more information" target="_blank"><img style="width:180;height:150;" src="https://www.membercentral.com/assets/common/searchAds/9.jpg?cb=20251029"></a><br><br><a href="http://services.membercentral.com/?event=ads.click&amp;cid=0&amp;d=QWRJRD05JkFkTmFtZT1FeHBlcnQlMjBXaXRuZXNzJTIwS25vd2xlZGdlJTIwTWFwJlVBQ29kZT1VQS00ODk3Mzc3NS0xJmVsPUV4cGVydCUyMFdpdG5lc3MlMjBLbm93bGVkZ2UlMjBNYXAmem9uZVR5cGVOYW1lPVNlYXJjaCZ6b25lTmFtZT1TZWFyY2gmaW1hZ2VVcmw9JTJGYXNzZXRzJTJGY29tbW9uJTJGc2VhcmNoQWRzJTJGOSUyRWpwZyUzRmNiJTNEMjAyNTEwMjkmb3JnbmFtZT1DYWxpZm9ybmlhJTIwQXBwbGljYW50cyUyMEF0dG9ybmV5cyUyMEFzc29jaWF0aW9uJmRlc3RVUkw9aHR0cHMlM0ElMkYlMkZ3d3clMkV0cmlhbHNtaXRoJTJFY29tJTJGVFMlMkYlM0ZldmVudCUzRHNob3dQYWdlJTI2cGclM0RFeHBlcnRLbm93bGVkZ2VNYXA=" title="Click for more information" target="_blank"><img style="width:180;height:150;" src="https://www.membercentral.com/assets/common/searchAds/9.jpg?cb=20251029"></a><br><br></div>
+</div>
+<div id="bk_content" class="span8 "> <h3>LISTSERVE MESSAGES</h3> <div>Listserve Messages includes messages from all subscribed listserves.</div> <br> <div style="padding-bottom:10px;"> <button class="btn searchReportButton hiddenButton" onclick="showReport();"><i class="fa-solid fa-file"></i> Download Search Report</button> <button class="btn" onclick="document.location.href='/?pg=listViewer&amp;lsAction=listBrowse'"><i class="fa-regular fa-envelope"></i> Browse My Lists</button> </div> <div class="row-fluid"> <div class="span12"> <div id="seachResultsPaginationBar" class="well well-small " style="margin:3px 0px;padding:5px;" data-totalpages="1000" data-currentpage="1"> <div id="tsSearchTopPagingControls" class="pull-right"> <div class="visible-desktop"> <ul class="pager"> <li><span style="border-radius:5px;">Page 1 of 1,000</span></li> <li><a class="bucketPagingButtonNextPage" href="javascript:b_doSearchPN(18695374,11,'','','');"><strong>Next</strong></a></li> </ul> </div> <div class="hidden-desktop mobileViewPager"> <ul class="pager"> <li><span>Page 1 of 1,000</span></li> <li style="margin-top:2px;"> <a class="bucketPagingButtonNextPage" href="javascript:b_doSearchPN(18695374,11,'','','');" title="Next Page">&gt;&gt;</a> </li> </ul> </div> </div> <div> <p style="margin-bottom:6px;"> <b>10,000</b> messages found </p> <div class="hidden-desktop" style="min-height:26px"></div> </div> </div> </div>
+</div> <div class="hidden-phone"> <table class="table table-striped"> <tbody><tr> <td style="width:70px;"><b>Date</b></td> <td style="width:200px;"><b>From</b></td> <td style="width:102px;"><b>List</b></td> <td style="width:14px;"><b>Att</b></td> <td><b>Subject</b></td> </tr> <tr> <td>10/27/25</td> <td>Alan B Snitzer <abs@snitzerlaw.com></abs@snitzerlaw.com></td> <td>lawnet</td> <td width="14"></td> <td><a href="javascript:b_loadmsgjson(21777803,'','responsive');">Re: Clive Seigel, John R. Quinn or Michael Le...</a></td> </tr> <tr> <td>10/27/25</td> <td>Jeffrey Linnetz <jefflinnetz@gmail.com></jefflinnetz@gmail.com></td> <td>lawnet</td> <td width="14"></td> <td><a href="javascript:b_loadmsgjson(21777790,'','responsive');">Re: Clive Seigel, John R. Quinn or Michael Le...</a></td> </tr> <tr> <td>10/25/25</td> <td>Ullasini Dholakia <litdholakia@gmail.com></litdholakia@gmail.com></td> <td>lawnet</td> <td width="14"></td> <td><a href="javascript:b_loadmsgjson(21775250,'','responsive');">Re: TELEMED PSYCH QME</a></td> </tr> <tr> <td>10/24/25</td> <td>Kimberley J. Pryor <kjpcaaa@kjpryorlaw.com></kjpcaaa@kjpryorlaw.com></td> <td>lawnet</td> <td width="14"></td> <td><a href="javascript:b_loadmsgjson(21774366,'','responsive');">Re: Clive Seigel, John R. Quinn or Michael Le...</a></td> </tr> <tr> <td>10/24/25</td> <td>Jack Don <jack@sdworkcompattorney.com></jack@sdworkcompattorney.com></td> <td>lawnet</td> <td width="14"></td> <td><a href="javascript:b_loadmsgjson(21774075,'','responsive');">Re: TELEMED PSYCH QME</a></td> </tr> <tr> <td>10/24/25</td> <td>Pauli S. Larsen <psllawyer@hotmail.com></psllawyer@hotmail.com></td> <td>lawnet</td> <td width="14"></td> <td><a href="javascript:b_loadmsgjson(21774004,'','responsive');">Re: TELEMED PSYCH QME</a></td> </tr> <tr> <td>10/24/25</td> <td>M. Hollie Rutkowski <hollie@tclc.org></hollie@tclc.org></td> <td>lawnet</td> <td width="14"></td> <td><a href="javascript:b_loadmsgjson(21773914,'','responsive');">Re: TELEMED PSYCH QME</a></td> </tr> <tr> <td>10/24/25</td> <td>Kevin Bryant <kbryant@klbryantlaw.com></kbryant@klbryantlaw.com></td> <td>lawnet</td> <td width="14"></td> <td><a href="javascript:b_loadmsgjson(21773749,'','responsive');">Re: TELEMED PSYCH QME</a></td> </tr> <tr> <td>10/24/25</td> <td>Jack Don <jack@sdworkcompattorney.com></jack@sdworkcompattorney.com></td> <td>lawnet</td> <td width="14"></td> <td><a href="javascript:b_loadmsgjson(21773706,'','responsive');">Re: TELEMED PSYCH QME</a></td> </tr> <tr> <td>10/23/25</td> <td>Maria Guevara <guevaralaw@att.net></guevaralaw@att.net></td> <td>lawnet</td> <td width="14"></td> <td><a href="javascript:b_loadmsgjson(21771849,'','responsive');">Re: Email address of any SCIF attorney</a></td> </tr> </tbody></table> </div> <div class="visible-phone"> <table class="table table-striped table-condensed lyrisMessageListMobile"> <tbody><tr> <td> <div> <span>10/27/25 on lawnet</span><br> <span>Alan B Snitzer <abs@snitzerlaw.com></abs@snitzerlaw.com></span><br> <div> <span><a href="javascript:$('table.lyrisMessageListMobile').hide(); $('div#s_lyris_messagewindow,div#closeMessageMobile').show(); b_loadmsgjson(21777803,'','responsive');">Re: Clive Seigel, John R. Quinn or Michael Le...</a></span> </div> </div> </td> </tr> <tr> <td> <div> <span>10/27/25 on lawnet</span><br> <span>Jeffrey Linnetz <jefflinnetz@gmail.com></jefflinnetz@gmail.com></span><br> <div> <span><a href="javascript:$('table.lyrisMessageListMobile').hide(); $('div#s_lyris_messagewindow,div#closeMessageMobile').show(); b_loadmsgjson(21777790,'','responsive');">Re: Clive Seigel, John R. Quinn or Michael Le...</a></span> </div> </div> </td> </tr> <tr> <td> <div> <span>10/25/25 on lawnet</span><br> <span>Ullasini Dholakia <litdholakia@gmail.com></litdholakia@gmail.com></span><br> <div> <span><a href="javascript:$('table.lyrisMessageListMobile').hide(); $('div#s_lyris_messagewindow,div#closeMessageMobile').show(); b_loadmsgjson(21775250,'','responsive');">Re: TELEMED PSYCH QME</a></span> </div> </div> </td> </tr> <tr> <td> <div> <span>10/24/25 on lawnet</span><br> <span>Kimberley J. Pryor <kjpcaaa@kjpryorlaw.com></kjpcaaa@kjpryorlaw.com></span><br> <div> <span><a href="javascript:$('table.lyrisMessageListMobile').hide(); $('div#s_lyris_messagewindow,div#closeMessageMobile').show(); b_loadmsgjson(21774366,'','responsive');">Re: Clive Seigel, John R. Quinn or Michael Le...</a></span> </div> </div> </td> </tr> <tr> <td> <div> <span>10/24/25 on lawnet</span><br> <span>Jack Don <jack@sdworkcompattorney.com></jack@sdworkcompattorney.com></span><br> <div> <span><a href="javascript:$('table.lyrisMessageListMobile').hide(); $('div#s_lyris_messagewindow,div#closeMessageMobile').show(); b_loadmsgjson(21774075,'','responsive');">Re: TELEMED PSYCH QME</a></span> </div> </div> </td> </tr> <tr> <td> <div> <span>10/24/25 on lawnet</span><br> <span>Pauli S. Larsen <psllawyer@hotmail.com></psllawyer@hotmail.com></span><br> <div> <span><a href="javascript:$('table.lyrisMessageListMobile').hide(); $('div#s_lyris_messagewindow,div#closeMessageMobile').show(); b_loadmsgjson(21774004,'','responsive');">Re: TELEMED PSYCH QME</a></span> </div> </div> </td> </tr> <tr> <td> <div> <span>10/24/25 on lawnet</span><br> <span>M. Hollie Rutkowski <hollie@tclc.org></hollie@tclc.org></span><br> <div> <span><a href="javascript:$('table.lyrisMessageListMobile').hide(); $('div#s_lyris_messagewindow,div#closeMessageMobile').show(); b_loadmsgjson(21773914,'','responsive');">Re: TELEMED PSYCH QME</a></span> </div> </div> </td> </tr> <tr> <td> <div> <span>10/24/25 on lawnet</span><br> <span>Kevin Bryant <kbryant@klbryantlaw.com></kbryant@klbryantlaw.com></span><br> <div> <span><a href="javascript:$('table.lyrisMessageListMobile').hide(); $('div#s_lyris_messagewindow,div#closeMessageMobile').show(); b_loadmsgjson(21773749,'','responsive');">Re: TELEMED PSYCH QME</a></span> </div> </div> </td> </tr> <tr> <td> <div> <span>10/24/25 on lawnet</span><br> <span>Jack Don <jack@sdworkcompattorney.com></jack@sdworkcompattorney.com></span><br> <div> <span><a href="javascript:$('table.lyrisMessageListMobile').hide(); $('div#s_lyris_messagewindow,div#closeMessageMobile').show(); b_loadmsgjson(21773706,'','responsive');">Re: TELEMED PSYCH QME</a></span> </div> </div> </td> </tr> <tr> <td> <div> <span>10/23/25 on lawnet</span><br> <span>Maria Guevara <guevaralaw@att.net></guevaralaw@att.net></span><br> <div> <span><a href="javascript:$('table.lyrisMessageListMobile').hide(); $('div#s_lyris_messagewindow,div#closeMessageMobile').show(); b_loadmsgjson(21771849,'','responsive');">Re: Email address of any SCIF attorney</a></span> </div> </div> </td> </tr> </tbody></table> <div id="closeMessageMobile" onclick="$('table.lyrisMessageListMobile').show(); $('div#s_lyris_messagewindow,div#closeMessageMobile').hide();" class="well well-small hide" style="margin-bottom:10px;"> <strong><i class="fa-solid fa-chevron-left"></i><span id="closeMessageText">Back to Messages</span></strong> </div> </div> <div id="s_lyris_messagewindow"></div> <iframe id="MCcontenttoprint" style="height:0px;width:0px;position:absolute;" frameborder="0"></iframe> <div class="row-fluid"> <div class="span12"> <div id="seachResultsPaginationBar" class="well well-small " style="margin:3px 0px;padding:5px;" data-totalpages="1000" data-currentpage="1"> <div class="text-center"> <div class="pagination" style="margin:10px 0px 0px;"> <ul> <li><span class="text-error"><strong>1</strong></span></li> <li><a href="javascript:b_doSearchPN(18695374,11,'','','');">2</a></li> <li class="hidden-phone hidden-tablet"><a href="javascript:b_doSearchPN(18695374,21,'','','');">3</a></li> <li class="hidden-phone hidden-tablet"><a href="javascript:b_doSearchPN(18695374,31,'','','');">4</a></li> <li class="hidden-phone hidden-tablet"><a href="javascript:b_doSearchPN(18695374,41,'','','');">5</a></li> <li class="hidden-phone hidden-tablet"><a href="javascript:b_doSearchPN(18695374,51,'','','');">6</a></li> <li class="hidden-phone hidden-tablet"><a href="javascript:b_doSearchPN(18695374,61,'','','');">7</a></li> <li class="hidden-phone hidden-tablet"><a href="javascript:b_doSearchPN(18695374,71,'','','');">8</a></li> <li class="hidden-phone hidden-tablet"><a href="javascript:b_doSearchPN(18695374,81,'','','');">9</a></li> <li class="hidden-phone hidden-tablet"><a href="javascript:b_doSearchPN(18695374,91,'','','');">10</a></li> <li><a href="javascript:b_doSearchPN(18695374,11,'','','');" title="Next Page" class="bucketPagingButtonNextPage">&gt;</a></li> <li><a href="javascript:b_doSearchPN(18695374, 9991,'','','');" title="Last Page" class="bucketPagingButtonLastPage">&gt;&gt;</a></li> </ul> </div> <div>Page 1 of 1,000</div> </div> </div> </div>
+</div> </div>
+</div>
+</div>
+</div>
+<div id="tsDocumentViewer" style="height:1500px;overflow:hidden;display:none;"></div>
+<div id="tsCartViewer" style="display:none;"></div>
+<div id="addDocToCartModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="addDocToCartModalLabel" aria-hidden="true">
+<div class="modal-header">
+<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+<h4 id="addDocToCartModalLabel">Add Document To Cart</h4>
+</div>
+<div class="modal-body">
+<p><b>Document:</b><br><span id="addDocCaseRefDesc"></span></p>
+<p><b>Case Reference:</b><br>Add reference which will appear on your monthly statement.</p>
+<div id="err_addDocCart" class="alert alert-danger" style="display:none;margin:2px 0;"></div>
+<form onsubmit="return false;">
+<div>
+<input type="text" id="addDocCaseRef" name="addDocCaseRef" value="" maxlength="50" style="width: 98%;">
+</div>
+<div id="addDocCaseRefBadges" class="well bk-p-2 bk-mt-2" style="display:none;"></div>
+</form>
+</div>
+<div class="modal-footer">
+<button type="button" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+<button type="button" name="btnAddDocToCart" id="btnAddDocToCart" class="btn btn-primary">Add to Cart</button>
+</div>
+</div>
+<div id="viewDocPromptModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="viewDocPromptModal" aria-hidden="true">
+<div class="modal-header text-center">
+<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button><br>
+<p class="text-center viewDocPromptModalHeader">Your Basic Plan only allows you to purchase documents a-la-carte.</p>
+</div>
+<div class="modal-body text-center">
+<h5>Upgrade Your TrialSmith Membership to Read ENTIRE Transcripts Before Purchasing</h5>
+<button type="button" onclick="location.href='/?pg=joinTrialSmith'" name="btnAddDocToCart" id="btnAddDocToCart" class="btn btn-primary">Learn more</button>
+</div>
+<div class="modal-footer">
+<button type="button" class="close" data-dismiss="modal" aria-hidden="true">Close</button> 
+</div>
+</div>
+<div id="oneClickPurchaseModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="oneClickPurchaseModalLabel" aria-hidden="true">
+<div class="modal-header">
+<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+<h4 id="oneClickPurchaseModalLabel">Quick Download</h4>
+</div>
+<div class="modal-body"></div>
+<div class="modal-footer">
+<button type="button" name="btnCloseOneClickPurchasePrompt" id="btnCloseOneClickPurchasePrompt" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+<button type="button" name="btnContinueOneClickPurchase" id="btnContinueOneClickPurchase" class="btn btn-primary">Continue</button>
+</div>
+</div>
+<div class="mc-modal">
+<div class="mc-modal-header"><h4 class="mc-modal-title"></h4><span class="mc-modal-close">×</span></div>
+<div class="mc-modal-body"></div>
+</div>
+<div id="docDownloadWaitingModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="docDownloadWaitingModalLabel" aria-hidden="true">
+<div class="modal-header text-center">
+<h4 id="docDownloadWaitingModalLabel">Downloading Document</h4>
+</div>
+<div class="modal-body">
+<div style="min-height:75px;" class="text-center"><i class="fa-light fa-circle-notch fa-spin fa-lg"></i> Please wait while we download your document.</div>
+</div>
+</div>
+<iframe id="docDownloadIframe" style="display:none;"></iframe>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div><!-- /contianer -->
+</div>
+<div class="main-footer padding-top45 dark-bg margin-top100">
+<div class="container">
+<div class="row-fluid">
+<div class="span12 margin-bottom30">
+<div class="widget widget-logo widget-logo-style2">
+<figure>
+<div id="zoneK" class="zonewrapper">
+<div id="K269876" class="zoneresource"><p><img alt="CAAA" src="/userassets/CAAA/CAAA/userimages/caaa%20logo%20with%20text_all%20white_resized.png"></p></div>
+</div>
+</figure>
+</div><!-- /log-widget -->
+</div><!-- /span12 -->
+<div class="span12 align-center">
+<div id="zoneN" class="zonewrapper">
+<div id="N269877" class="zoneresource"><p class="clearfix footer-copy"><span>1303 J Street, Suite 420, Sacramento, CA 95814<br>
+p: 916.444.5155&nbsp;• f: 916.444.0661</span></p>
+<p class="clearfix footer-copy"><span>Mon - Fri 9:00 AM - 5:00 PM</span></p>
+<div id="google_translate_element">&nbsp;<div class="skiptranslate goog-te-gadget" dir="ltr" style=""><div id=":0.targetLanguage" style="display: inline;"><select class="goog-te-combo" aria-label="Language Translate Widget"><option value="">Select Language</option><option value="ab">Abkhaz</option><option value="ace">Acehnese</option><option value="ach">Acholi</option><option value="aa">Afar</option><option value="af">Afrikaans</option><option value="sq">Albanian</option><option value="alz">Alur</option><option value="am">Amharic</option><option value="ar">Arabic</option><option value="hy">Armenian</option><option value="as">Assamese</option><option value="av">Avar</option><option value="awa">Awadhi</option><option value="ay">Aymara</option><option value="az">Azerbaijani</option><option value="ban">Balinese</option><option value="bal">Baluchi</option><option value="bm">Bambara</option><option value="bci">Baoulé</option><option value="ba">Bashkir</option><option value="eu">Basque</option><option value="btx">Batak Karo</option><option value="bts">Batak Simalungun</option><option value="bbc">Batak Toba</option><option value="be">Belarusian</option><option value="bem">Bemba</option><option value="bn">Bengali</option><option value="bew">Betawi</option><option value="bho">Bhojpuri</option><option value="bik">Bikol</option><option value="bs">Bosnian</option><option value="br">Breton</option><option value="bg">Bulgarian</option><option value="bua">Buryat</option><option value="yue">Cantonese</option><option value="ca">Catalan</option><option value="ceb">Cebuano</option><option value="ch">Chamorro</option><option value="ce">Chechen</option><option value="ny">Chichewa</option><option value="zh-CN">Chinese (Simplified)</option><option value="zh-TW">Chinese (Traditional)</option><option value="chk">Chuukese</option><option value="cv">Chuvash</option><option value="co">Corsican</option><option value="crh">Crimean Tatar (Cyrillic)</option><option value="crh-Latn">Crimean Tatar (Latin)</option><option value="hr">Croatian</option><option value="cs">Czech</option><option value="da">Danish</option><option value="fa-AF">Dari</option><option value="dv">Dhivehi</option><option value="din">Dinka</option><option value="doi">Dogri</option><option value="dov">Dombe</option><option value="nl">Dutch</option><option value="dyu">Dyula</option><option value="dz">Dzongkha</option><option value="eo">Esperanto</option><option value="et">Estonian</option><option value="ee">Ewe</option><option value="fo">Faroese</option><option value="fj">Fijian</option><option value="tl">Filipino</option><option value="fi">Finnish</option><option value="fon">Fon</option><option value="fr">French</option><option value="fr-CA">French (Canada)</option><option value="fy">Frisian</option><option value="fur">Friulian</option><option value="ff">Fulani</option><option value="gaa">Ga</option><option value="gl">Galician</option><option value="ka">Georgian</option><option value="de">German</option><option value="el">Greek</option><option value="gn">Guarani</option><option value="gu">Gujarati</option><option value="ht">Haitian Creole</option><option value="cnh">Hakha Chin</option><option value="ha">Hausa</option><option value="haw">Hawaiian</option><option value="iw">Hebrew</option><option value="hil">Hiligaynon</option><option value="hi">Hindi</option><option value="hmn">Hmong</option><option value="hu">Hungarian</option><option value="hrx">Hunsrik</option><option value="iba">Iban</option><option value="is">Icelandic</option><option value="ig">Igbo</option><option value="ilo">Ilocano</option><option value="id">Indonesian</option><option value="iu-Latn">Inuktut (Latin)</option><option value="iu">Inuktut (Syllabics)</option><option value="ga">Irish</option><option value="it">Italian</option><option value="jam">Jamaican Patois</option><option value="ja">Japanese</option><option value="jw">Javanese</option><option value="kac">Jingpo</option><option value="kl">Kalaallisut</option><option value="kn">Kannada</option><option value="kr">Kanuri</option><option value="pam">Kapampangan</option><option value="kk">Kazakh</option><option value="kha">Khasi</option><option value="km">Khmer</option><option value="cgg">Kiga</option><option value="kg">Kikongo</option><option value="rw">Kinyarwanda</option><option value="ktu">Kituba</option><option value="trp">Kokborok</option><option value="kv">Komi</option><option value="gom">Konkani</option><option value="ko">Korean</option><option value="kri">Krio</option><option value="ku">Kurdish (Kurmanji)</option><option value="ckb">Kurdish (Sorani)</option><option value="ky">Kyrgyz</option><option value="lo">Lao</option><option value="ltg">Latgalian</option><option value="la">Latin</option><option value="lv">Latvian</option><option value="lij">Ligurian</option><option value="li">Limburgish</option><option value="ln">Lingala</option><option value="lt">Lithuanian</option><option value="lmo">Lombard</option><option value="lg">Luganda</option><option value="luo">Luo</option><option value="lb">Luxembourgish</option><option value="mk">Macedonian</option><option value="mad">Madurese</option><option value="mai">Maithili</option><option value="mak">Makassar</option><option value="mg">Malagasy</option><option value="ms">Malay</option><option value="ms-Arab">Malay (Jawi)</option><option value="ml">Malayalam</option><option value="mt">Maltese</option><option value="mam">Mam</option><option value="gv">Manx</option><option value="mi">Maori</option><option value="mr">Marathi</option><option value="mh">Marshallese</option><option value="mwr">Marwadi</option><option value="mfe">Mauritian Creole</option><option value="chm">Meadow Mari</option><option value="mni-Mtei">Meiteilon (Manipuri)</option><option value="min">Minang</option><option value="lus">Mizo</option><option value="mn">Mongolian</option><option value="my">Myanmar (Burmese)</option><option value="nhe">Nahuatl (Eastern Huasteca)</option><option value="ndc-ZW">Ndau</option><option value="nr">Ndebele (South)</option><option value="new">Nepalbhasa (Newari)</option><option value="ne">Nepali</option><option value="bm-Nkoo">NKo</option><option value="no">Norwegian</option><option value="nus">Nuer</option><option value="oc">Occitan</option><option value="or">Odia (Oriya)</option><option value="om">Oromo</option><option value="os">Ossetian</option><option value="pag">Pangasinan</option><option value="pap">Papiamento</option><option value="ps">Pashto</option><option value="fa">Persian</option><option value="pl">Polish</option><option value="pt">Portuguese (Brazil)</option><option value="pt-PT">Portuguese (Portugal)</option><option value="pa">Punjabi (Gurmukhi)</option><option value="pa-Arab">Punjabi (Shahmukhi)</option><option value="qu">Quechua</option><option value="kek">Qʼeqchiʼ</option><option value="rom">Romani</option><option value="ro">Romanian</option><option value="rn">Rundi</option><option value="ru">Russian</option><option value="se">Sami (North)</option><option value="sm">Samoan</option><option value="sg">Sango</option><option value="sa">Sanskrit</option><option value="sat-Latn">Santali (Latin)</option><option value="sat">Santali (Ol Chiki)</option><option value="gd">Scots Gaelic</option><option value="nso">Sepedi</option><option value="sr">Serbian</option><option value="st">Sesotho</option><option value="crs">Seychellois Creole</option><option value="shn">Shan</option><option value="sn">Shona</option><option value="scn">Sicilian</option><option value="szl">Silesian</option><option value="sd">Sindhi</option><option value="si">Sinhala</option><option value="sk">Slovak</option><option value="sl">Slovenian</option><option value="so">Somali</option><option value="es">Spanish</option><option value="su">Sundanese</option><option value="sus">Susu</option><option value="sw">Swahili</option><option value="ss">Swati</option><option value="sv">Swedish</option><option value="ty">Tahitian</option><option value="tg">Tajik</option><option value="ber-Latn">Tamazight</option><option value="ber">Tamazight (Tifinagh)</option><option value="ta">Tamil</option><option value="tt">Tatar</option><option value="te">Telugu</option><option value="tet">Tetum</option><option value="th">Thai</option><option value="bo">Tibetan</option><option value="ti">Tigrinya</option><option value="tiv">Tiv</option><option value="tpi">Tok Pisin</option><option value="to">Tongan</option><option value="lua">Tshiluba</option><option value="ts">Tsonga</option><option value="tn">Tswana</option><option value="tcy">Tulu</option><option value="tum">Tumbuka</option><option value="tr">Turkish</option><option value="tk">Turkmen</option><option value="tyv">Tuvan</option><option value="ak">Twi</option><option value="udm">Udmurt</option><option value="uk">Ukrainian</option><option value="ur">Urdu</option><option value="ug">Uyghur</option><option value="uz">Uzbek</option><option value="ve">Venda</option><option value="vec">Venetian</option><option value="vi">Vietnamese</option><option value="war">Waray</option><option value="cy">Welsh</option><option value="wo">Wolof</option><option value="xh">Xhosa</option><option value="sah">Yakut</option><option value="yi">Yiddish</option><option value="yo">Yoruba</option><option value="yua">Yucatec Maya</option><option value="zap">Zapotec</option><option value="zu">Zulu</option></select></div>&nbsp;&nbsp;Powered by <span style="white-space:nowrap"><a class="VIpgJd-ZVi9od-l4eHX-hSRGPd" href="https://translate.google.com" target="_blank"><img src="https://www.gstatic.com/images/branding/googlelogo/1x/googlelogo_color_42x16dp.png" width="37px" height="14px" style="padding-right: 3px" alt="Google Translate">Translate</a></span></div></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+new google.translate.TranslateElement({pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL}, 'google_translate_element');
+}
+</script><script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<style type="text/css">
+</style>
+</div>
+<div id="N1661272" class="zoneresource"><p class="clearfix margin-top20"><span class="white-color bold">Follow Us</span></p></div>
+<div id="N1661273" class="zoneresource"><p class="clearfix margin-top20"><a href="https://www.facebook.com/CaliforniaApplicantsAttorneysAssociation" target="_blank"><img alt="FACEBOOK" class="social-icons" src="/images/misc/facebook.png"></a> <a href="https://twitter.com/CAAA365" target="_blank"><img alt="TWITTER" class="social-icons" src="/images/misc/twitter.png"></a> <a href="https://www.instagram.com/caaa_365/" target="_blank"><img alt="INSTAGRAM" class="social-icons" src="/images/misc/instagram.png"></a> <a href="https://www.linkedin.com/organization/3304345" target="_blank"><img alt="LINKEDIN" class="social-icons" src="/images/misc/linkedin.png"></a></p>
+</div>
+</div>
+</div><!-- /span12 -->
+</div><!-- /row -->
+</div><!-- /container -->
+<div class="container-fluid copyright-footer margin-top20" style="">
+<div class="padding-25">
+<div id="zoneQ" class="zonewrapper">
+<div id="Q269880" class="zoneresource"><h6 class="footer-copyright align-center v-center padding-top15 general-copy">Copyrights © 2021 CAAA. All Rights Reserved.&nbsp;&nbsp;<a href="/TermsofUse" target="_blank">Terms of Use</a>.&nbsp;&nbsp;<a href="/PrivacyPolicy" target="_blank">Privacy Policy.</a>&nbsp;&nbsp;<a href="/?pg=PhotoConsent" target="_blank">Photo Consent Policy</a>.</h6>
+<style type="text/css">#editSelector option {font-size: 12px !important;}
+</style>
+</div>
+</div>
+</div><!-- /widget-promo -->
+</div><!-- /container -->
+</div>
+<script src="/javascript/vendor/modernizr-2.6.2.min.js"></script>
+<script src="/javascript/jquery.magnific-popup.min.js"></script>
+<script src="/javascript/imagesloaded.pkgd.min.js"></script>
+<script src="/javascript/jquery.fs.shifter.min.js"></script>
+<script src="/javascript/jquery.stellar.min.js"></script>
+<script src="/javascript/isotope.pkgd.min.js"></script>
+<script src="/javascript/jpreloader.js"></script>
+<script src="/javascript/wow.min.js"></script>
+<script src="/javascript/main.js"></script>
+<script src="/javascript/latestNews.js"></script>
+<script src="/assets/common/javascript/owlCarousel/234/owl.carousel.min.js" type="text/javascript"></script> 
+<script src="/javascript/script.js"></script>
+<!-- End main-footer -->
+</div>
+
+
+<div id="cboxOverlay" style="display: none;"></div><div id="goog-gt-tt" class="VIpgJd-yAWNEb-L7lbkb skiptranslate" style="border-radius: 12px; margin: 0 0 0 -23px; padding: 0; font-family: 'Google Sans', Arial, sans-serif;" data-id=""><div id="goog-gt-vt" class="VIpgJd-yAWNEb-hvhgNd"><div class="VIpgJd-yAWNEb-hvhgNd-Ud7fr"><img src="https://fonts.gstatic.com/s/i/productlogos/translate/v14/24px.svg" width="24" height="24" alt=""><div class=" VIpgJd-yAWNEb-hvhgNd-IuizWc-i3jM8c " dir="ltr">Original text</div></div><div class="VIpgJd-yAWNEb-hvhgNd-k77Iif"><div id="goog-gt-original-text" class="VIpgJd-yAWNEb-nVMfcd-fmcmS VIpgJd-yAWNEb-hvhgNd-axAV1"></div></div><div class="VIpgJd-yAWNEb-hvhgNd-N7Eqid ltr"><div class="VIpgJd-yAWNEb-hvhgNd-N7Eqid-B7I4Od ltr" dir="ltr"><div class="VIpgJd-yAWNEb-hvhgNd-UTujCb">Rate this translation</div><div class="VIpgJd-yAWNEb-hvhgNd-eO9mKe">Your feedback will be used to help improve Google Translate</div></div><div class="VIpgJd-yAWNEb-hvhgNd-xgov5 ltr"><button id="goog-gt-thumbUpButton" type="button" class="VIpgJd-yAWNEb-hvhgNd-bgm6sf" title="Good translation" aria-label="Good translation" aria-pressed="false"><span id="goog-gt-thumbUpIcon"><svg width="24" height="24" viewBox="0 0 24 24" focusable="false" class="VIpgJd-yAWNEb-hvhgNd-THI6Vb NMm5M"><path d="M21 7h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 0S7.08 6.85 7 7H2v13h16c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73V9c0-1.1-.9-2-2-2zM7 18H4V9h3v9zm14-7l-3 7H9V8l4.34-4.34L12 9h9v2z"></path></svg></span><span id="goog-gt-thumbUpIconFilled"><svg width="24" height="24" viewBox="0 0 24 24" focusable="false" class="VIpgJd-yAWNEb-hvhgNd-THI6Vb NMm5M"><path d="M21 7h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 0S7.08 6.85 7 7v13h11c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73V9c0-1.1-.9-2-2-2zM5 7H1v13h4V7z"></path></svg></span></button><button id="goog-gt-thumbDownButton" type="button" class="VIpgJd-yAWNEb-hvhgNd-bgm6sf" title="Poor translation" aria-label="Poor translation" aria-pressed="false"><span id="goog-gt-thumbDownIcon"><svg width="24" height="24" viewBox="0 0 24 24" focusable="false" class="VIpgJd-yAWNEb-hvhgNd-THI6Vb NMm5M"><path d="M3 17h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 24s7.09-6.85 7.17-7h5V4H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2zM17 6h3v9h-3V6zM3 13l3-7h9v10l-4.34 4.34L12 15H3v-2z"></path></svg></span><span id="goog-gt-thumbDownIconFilled"><svg width="24" height="24" viewBox="0 0 24 24" focusable="false" class="VIpgJd-yAWNEb-hvhgNd-THI6Vb NMm5M"><path d="M3 17h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 24s7.09-6.85 7.17-7V4H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2zm16 0h4V4h-4v13z"></path></svg></span></button></div></div><div id="goog-gt-votingHiddenPane" class="VIpgJd-yAWNEb-hvhgNd-aXYTce"><form id="goog-gt-votingForm" action="//translate.googleapis.com/translate_voting?client=te" method="post" target="votingFrame" class="VIpgJd-yAWNEb-hvhgNd-aXYTce"><input type="text" name="sl" id="goog-gt-votingInputSrcLang" style=""><input type="text" name="tl" id="goog-gt-votingInputTrgLang" style=""><input type="text" name="query" id="goog-gt-votingInputSrcText" style=""><input type="text" name="gtrans" id="goog-gt-votingInputTrgText" style=""><input type="text" name="vote" id="goog-gt-votingInputVote" style=""></form><iframe name="votingFrame" frameborder="0"></iframe></div></div></div><div id="colorbox" class="" role="dialog" tabindex="-1" style="display: none;"><div id="cboxWrapper"><div><div id="cboxTopLeft" style="float: left;"></div><div id="cboxTopCenter" style="float: left;"></div><div id="cboxTopRight" style="float: left;"></div></div><div style="clear: left;"><div id="cboxMiddleLeft" style="float: left;"></div><div id="cboxContent" style="float: left;"><div id="cboxTitle" style="float: left;"></div><div id="cboxCurrent" style="float: left;"></div><button type="button" id="cboxPrevious"></button><button type="button" id="cboxNext"></button><button id="cboxSlideshow"></button><div id="cboxLoadingOverlay" style="float: left;"></div><div id="cboxLoadingGraphic" style="float: left;"></div><button type="button" id="cboxClose"></button></div><div id="cboxMiddleRight" style="float: left;"></div></div><div style="clear: left;"><div id="cboxBottomLeft" style="float: left;"></div><div id="cboxBottomCenter" style="float: left;"></div><div id="cboxBottomRight" style="float: left;"></div></div></div><div style="position: absolute; width: 9999px; visibility: hidden; display: none;"></div></div><div class="VIpgJd-ZVi9od-aZ2wEe-wOHMyf"><div class="VIpgJd-ZVi9od-aZ2wEe-OiiCO"><svg xmlns="http://www.w3.org/2000/svg" class="VIpgJd-ZVi9od-aZ2wEe" width="96px" height="96px" viewBox="0 0 66 66"><circle class="VIpgJd-ZVi9od-aZ2wEe-Jt5cK" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle></svg></div></div></body></html>

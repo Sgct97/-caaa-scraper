@@ -1,0 +1,102 @@
+{
+  "search_term": "John",
+  "results_url": "https://www.caaa.org/?bid=3305&pg=search&s_a=doSearch&sid=18695374",
+  "result_patterns": [
+    {
+      "selector": "tr",
+      "count": 21
+    },
+    {
+      "selector": "li",
+      "count": 204
+    },
+    {
+      "selector": "[class*=\"result\"]",
+      "count": 2
+    },
+    {
+      "selector": "[class*=\"item\"]",
+      "count": 34
+    },
+    {
+      "selector": "[class*=\"post\"]",
+      "count": 1
+    },
+    {
+      "selector": "[class*=\"message\"]",
+      "count": 1
+    }
+  ],
+  "pagination": [
+    {
+      "selector": "a[href*=\"pg=\"]",
+      "count": 152
+    },
+    {
+      "selector": "a:has-text(\"Next\")",
+      "count": 1
+    },
+    {
+      "selector": "a:has-text(\">\")",
+      "count": 3
+    },
+    {
+      "selector": "[class*=\"pag\"]",
+      "count": 4
+    }
+  ],
+  "post_links": [
+    {
+      "text": "(no text)",
+      "href": "/?pg=main"
+    },
+    {
+      "text": "HOME",
+      "href": "/?pg=main"
+    },
+    {
+      "text": "ABOUT US",
+      "href": "/?pg=About-Us"
+    },
+    {
+      "text": "EXECUTIVE COMMITTEE",
+      "href": "/?pg=Executive-Board"
+    },
+    {
+      "text": "CONSULTANTS",
+      "href": "/?pg=Consultants"
+    },
+    {
+      "text": "COMMITTEES",
+      "href": "/?pg=Committees-Overview"
+    },
+    {
+      "text": "BENEFITS OF MEMBERSHIP",
+      "href": "/?pg=BenefitsOfMembership"
+    },
+    {
+      "text": "JOIN US",
+      "href": "/?pg=JoinToday"
+    },
+    {
+      "text": "CONTACT US",
+      "href": "/?pg=Staff-Contact"
+    },
+    {
+      "text": "MYCAAA\u00a0PROFILE",
+      "href": "/?pg=myCAAA"
+    }
+  ],
+  "tables": [
+    {
+      "index": 0,
+      "row_count": 11,
+      "headers": []
+    },
+    {
+      "index": 1,
+      "row_count": 10,
+      "headers": []
+    }
+  ]
+}
