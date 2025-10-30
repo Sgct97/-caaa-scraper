@@ -1,0 +1,16 @@
+[Unit]
+Description=CAAA Persistent Browser Session
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/srv/caaa_scraper
+Environment="DISPLAY=:99"
+ExecStart=/srv/caaa_scraper/venv/bin/python /srv/caaa_scraper/persistent_browser.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+
