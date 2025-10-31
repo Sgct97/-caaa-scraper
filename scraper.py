@@ -35,7 +35,7 @@ class CAAAScraper:
             List of message dictionaries
         """
         with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
+            browser = p.chromium.launch(headless=False)
             context = browser.new_context(storage_state=self.storage_state_path)
             page = context.new_page()
             
