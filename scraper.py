@@ -123,7 +123,17 @@ class CAAAScraper:
         
         # Submit search
         print(f"→ Submitting search...")
-        page.click('#s_btn')
+        try:
+            # Try clicking the search button
+            page.click('#s_btn', timeout=10000)
+        except Exception as e:
+            print(f"  ⚠️  Could not click #s_btn: {e}")
+            # Try alternative selector
+            try:
+                page.click('input[name="s_btn"]', timeout=5000)
+            except:
+                print(f"  ⚠️  Trying to find any submit button...")
+                page.click('button[type="submit"], input[type="submit"]', timeout=5000)
         
         # Wait for results
         try:
