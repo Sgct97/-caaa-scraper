@@ -216,7 +216,16 @@ async def ai_analyze(request: AIAnalyzeRequest):
             raise HTTPException(status_code=503, detail="AI service not available")
         
         # Build prompt for AI
+        from datetime import datetime, timedelta
+        today = datetime.now()
+        three_months_ago = (today - timedelta(days=90)).strftime('%Y-%m-%d')
+        six_months_ago = (today - timedelta(days=180)).strftime('%Y-%m-%d')
+        one_year_ago = (today - timedelta(days=365)).strftime('%Y-%m-%d')
+        today_str = today.strftime('%Y-%m-%d')
+        
         prompt = f"""You are an expert legal research assistant for California workers' compensation law.
+
+TODAY'S DATE: {today_str}
 
 USER'S INTENT: "{request.intent}"
 
@@ -225,8 +234,15 @@ CURRENT SEARCH FIELDS THEY'VE FILLED:
 
 Your task:
 1. Analyze what the user is truly trying to find
-2. Review their current search field values
+2. Review their current search field values  
 3. Suggest improvements or ask clarifying questions
+
+IMPORTANT RULES:
+- If user says "recent", suggest dates from 3-6 months ago to TODAY ({three_months_ago} to {today_str})
+- If user says "last year", use dates from 1 year ago to TODAY ({one_year_ago} to {today_str})
+- DO NOT suggest old/past date ranges like 2022-2023 unless user specifically asks for historical data
+- Focus on what they're actually asking for, not random fields
+- Keep suggestions minimal and relevant
 
 If their fields look good, affirm them and suggest proceeding.
 If you see issues or opportunities for better results, explain what and why.
