@@ -341,7 +341,7 @@ async def run_search_async(search_fields: Optional[dict], ai_intent: Optional[st
             date_from=search_fields.get('date_from'),
             date_to=search_fields.get('date_to'),
             posted_by=search_fields.get('posted_by'),
-            last_name=search_fields.get('last_name'),
+            author_last_name=search_fields.get('last_name'),  # Map 'last_name' to 'author_last_name'
             search_in=search_fields.get('search_in', 'subject_and_body'),
             attachments=search_fields.get('attachments')
         )
