@@ -347,6 +347,16 @@ async def run_search_async(search_fields: Optional[dict], ai_intent: Optional[st
     # Build search params from manual fields
     if search_fields:
         # User provided manual search fields
+        # Parse dates if provided as strings
+        date_from = search_fields.get('date_from')
+        date_to = search_fields.get('date_to')
+        if date_from and isinstance(date_from, str):
+            from datetime import datetime
+            date_from = datetime.strptime(date_from, '%Y-%m-%d').date()
+        if date_to and isinstance(date_to, str):
+            from datetime import datetime
+            date_to = datetime.strptime(date_to, '%Y-%m-%d').date()
+        
         search_params = SearchParams(
             keyword=search_fields.get('keyword'),
             keywords_all=search_fields.get('keywords_all'),
@@ -354,12 +364,12 @@ async def run_search_async(search_fields: Optional[dict], ai_intent: Optional[st
             keywords_any=search_fields.get('keywords_any'),
             keywords_exclude=search_fields.get('keywords_exclude'),
             listserv=search_fields.get('listserv', 'all'),
-            date_from=search_fields.get('date_from'),
-            date_to=search_fields.get('date_to'),
+            date_from=date_from,
+            date_to=date_to,
             posted_by=search_fields.get('posted_by'),
             author_last_name=search_fields.get('last_name'),  # Map 'last_name' to 'author_last_name'
             search_in=search_fields.get('search_in', 'subject_and_body'),
-            attachments=search_fields.get('attachments')
+            attachment_filter=search_fields.get('attachments', 'all')  # Map 'attachments' to 'attachment_filter'
         )
     elif use_ai and ai_intent and orchestrator.query_enhancer:
         # Use AI to generate search params
