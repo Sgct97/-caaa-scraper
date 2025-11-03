@@ -83,9 +83,10 @@ class AIAnalyzer:
             self.total_tokens_used += tokens_used
             self.total_cost_usd += cost
             
-            result['tokens_used'] = tokens_used
-            result['cost_usd'] = cost
-            result['model'] = self.model
+            result['ai_tokens_used'] = tokens_used
+            result['ai_cost_usd'] = cost
+            result['ai_model'] = self.model
+            result['ai_reasoning'] = result.pop('reasoning')  # Rename for DB compatibility
             
             return result
             
@@ -95,10 +96,10 @@ class AIAnalyzer:
             return {
                 'is_relevant': False,
                 'confidence': 0.0,
-                'reasoning': f"Error analyzing message: {str(e)}",
-                'tokens_used': 0,
-                'cost_usd': 0.0,
-                'model': self.model
+                'ai_reasoning': f"Error analyzing message: {str(e)}",
+                'ai_tokens_used': 0,
+                'ai_cost_usd': 0.0,
+                'ai_model': self.model
             }
     
     def _build_prompt(self, message: Dict, search_keyword: str, context: Optional[str]) -> str:
