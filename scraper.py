@@ -135,13 +135,21 @@ class CAAAScraper:
                 print(f"  ⚠️  Trying to find any submit button...")
                 page.click('button[type="submit"], input[type="submit"]', timeout=5000)
         
-        # Wait for results
+        # Wait for results (AJAX loads results dynamically)
+        print(f"→ Waiting for results to load...")
         try:
-            page.wait_for_load_state("domcontentloaded", timeout=10000)
-        except:
-            pass
+            # Wait for the loading icon to appear, then disappear (indicates AJAX is complete)
+            page.wait_for_selector('#bk_content', timeout=5000)
+            page.wait_for_timeout(2000)  # Let AJAX start
+            
+            # Wait for results table or "no results" message (up to 30 seconds for slow searches)
+            page.wait_for_selector("table.table-striped tbody tr, .resultMsgExposition, .s_rnfne", timeout=30000)
+            page.wait_for_timeout(2000)  # Let content fully render
+            
+        except Exception as e:
+            print(f"  ⚠️  Timeout waiting for results: {e}")
+            page.wait_for_timeout(5000)  # Fallback wait
         
-        page.wait_for_timeout(3000)
         print(f"✓ Search submitted")
     
     def _extract_message_ids(self, 
