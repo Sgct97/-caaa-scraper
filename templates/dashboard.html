@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAAA Legal Intelligence | AI-Powered Research Platform</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js for interactivity -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .animate-gradient {
+            background-size: 200% 200%;
+            animation: gradient 15s ease infinite;
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .search-box-shadow {
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
+    
+    <!-- Navigation -->
+    <nav class="glass border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-balance-scale text-primary-600 text-2xl mr-3"></i>
+                        <span class="text-2xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">
+                            CAAA Legal Intelligence
+                        </span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-sm text-gray-600">
+                        <i class="fas fa-robot text-primary-500"></i>
+                        <span class="font-semibold">AI-Powered</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Hero Section with Search -->
+        <div class="mb-12">
+            <div class="text-center mb-8">
+                <h1 class="text-5xl font-bold text-gray-900 mb-4">
+                    Legal Research, <span class="bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">Supercharged</span>
+                </h1>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Describe what you're looking for in plain English. Our AI will find, analyze, and rank the most relevant cases for you.
+                </p>
+            </div>
+            
+            <!-- Search Box -->
+            <div class="max-w-4xl mx-auto" x-data="searchApp()">
+                <div class="glass rounded-2xl p-8 search-box-shadow">
+                    <form @submit.prevent="submitSearch">
+                        <div class="space-y-4">
+                            <!-- Main Search Input -->
+                            <div class="relative">
+                                <textarea 
+                                    x-model="query"
+                                    rows="3"
+                                    class="w-full px-6 py-4 text-lg border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition-all resize-none"
+                                    placeholder="e.g., 'I need cases about injured workers being denied medical treatment' or 'Recent decisions on permanent disability ratings'"
+                                    :disabled="searching"
+                                ></textarea>
+                                <div class="absolute bottom-4 right-4 text-sm text-gray-400">
+                                    <i class="fas fa-sparkles text-primary-400"></i> AI Enhanced
+                                </div>
+                            </div>
+                            
+                            <!-- Options -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4 text-sm">
+                                    <label class="flex items-center cursor-pointer">
+                                        <input 
+                                            type="checkbox" 
+                                            x-model="useAI"
+                                            class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                                            :disabled="searching"
+                                        >
+                                        <span class="ml-2 text-gray-700">
+                                            <i class="fas fa-brain text-primary-500"></i> AI Query Enhancement
+                                        </span>
+                                    </label>
+                                    <span class="text-gray-400">|</span>
+                                    <span class="text-gray-600">
+                                        Max: <span class="font-semibold text-primary-600">100</span> messages
+                                    </span>
+                                </div>
+                                
+                                <button 
+                                    type="submit"
+                                    class="px-8 py-3 bg-gradient-to-r from-primary-600 to-purple-600 text-white font-semibold rounded-xl hover:from-primary-700 hover:to-purple-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                                    :disabled="searching || !query.trim()"
+                                >
+                                    <span x-show="!searching" class="flex items-center">
+                                        <i class="fas fa-search mr-2"></i>
+                                        Search & Analyze
+                                    </span>
+                                    <span x-show="searching" class="flex items-center">
+                                        <i class="fas fa-spinner fa-spin mr-2"></i>
+                                        Processing...
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <!-- Status Message -->
+                    <div x-show="statusMessage" 
+                         class="mt-4 p-4 rounded-lg" 
+                         :class="statusType === 'error' ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'">
+                        <span x-text="statusMessage"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+            <div class="glass rounded-xl p-6 hover:shadow-lg transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 font-medium">Total Searches</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats.total_searches or 0 }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-search text-primary-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="glass rounded-xl p-6 hover:shadow-lg transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 font-medium">Messages Analyzed</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats.total_messages or 0 }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-file-alt text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="glass rounded-xl p-6 hover:shadow-lg transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 font-medium">Relevant Results</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats.total_relevant or 0 }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="glass rounded-xl p-6 hover:shadow-lg transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 font-medium">Active Searches</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats.running_searches or 0 }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-spinner fa-pulse text-yellow-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Searches -->
+        <div class="glass rounded-xl p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                <i class="fas fa-history text-primary-600 mr-3"></i>
+                Recent Searches
+            </h2>
+            
+            {% if recent_searches %}
+            <div class="space-y-4">
+                {% for search in recent_searches %}
+                <a href="/search/{{ search.id }}" 
+                   class="block p-6 border-2 border-gray-100 rounded-xl hover:border-primary-300 hover:shadow-md transition-all">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <h3 class="text-lg font-semibold text-gray-900">{{ search.keyword }}</h3>
+                                <span class="px-3 py-1 text-xs font-semibold rounded-full
+                                    {% if search.status == 'completed' %}bg-green-100 text-green-700
+                                    {% elif search.status == 'running' %}bg-yellow-100 text-yellow-700
+                                    {% elif search.status == 'failed' %}bg-red-100 text-red-700
+                                    {% else %}bg-gray-100 text-gray-700{% endif %}">
+                                    {{ search.status|upper }}
+                                </span>
+                            </div>
+                            <div class="flex items-center space-x-6 text-sm text-gray-600">
+                                <span>
+                                    <i class="fas fa-file-alt text-gray-400 mr-1"></i>
+                                    {{ search.total_messages_found or 0 }} found
+                                </span>
+                                <span>
+                                    <i class="fas fa-check-circle text-green-500 mr-1"></i>
+                                    {{ search.total_relevant_found or 0 }} relevant
+                                </span>
+                                <span>
+                                    <i class="fas fa-clock text-gray-400 mr-1"></i>
+                                    {{ search.created_at.strftime('%b %d, %Y %I:%M %p') if search.created_at else 'N/A' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-12 text-gray-500">
+                <i class="fas fa-search text-6xl text-gray-300 mb-4"></i>
+                <p class="text-lg">No searches yet. Start your first AI-powered search above!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function searchApp() {
+            return {
+                query: '',
+                useAI: true,
+                searching: false,
+                statusMessage: '',
+                statusType: '',
+                
+                async submitSearch() {
+                    if (!this.query.trim()) return;
+                    
+                    this.searching = true;
+                    this.statusMessage = '';
+                    
+                    try {
+                        const response = await fetch('/api/search', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                query: this.query,
+                                use_ai_enhancement: this.useAI,
+                                max_messages: 100,
+                                max_pages: 10
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            this.statusMessage = 'Search started! Redirecting to results...';
+                            this.statusType = 'success';
+                            
+                            // Redirect to search results page
+                            setTimeout(() => {
+                                window.location.href = `/search/${data.search_id}`;
+                            }, 1000);
+                        } else {
+                            throw new Error(data.detail || 'Search failed');
+                        }
+                    } catch (error) {
+                        this.statusMessage = `Error: ${error.message}`;
+                        this.statusType = 'error';
+                        this.searching = false;
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
+

@@ -295,6 +295,65 @@ class Database:
                 """, (search_id,))
                 
                 return cur.fetchone()
+    
+    def get_search_info(self, search_id: str) -> dict:
+        """Get basic search information"""
+        with self.get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("""
+                    SELECT 
+                        id::text,
+                        keyword,
+                        status,
+                        total_messages_found,
+                        total_relevant_found,
+                        created_at,
+                        started_at,
+                        completed_at
+                    FROM searches
+                    WHERE id = %s
+                """, (search_id,))
+                
+                return cur.fetchone()
+    
+    def get_recent_searches(self, limit: int = 10) -> List[Dict]:
+        """Get recent searches"""
+        with self.get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("""
+                    SELECT 
+                        id::text,
+                        keyword,
+                        status,
+                        total_messages_found,
+                        total_relevant_found,
+                        created_at,
+                        completed_at
+                    FROM searches
+                    ORDER BY created_at DESC
+                    LIMIT %s
+                """, (limit,))
+                
+                return cur.fetchall()
+    
+    def get_platform_stats(self) -> dict:
+        """Get overall platform statistics"""
+        with self.get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("""
+                    SELECT 
+                        COUNT(DISTINCT s.id) as total_searches,
+                        COUNT(DISTINCT m.id) as total_messages,
+                        COUNT(DISTINCT a.id) FILTER (WHERE a.is_relevant = TRUE) as total_relevant,
+                        COUNT(DISTINCT s.id) FILTER (WHERE s.status = 'completed') as completed_searches,
+                        COUNT(DISTINCT s.id) FILTER (WHERE s.status = 'running') as running_searches
+                    FROM searches s
+                    LEFT JOIN search_results sr ON s.id = sr.search_id
+                    LEFT JOIN messages m ON sr.message_id = m.id
+                    LEFT JOIN analyses a ON a.message_id = m.id
+                """)
+                
+                return cur.fetchone()
 
 
 # ============================================================
