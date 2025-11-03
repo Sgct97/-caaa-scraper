@@ -100,6 +100,12 @@ async def create_search(search_req: SearchRequest, background_tasks: BackgroundT
     """Create a new search and start processing in background"""
     
     try:
+        # DEBUG: Log what we received
+        print(f"📥 Received search request:")
+        print(f"   search_fields: {search_req.search_fields}")
+        print(f"   ai_intent: {search_req.ai_intent}")
+        print(f"   use_ai_enhancement: {search_req.use_ai_enhancement}")
+        
         # Validate that we have either search fields or AI intent
         if not search_req.search_fields and not search_req.ai_intent:
             raise HTTPException(status_code=400, detail="Must provide search fields or AI intent")
