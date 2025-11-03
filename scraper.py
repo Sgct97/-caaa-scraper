@@ -161,6 +161,14 @@ class CAAAScraper:
         except Exception as e:
             print(f"  ⚠️  Timeout waiting for results: {e}")
             page.wait_for_timeout(5000)  # Fallback wait
+            # Take screenshot to debug
+            try:
+                page.screenshot(path="/srv/caaa_scraper/debug_search_timeout.png")
+                print(f"  📸 Screenshot saved to debug_search_timeout.png")
+            except:
+                pass
+            print(f"  🔗 Current URL: {page.url}")
+            print(f"  📄 Page title: {page.title()}")
         
         print(f"✓ Search submitted")
     
