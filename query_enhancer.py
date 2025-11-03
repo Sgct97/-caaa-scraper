@@ -120,11 +120,7 @@ Guidelines:
 - Use keywords_all for concepts that must appear together
 - Use keywords_any for synonyms or related terms
 - Use keywords_phrase for legal terms that should appear exactly
-- For date ranges, calculate from TODAY'S DATE provided above:
-  * "last 3 months" = 3 months ago to today
-  * "recent" = 1 month ago to today
-  * "this year" = Jan 1 current year to today
-  * Use YYYY-MM-DD format
+- **DO NOT use date filters unless the user explicitly mentions a specific time period** - searches work better without date restrictions
 - Choose appropriate listserv if context suggests worker vs employer side
 - Think about legal synonyms and abbreviations (PD = permanent disability, TD = temporary disability, etc.)
 
