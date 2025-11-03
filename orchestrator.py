@@ -37,10 +37,13 @@ class CAAAOrchestrator:
         self.openai_api_key = openai_api_key or os.getenv("OPENAI_API_KEY")
         
         if self.openai_api_key:
+            from openai import OpenAI
+            self.client = OpenAI(api_key=self.openai_api_key)
             self.query_enhancer = QueryEnhancer(api_key=self.openai_api_key)
             self.ai_analyzer = AIAnalyzer(api_key=self.openai_api_key)
             print("✓ AI components initialized")
         else:
+            self.client = None
             self.query_enhancer = None
             self.ai_analyzer = None
             print("⚠️  Running without AI (no OpenAI API key)")

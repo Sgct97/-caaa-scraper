@@ -11,6 +11,7 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from typing import Optional, List
 import os
+import json
 from datetime import datetime
 import asyncio
 from contextlib import asynccontextmanager
@@ -59,10 +60,20 @@ templates = Jinja2Templates(directory="templates")
 # ============================================================
 
 class SearchRequest(BaseModel):
-    query: str
-    use_ai_enhancement: bool = True
+    search_fields: Optional[dict] = None
+    ai_intent: Optional[str] = None
+    use_ai_enhancement: bool = False
     max_messages: int = 100
     max_pages: int = 10
+
+class AIAnalyzeRequest(BaseModel):
+    intent: str
+    current_fields: dict
+
+class AIFollowUpRequest(BaseModel):
+    answer: str
+    conversation: List[dict]
+    current_fields: dict
 
 # ============================================================
 # Routes
@@ -89,13 +100,14 @@ async def create_search(search_req: SearchRequest, background_tasks: BackgroundT
     """Create a new search and start processing in background"""
     
     try:
-        # Validate query
-        if not search_req.query or len(search_req.query.strip()) == 0:
-            raise HTTPException(status_code=400, detail="Query cannot be empty")
+        # Validate that we have either search fields or AI intent
+        if not search_req.search_fields and not search_req.ai_intent:
+            raise HTTPException(status_code=400, detail="Must provide search fields or AI intent")
         
         # Start search in background
         search_id = await run_search_async(
-            search_req.query,
+            search_req.search_fields,
+            search_req.ai_intent,
             search_req.use_ai_enhancement,
             search_req.max_messages,
             search_req.max_pages
@@ -195,6 +207,106 @@ async def view_search(request: Request, search_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/api/ai/analyze")
+async def ai_analyze(request: AIAnalyzeRequest):
+    """AI analyzes user intent and current search fields, suggests improvements"""
+    
+    try:
+        if not orchestrator.client:
+            raise HTTPException(status_code=503, detail="AI service not available")
+        
+        # Build prompt for AI
+        prompt = f"""You are an expert legal research assistant for California workers' compensation law.
+
+USER'S INTENT: "{request.intent}"
+
+CURRENT SEARCH FIELDS THEY'VE FILLED:
+{json.dumps(request.current_fields, indent=2)}
+
+Your task:
+1. Analyze what the user is truly trying to find
+2. Review their current search field values
+3. Suggest improvements or ask clarifying questions
+
+If their fields look good, affirm them and suggest proceeding.
+If you see issues or opportunities for better results, explain what and why.
+If you need more information to give better advice, ask ONE specific follow-up question.
+
+Respond in JSON format:
+{{
+  "analysis": "Your analysis and advice (2-3 sentences)",
+  "suggestions": {{dictionary of improved field values, or null if current is good}},
+  "follow_up_question": "A specific question to ask, or null"
+}}
+"""
+        
+        response = orchestrator.client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are a California workers' compensation legal research expert."},
+                {"role": "user", "content": prompt}
+            ],
+            response_format={"type": "json_object"},
+            temperature=0.7
+        )
+        
+        result = json.loads(response.choices[0].message.content)
+        
+        return {
+            "success": True,
+            "analysis": result.get("analysis", ""),
+            "suggestions": result.get("suggestions"),
+            "follow_up_question": result.get("follow_up_question")
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/ai/follow-up")
+async def ai_follow_up(request: AIFollowUpRequest):
+    """Continue AI conversation with user's answer to follow-up question"""
+    
+    try:
+        if not orchestrator.client:
+            raise HTTPException(status_code=503, detail="AI service not available")
+        
+        # Build conversation history
+        messages = [
+            {"role": "system", "content": "You are a California workers' compensation legal research expert."}
+        ]
+        
+        # Add conversation history
+        for msg in request.conversation[-4:]:  # Last 4 messages for context
+            if msg['role'] == 'user':
+                messages.append({"role": "user", "content": msg['content']})
+            elif msg['role'] == 'ai':
+                messages.append({"role": "assistant", "content": msg['content']})
+        
+        # Add latest answer
+        messages.append({
+            "role": "user",
+            "content": f"User's answer: {request.answer}\n\nCurrent fields: {json.dumps(request.current_fields)}\n\nBased on this, provide final search recommendations in JSON format with: analysis, suggestions, follow_up_question (or null if done)."
+        })
+        
+        response = orchestrator.client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            response_format={"type": "json_object"},
+            temperature=0.7
+        )
+        
+        result = json.loads(response.choices[0].message.content)
+        
+        return {
+            "success": True,
+            "analysis": result.get("analysis", ""),
+            "suggestions": result.get("suggestions"),
+            "follow_up_question": result.get("follow_up_question")
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
@@ -208,18 +320,37 @@ async def health_check():
 # Helper Functions
 # ============================================================
 
-async def run_search_async(query: str, use_ai: bool, max_messages: int, max_pages: int) -> str:
+async def run_search_async(search_fields: Optional[dict], ai_intent: Optional[str], 
+                           use_ai: bool, max_messages: int, max_pages: int) -> str:
     """Run search asynchronously"""
     
     # Import here to avoid circular dependency
     from search_params import SearchParams
     from query_enhancer import QueryEnhancer
     
-    # Get AI-enhanced params if enabled
-    if use_ai and orchestrator.query_enhancer:
-        search_params = orchestrator.query_enhancer.enhance_query(query)
+    # Build search params from manual fields
+    if search_fields:
+        # User provided manual search fields
+        search_params = SearchParams(
+            keyword=search_fields.get('keyword'),
+            keywords_all=search_fields.get('keywords_all'),
+            keywords_phrase=search_fields.get('keywords_phrase'),
+            keywords_any=search_fields.get('keywords_any'),
+            keywords_exclude=search_fields.get('keywords_exclude'),
+            listserv=search_fields.get('listserv', 'all'),
+            date_from=search_fields.get('date_from'),
+            date_to=search_fields.get('date_to'),
+            posted_by=search_fields.get('posted_by'),
+            last_name=search_fields.get('last_name'),
+            search_in=search_fields.get('search_in', 'subject_and_body'),
+            attachments=search_fields.get('attachments')
+        )
+    elif use_ai and ai_intent and orchestrator.query_enhancer:
+        # Use AI to generate search params
+        search_params = orchestrator.query_enhancer.enhance_query(ai_intent)
     else:
-        search_params = SearchParams(keyword=query)
+        # Fallback to simple keyword from AI intent
+        search_params = SearchParams(keyword=ai_intent or "")
     
     # Apply limits
     search_params.max_messages = max_messages
@@ -231,7 +362,7 @@ async def run_search_async(query: str, use_ai: bool, max_messages: int, max_page
     
     # Run in thread pool to avoid blocking
     loop = asyncio.get_event_loop()
-    loop.run_in_executor(None, run_search_sync, search_id, search_params, query)
+    loop.run_in_executor(None, run_search_sync, search_id, search_params, ai_intent or "manual search")
     
     return search_id
 
