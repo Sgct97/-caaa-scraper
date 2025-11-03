@@ -86,8 +86,20 @@ class CAAAScraper:
     def _execute_search(self, page: Page, search_params: SearchParams):
         """Execute search with given parameters"""
         print(f"\n→ Navigating to search page...")
-        page.goto(self.search_url, wait_until="domcontentloaded")
-        page.wait_for_timeout(2000)
+        
+        # Try to load page with retries and longer timeout
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                page.goto(self.search_url, wait_until="domcontentloaded", timeout=60000)
+                page.wait_for_timeout(2000)
+                break
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    print(f"  ⚠️  Retry {attempt + 1}/{max_retries} after error: {e}")
+                    page.wait_for_timeout(3000)
+                else:
+                    raise Exception(f"Failed to load search page after {max_retries} attempts: {e}")
         
         print(f"→ Filling search form...")
         print(f"   Parameters: {search_params}")
