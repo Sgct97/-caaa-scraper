@@ -6,7 +6,7 @@ Converts plain English user queries into optimized SearchParams
 
 import os
 import json
-import openai
+from openai import OpenAI
 from typing import Dict, Optional
 from datetime import date, timedelta
 import re
@@ -29,7 +29,7 @@ class QueryEnhancer:
         if not self.api_key:
             raise ValueError("OpenAI API key required. Set OPENAI_API_KEY env var or pass api_key parameter.")
         
-        openai.api_key = self.api_key
+        self.client = OpenAI(api_key=self.api_key)
         self.model = model
     
     def enhance_query(self, user_query: str) -> SearchParams:
@@ -54,7 +54,7 @@ class QueryEnhancer:
         
         try:
             # Call OpenAI
-            response = openai.chat.completions.create(
+            response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
                     {

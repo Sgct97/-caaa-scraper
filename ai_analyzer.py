@@ -7,7 +7,7 @@ Uses OpenAI to determine if messages are relevant to search queries
 import os
 from typing import Dict, Optional
 import json
-import openai
+from openai import OpenAI
 
 
 class AIAnalyzer:
@@ -25,7 +25,7 @@ class AIAnalyzer:
         if not self.api_key:
             raise ValueError("OpenAI API key required. Set OPENAI_API_KEY env var or pass api_key parameter.")
         
-        openai.api_key = self.api_key
+        self.client = OpenAI(api_key=self.api_key)
         self.model = model
         self.total_tokens_used = 0
         self.total_cost_usd = 0.0
@@ -56,7 +56,7 @@ class AIAnalyzer:
         
         try:
             # Call OpenAI
-            response = openai.chat.completions.create(
+            response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
                     {
