@@ -316,18 +316,31 @@ class CAAAScraper:
         message_id = message_info['message_id']
         
         try:
-            # Click the message link to load content
-            # Navigate back to results first (if not on results page)
-            if "#s_lyris_messagewindow" not in page.url:
-                # We might need to re-execute search or store results URL
-                pass
+            print(f"    → Fetching content for message {message_id}...")
             
-            # Use JavaScript to load message
-            page.evaluate(f"b_loadmsgjson({message_id},'','responsive');")
-            page.wait_for_timeout(2000)
+            # Try clicking the message link directly
+            try:
+                # Look for the message link in the results table
+                link_selector = f'a[onclick*="b_loadmsgjson({message_id}"]'
+                if page.query_selector(link_selector):
+                    print(f"      Found link, clicking...")
+                    page.click(link_selector)
+                else:
+                    # Try JavaScript method
+                    print(f"      Link not found, trying JavaScript...")
+                    page.evaluate(f"b_loadmsgjson({message_id},'','responsive');")
+            except Exception as e:
+                print(f"      Warning: Click/JS failed: {e}")
+                # Try direct navigation as fallback
+                message_url = f"https://www.caaa.org/?pg=search&bid=3305&msgid={message_id}"
+                print(f"      Trying direct URL: {message_url}")
+                page.goto(message_url, timeout=10000)
             
-            # Wait for message content
-            page.wait_for_selector("#s_lyris_messagewindow", timeout=5000)
+            page.wait_for_timeout(3000)  # Wait longer for content to load
+            
+            # Wait for message content with better error handling
+            print(f"      Waiting for message window...")
+            page.wait_for_selector("#s_lyris_messagewindow", timeout=10000)
             
             # Extract clean content
             message_container = page.query_selector("#s_lyris_messagewindow")
