@@ -402,8 +402,10 @@ class CAAAScraper:
             elif text.startswith('Subject:'):
                 subject_field = text.replace('Subject:', '').strip()
         
-        # Find main message body (first div with dir="ltr" not inside blockquote)
+        # Try multiple strategies to find body content
         main_body = ""
+        
+        # Strategy 1: Look for div with dir="ltr"
         for div in soup.find_all('div', {'dir': 'ltr'}):
             if not div.find_parent('blockquote'):
                 text_parts = []
@@ -416,8 +418,35 @@ class CAAAScraper:
                         text_parts.append(child.strip())
                 
                 main_body = ' '.join([t for t in text_parts if t])
-                if main_body:
+                if main_body and len(main_body) > 20:
                     break
+        
+        # Strategy 2: If Strategy 1 failed, get all text and strip quoted content
+        if not main_body or len(main_body) < 20:
+            # Get all text content
+            all_text = soup.get_text(separator='\n', strip=True)
+            
+            # Remove header lines
+            lines = all_text.split('\n')
+            body_lines = []
+            skip_until_body = True
+            
+            for line in lines:
+                # Skip header lines
+                if skip_until_body:
+                    if line.startswith('From:') or line.startswith('Date:') or line.startswith('Subject:'):
+                        continue
+                    elif line.strip():
+                        skip_until_body = False
+                
+                if not skip_until_body:
+                    # Stop at quoted content markers
+                    if line.startswith('>') or line.startswith('On ') and ' wrote:' in line:
+                        break
+                    if line.strip():
+                        body_lines.append(line)
+            
+            main_body = '\n'.join(body_lines).strip()
         
         return {
             'from': from_field,
