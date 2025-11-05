@@ -263,7 +263,7 @@ Respond in JSON format:
 """
         
         response = orchestrator.client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="llama3.1:8b-instruct-q4_K_M",
             messages=[
                 {"role": "system", "content": "You are a California workers' compensation legal research expert."},
                 {"role": "user", "content": prompt}
@@ -311,7 +311,7 @@ async def ai_follow_up(request: AIFollowUpRequest):
         })
         
         response = orchestrator.client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="llama3.1:8b-instruct-q4_K_M",
             messages=messages,
             response_format={"type": "json_object"},
             temperature=0.7
