@@ -33,24 +33,17 @@ class CAAAOrchestrator:
         self.db = Database(db_config)
         self.scraper = CAAAScraper(storage_state_path)
         
-        # AI components (only if API key provided)
-        self.openai_api_key = openai_api_key or os.getenv("OPENAI_API_KEY")
+        # AI components - using local Llama via Ollama (no API key needed)
+        from openai import OpenAI
         
-        if self.openai_api_key:
-            from openai import OpenAI
-            # Use local Llama via Ollama for HIPAA compliance
-            self.client = OpenAI(
-                base_url="http://localhost:11434/v1",
-                api_key="ollama"  # Ollama doesn't need a real key
-            )
-            self.query_enhancer = QueryEnhancer(api_key=self.openai_api_key)
-            self.ai_analyzer = AIAnalyzer(api_key=self.openai_api_key)
-            print("✓ AI components initialized")
-        else:
-            self.client = None
-            self.query_enhancer = None
-            self.ai_analyzer = None
-            print("⚠️  Running without AI (no OpenAI API key)")
+        # Use local Llama via Ollama for HIPAA compliance
+        self.client = OpenAI(
+            base_url="http://localhost:11434/v1",
+            api_key="ollama"  # Ollama doesn't need a real key
+        )
+        self.query_enhancer = QueryEnhancer()
+        self.ai_analyzer = AIAnalyzer()
+        print("✓ AI components initialized (Local Llama 3.1 8B)")
     
     def search(self, user_query: str, use_ai_enhancement: bool = True) -> Dict:
         """
