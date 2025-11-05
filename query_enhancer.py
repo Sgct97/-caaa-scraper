@@ -25,12 +25,12 @@ class QueryEnhancer:
             api_key: OpenAI API key (or set OPENAI_API_KEY env var)
             model: Model to use (default: gpt-4o-mini)
         """
-        self.api_key = api_key or os.getenv("OPENAI_API_KEY")
-        if not self.api_key:
-            raise ValueError("OpenAI API key required. Set OPENAI_API_KEY env var or pass api_key parameter.")
-        
-        self.client = OpenAI(api_key=self.api_key)
-        self.model = model
+        # Use local Llama via Ollama for HIPAA compliance
+        self.client = OpenAI(
+            base_url="http://localhost:11434/v1",
+            api_key="ollama"
+        )
+        self.model = "llama3.1:8b-instruct-q4_K_M"
     
     def enhance_query(self, user_query: str) -> SearchParams:
         """

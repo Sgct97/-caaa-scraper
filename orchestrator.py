@@ -38,7 +38,11 @@ class CAAAOrchestrator:
         
         if self.openai_api_key:
             from openai import OpenAI
-            self.client = OpenAI(api_key=self.openai_api_key)
+            # Use local Llama via Ollama for HIPAA compliance
+            self.client = OpenAI(
+                base_url="http://localhost:11434/v1",
+                api_key="ollama"  # Ollama doesn't need a real key
+            )
             self.query_enhancer = QueryEnhancer(api_key=self.openai_api_key)
             self.ai_analyzer = AIAnalyzer(api_key=self.openai_api_key)
             print("✓ AI components initialized")
