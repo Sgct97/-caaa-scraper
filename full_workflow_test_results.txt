@@ -1,0 +1,105 @@
+
+================================================================================
+COMPREHENSIVE AI WORKFLOW TEST - Production Simulation
+================================================================================
+
+================================================================================
+TEST SCENARIO 1
+================================================================================
+
+User Query: "I'm looking for recent cases where John Smith dealt with QME panels"
+Expected: author_last_name: Smith, keywords about QME, recent dates
+
+--- AI LAYER 1: Query Enhancement ---
+✓ AI Generated Search Params:
+  - keywords_any: QME panels
+  - date_from: 2025-08-07
+  - date_to: 2025-11-05
+  - author_last_name: Smith
+  Reasoning: User is looking for recent cases involving John Smith and QME panels in Californ...
+
+--- AI LAYER 2: Relevance Filtering ---
+Testing relevance with query: 'I'm looking for recent'
+Analyzing 7 messages...
+
+📊 Results:
+  High relevance (70-100): 3
+  Medium relevance (40-69): 1
+  Low relevance (0-39): 1
+
+  Top 3 by relevance:
+    1. [80/100] Re: 106 or 31.7?...
+       Medium relevance: The message directly addresses the query topic by providing a specific guideline f...
+    2. [80/100] Re: Deposition Question: Why did you get an attorney, and ho...
+       Medium relevance: The message mentions the query topic of recent California cases discussing attorne...
+    3. [80/100] Re: Deposition Question: Why did you get an attorney, and ho...
+       Medium relevance: The message discusses the query topic of recent depositions and attorney-client pr...
+
+================================================================================
+TEST SCENARIO 2
+================================================================================
+
+User Query: "permanent disability ratings from 2024"
+Expected: keywords: permanent disability, dates: 2024
+
+--- AI LAYER 1: Query Enhancement ---
+✓ AI Generated Search Params:
+  - keywords_any: permanent disability ratings
+  - date_from: 2024-01-01
+  - date_to: 2024-12-31
+  Reasoning: N/A...
+
+--- AI LAYER 2: Relevance Filtering ---
+Testing relevance with query: 'permanent disability ratings from'
+Analyzing 7 messages...
+
+📊 Results:
+  High relevance (70-100): 2
+  Medium relevance (40-69): 2
+  Low relevance (0-39): 1
+
+  Top 3 by relevance:
+    1. [80/100] Re: 106 or 31.7?...
+       Medium relevance: The message directly addresses the query topic by providing guidance on when to us...
+    2. [70/100] Re: Deposition Question: Why did you get an attorney, and ho...
+       Medium relevance: The message mentions the query topic of attorney referrals to doctors in depositio...
+    3. [50/100] Re: ORTHO VS PAIN VS PHYSICAL MEDICINE VS CHIROPRACTOR QME P...
+       Medium relevance: The message mentions the query topic 'permanent disability ratings from' in a sent...
+
+================================================================================
+TEST SCENARIO 3
+================================================================================
+
+User Query: "medical treatment authorization disputes"
+Expected: keywords: medical treatment authorization, no date filter
+
+--- AI LAYER 1: Query Enhancement ---
+✓ AI Generated Search Params:
+  - keywords_any: medical treatment authorization disputes
+  Reasoning: N/A...
+
+--- AI LAYER 2: Relevance Filtering ---
+Testing relevance with query: 'medical treatment authorization disputes'
+Analyzing 7 messages...
+
+📊 Results:
+  High relevance (70-100): 3
+  Medium relevance (40-69): 2
+  Low relevance (0-39): 0
+
+  Top 3 by relevance:
+    1. [80/100] Re: 106 or 31.7?...
+       Medium relevance: The message directly addresses the query topic by providing guidance on when to us...
+    2. [70/100] Re: Deposition Question: Why did you get an attorney, and ho...
+       Medium relevance: The message mentions the query topic of medical treatment authorization disputes, ...
+    3. [70/100] Re: Deposition Question: Why did you get an attorney, and ho...
+       Medium relevance: The message discusses a deposition scenario where an attorney-client privileged in...
+
+================================================================================
+COMPREHENSIVE TEST COMPLETE
+================================================================================
+
+✅ If Llama performed well above, it's ready for production!
+   - Query enhancement should extract correct fields
+   - Relevance scores should match message content accurately
+   - High scores for relevant, low scores for irrelevant

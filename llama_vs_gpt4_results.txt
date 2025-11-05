@@ -1,0 +1,141 @@
+
+================================================================================
+LLAMA 3.1 8B vs GPT-4o-mini - FINAL COMPARISON
+================================================================================
+
+Testing with 5 real CAAA legal messages
+
+
+================================================================================
+QUERY: 'QME panel procedures'
+================================================================================
+
+--- Message 1: Judge Diamond... ---
+🦙 Llama 3.1 8B:
+   Score: 90/100
+   Reasoning: The message discusses a QME panel evaluation and the defense's offer to split stip values, which is ...
+
+🤖 GPT-4o-mini:
+   Score: 61/100
+   Reasoning: The message discusses a specific case involving causation and apportionment related to a knee injury...
+
+   ❌ Large difference (diff: 29)
+
+--- Message 2: Re: ORTHO VS PAIN VS PHYSICAL MEDICINE VS CHIROPRACTOR QME P... ---
+🦙 Llama 3.1 8B:
+   Score: 81/100
+   Reasoning: The message is highly relevant because it directly addresses the user's search query about QME panel...
+
+🤖 GPT-4o-mini:
+   Score: 21/100
+   Reasoning: The message acknowledges helpful information but does not directly discuss QME panel procedures, mak...
+
+   ❌ Large difference (diff: 60)
+
+--- Message 3: Re: penalty case for bret graham et al... ---
+🦙 Llama 3.1 8B:
+   Score: 85/100
+   Reasoning: The message discusses QME panel procedures in the context of penalty cases for delayed medical care,...
+
+🤖 GPT-4o-mini:
+   Score: 61/100
+   Reasoning: The message discusses penalties related to delays in providing medical care and references QME (Qual...
+
+   ❌ Large difference (diff: 24)
+
+================================================================================
+QUERY: 'apportionment case law'
+================================================================================
+
+--- Message 1: Judge Diamond... ---
+🦙 Llama 3.1 8B:
+   Score: 95/100
+   Reasoning: The message discusses apportionment and compensable consequence injuries in a workers' compensation ...
+
+🤖 GPT-4o-mini:
+   Score: 81/100
+   Reasoning: The message discusses apportionment in the context of a specific case involving causation and compen...
+
+   ⚠️  Moderate difference (diff: 14)
+
+--- Message 2: Re: ORTHO VS PAIN VS PHYSICAL MEDICINE VS CHIROPRACTOR QME P... ---
+🦙 Llama 3.1 8B:
+   Score: 41/100
+   Reasoning: The message discusses the differences between various types of medical evaluations for workers' comp...
+
+🤖 GPT-4o-mini:
+   Score: 0/100
+   Reasoning: The message does not discuss apportionment case law or any related legal principles; it is merely a ...
+
+   ❌ Large difference (diff: 41)
+
+--- Message 3: Re: penalty case for bret graham et al... ---
+🦙 Llama 3.1 8B:
+   Score: 81/100
+   Reasoning: The message discusses a case related to penalties for delay in providing medical care and investigat...
+
+🤖 GPT-4o-mini:
+   Score: 21/100
+   Reasoning: The message discusses penalties for delay in providing medical care and references relevant duties u...
+
+   ❌ Large difference (diff: 60)
+
+================================================================================
+QUERY: 'penalties in workers compensation'
+================================================================================
+
+--- Message 1: Judge Diamond... ---
+🦙 Llama 3.1 8B:
+   Score: 85/100
+   Reasoning: The message discusses a case involving apportionment and compensable consequences, which are directl...
+
+🤖 GPT-4o-mini:
+   Score: 61/100
+   Reasoning: The message discusses causation and compensable consequences related to a workers' compensation case...
+
+   ❌ Large difference (diff: 24)
+
+--- Message 2: Re: ORTHO VS PAIN VS PHYSICAL MEDICINE VS CHIROPRACTOR QME P... ---
+🦙 Llama 3.1 8B:
+   Score: 41/100
+   Reasoning: The message discusses QME panel options for medical evaluations, which is related to the penalties i...
+
+🤖 GPT-4o-mini:
+   Score: 0/100
+   Reasoning: The message does not discuss penalties in workers' compensation or any related legal issues; it is s...
+
+   ❌ Large difference (diff: 41)
+
+--- Message 3: Re: penalty case for bret graham et al... ---
+🦙 Llama 3.1 8B:
+   Score: 90/100
+   Reasoning: The message discusses penalties in workers' compensation law, specifically referencing Labor Code se...
+
+🤖 GPT-4o-mini:
+   Score: 80/100
+   Reasoning: The message discusses penalties related to delays in providing medical care in a workers' compensati...
+
+   ✅ Similar scores (diff: 10)
+
+================================================================================
+FINAL STATISTICS
+================================================================================
+
+🦙 Llama 3.1 8B:
+   Average score: 76.6/100
+   Cost per 1000 messages: $0
+   Privacy: 100% (runs locally)
+   HIPAA: ✅ Automatic
+
+🤖 GPT-4o-mini:
+   Average score: 42.9/100
+   Cost per 1000 messages: ~$5-10
+   Privacy: Data sent to OpenAI
+   HIPAA: ❌ Needs BAA
+
+📊 Comparison:
+   Score difference: 33.7 points
+   ❌ Quality: GPT-4 significantly better
+
+   🎯 RECOMMENDATION: Use GPT-4o-mini
+      - Quality difference justifies the cost
