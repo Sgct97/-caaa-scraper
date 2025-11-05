@@ -343,29 +343,44 @@ class CAAAScraper:
             page.wait_for_selector("#s_lyris_messagewindow", timeout=10000)
             
             # Extract clean content
+            print(f"      Looking for message window...")
             message_container = page.query_selector("#s_lyris_messagewindow")
             if not message_container:
+                print(f"      ❌ Message window not found!")
+                # Take screenshot for debugging
+                page.screenshot(path=f"/srv/caaa_scraper/failed_msg_{message_id}.png")
                 return None
             
+            print(f"      ✓ Found message window, extracting content...")
             html_content = message_container.inner_html()
             clean_data = self._extract_clean_message_text(html_content)
             
+            body_text = clean_data.get('body', '')
+            print(f"      ✓ Extracted {len(body_text)} chars of content")
+            
             # Combine with metadata
-            return {
+            result = {
                 'caaa_message_id': message_id,
                 'post_date': self._parse_date(message_info['date']),
                 'from_name': clean_data.get('from', message_info['from']),
                 'from_email': self._extract_email(clean_data.get('from', '')),
                 'listserv': message_info['list'],
                 'subject': clean_data.get('subject', message_info['subject']),
-                'body': clean_data.get('body', ''),
+                'body': body_text,
                 'has_attachment': message_info['has_attachment'],
                 'position': message_info['position'],
                 'page': message_info['page']
             }
             
+            if len(body_text) < 10:
+                print(f"      ⚠️  Warning: Very short content!")
+            
+            return result
+            
         except Exception as e:
-            print(f"    Error fetching message {message_id}: {e}")
+            print(f"    ❌ Error fetching message {message_id}: {e}")
+            import traceback
+            traceback.print_exc()
             return None
     
     def _extract_clean_message_text(self, html_content: str) -> Dict[str, str]:
