@@ -35,8 +35,7 @@ class CAAAScraper:
             List of message dictionaries
         """
         with sync_playwright() as p:
-            # Set headless=False to see browser in VNC
-            browser = p.chromium.launch(headless=False)
+            browser = p.chromium.launch(headless=True)
             context = browser.new_context(storage_state=self.storage_state_path)
             page = context.new_page()
             
