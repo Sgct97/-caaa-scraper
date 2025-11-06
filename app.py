@@ -399,6 +399,23 @@ async def run_search_async(search_fields: Optional[dict], ai_intent: Optional[st
     search_params.max_messages = max_messages
     search_params.max_pages = max_pages
     
+    # If no AI intent provided, construct one from search parameters for relevance analysis
+    if not ai_intent or ai_intent.strip() == "":
+        intent_parts = []
+        if search_params.keywords_all:
+            intent_parts.append(f"messages containing all: {search_params.keywords_all}")
+        if search_params.keywords_phrase:
+            intent_parts.append(f"exact phrase: {search_params.keywords_phrase}")
+        if search_params.keywords_any:
+            intent_parts.append(f"containing: {search_params.keywords_any}")
+        if search_params.author_last_name:
+            intent_parts.append(f"by author: {search_params.author_last_name}")
+        if search_params.posted_by:
+            intent_parts.append(f"posted by: {search_params.posted_by}")
+        
+        ai_intent = "Looking for " + ", ".join(intent_parts) if intent_parts else "all messages matching search criteria"
+        print(f"📝 Generated AI intent from search fields: {ai_intent}", flush=True)
+    
     # Create search record
     search_id = orchestrator.db.create_search(search_params)
     orchestrator.db.update_search_status(search_id, 'running')
@@ -424,7 +441,7 @@ async def run_search_async(search_fields: Optional[dict], ai_intent: Optional[st
             '/srv/caaa_scraper/venv/bin/python',
             '/srv/caaa_scraper/run_search_worker.py',
             search_id,
-            ai_intent or "manual search"
+            ai_intent
         ], stdout=log_file, stderr=log_file, env=worker_env)
     
     return search_id
