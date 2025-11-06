@@ -126,13 +126,16 @@ Subject: {subject}
 Body: {body}
 
 Your task:
-1. Determine if this message is genuinely relevant to the search query
-2. Consider:
-   - Does it directly discuss the topic?
-   - Is it substantive (not just a brief mention)?
-   - Would it be useful to someone searching for "{search_keyword}"?
-3. Provide a confidence score (0.0 to 1.0)
-4. Explain your reasoning briefly
+1. Determine if this message matches the search query
+2. Consider it RELEVANT if:
+   - The search terms appear in the subject or body (even briefly)
+   - The topic is related to the search query
+   - The author name matches (if searching by author)
+3. Only mark as NOT relevant if the message has no connection to the search terms
+4. Provide a confidence score (0.0 to 1.0)
+5. Explain your reasoning briefly
+
+BE LENIENT - if the search terms appear or the topic is related, mark as relevant.
 
 Respond in JSON format:
 {{
