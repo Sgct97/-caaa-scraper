@@ -405,12 +405,27 @@ async def run_search_async(search_fields: Optional[dict], ai_intent: Optional[st
     
     # Run as subprocess to avoid Playwright threading issues
     import subprocess
-    subprocess.Popen([
-        '/srv/caaa_scraper/venv/bin/python',
-        '/srv/caaa_scraper/run_search_worker.py',
-        search_id,
-        ai_intent or "manual search"
-    ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    import os
+    
+    # Set environment variables for worker
+    worker_env = os.environ.copy()
+    worker_env.update({
+        'DB_NAME': 'caaa_scraper',
+        'DB_USER': 'caaa_user', 
+        'DB_PASSWORD': 'secure_password_here',
+        'DB_HOST': 'localhost'
+    })
+    
+    worker_log = f'/tmp/worker_{search_id}.log'
+    print(f"🚀 Launching worker for search {search_id}, logs: {worker_log}", flush=True)
+    
+    with open(worker_log, 'w') as log_file:
+        subprocess.Popen([
+            '/srv/caaa_scraper/venv/bin/python',
+            '/srv/caaa_scraper/run_search_worker.py',
+            search_id,
+            ai_intent or "manual search"
+        ], stdout=log_file, stderr=log_file, env=worker_env)
     
     return search_id
 
