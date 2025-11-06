@@ -403,9 +403,14 @@ async def run_search_async(search_fields: Optional[dict], ai_intent: Optional[st
     search_id = orchestrator.db.create_search(search_params)
     orchestrator.db.update_search_status(search_id, 'running')
     
-    # Run in thread pool to avoid blocking
-    loop = asyncio.get_event_loop()
-    loop.run_in_executor(None, run_search_sync, search_id, search_params, ai_intent or "manual search")
+    # Run as subprocess to avoid Playwright threading issues
+    import subprocess
+    subprocess.Popen([
+        '/srv/caaa_scraper/venv/bin/python',
+        '/srv/caaa_scraper/run_search_worker.py',
+        search_id,
+        ai_intent or "manual search"
+    ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     
     return search_id
 
