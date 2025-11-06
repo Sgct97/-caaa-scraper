@@ -61,6 +61,9 @@ class Database:
         Returns:
             search_id (UUID as string)
         """
+        form_data = search_params.to_form_data()
+        print(f"🔍 DEBUG create_search - form_data: {form_data}", flush=True)
+        
         with self.get_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("""
@@ -74,7 +77,7 @@ class Database:
                     ) VALUES (%s, %s, %s, %s, %s, 'pending')
                     RETURNING id::text
                 """, (
-                    Json(search_params.to_form_data()),
+                    Json(form_data),
                     search_params.keyword,
                     search_params.listserv if search_params.listserv != "all" else None,
                     search_params.date_from,
