@@ -33,18 +33,19 @@ class CAAAOrchestrator:
         self.db = Database(db_config)
         self.scraper = CAAAScraper(storage_state_path)
         
-        # AI components - using Qwen 14B on Vast.ai GPU (HIPAA compliant)
+        # AI components - using Qwen 14B on Vast.ai GPU via SSH tunnel (HIPAA compliant)
         from openai import OpenAI
         
-        # Use Vast.ai GPU for fast processing
-        vast_ai_url = os.getenv("VAST_AI_URL", "http://171.247.185.4:47915/v1")
+        # Use Vast.ai GPU via SSH tunnel for fast processing
+        # SSH tunnel: ssh -N -L 11434:localhost:11434 -p 47162 root@171.247.185.4
+        ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434/v1")
         self.client = OpenAI(
-            base_url=vast_ai_url,
+            base_url=ollama_url,
             api_key="ollama"  # Ollama doesn't need a real key
         )
         self.query_enhancer = QueryEnhancer()
         self.ai_analyzer = AIAnalyzer()
-        print(f"✓ AI components initialized (Qwen 14B on Vast.ai GPU: {vast_ai_url})")
+        print(f"✓ AI components initialized (Qwen 14B on Vast.ai GPU via tunnel)")
     
     def search(self, user_query: str, use_ai_enhancement: bool = True) -> Dict:
         """
