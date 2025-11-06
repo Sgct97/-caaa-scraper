@@ -10,7 +10,8 @@ echo "=========================================="
 
 # Update system
 echo "Step 1: Updating system..."
-apt update && apt upgrade -y
+export DEBIAN_FRONTEND=noninteractive
+apt update && apt upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
 
 # Install dependencies
 echo "Step 2: Installing dependencies..."

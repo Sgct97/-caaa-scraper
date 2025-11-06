@@ -21,12 +21,13 @@ class AIAnalyzer:
             api_key: OpenAI API key (or set OPENAI_API_KEY env var)
             model: Model to use (default: gpt-4o-mini for cost efficiency)
         """
-        # Use local Llama via Ollama for HIPAA compliance
+        # Use Vast.ai GPU with Qwen 14B for fast, HIPAA-compliant processing
+        vast_ai_url = os.getenv("VAST_AI_URL", "http://171.247.185.4:47915/v1")
         self.client = OpenAI(
-            base_url="http://localhost:11434/v1",
+            base_url=vast_ai_url,
             api_key="ollama"
         )
-        self.model = "llama3.1:8b-instruct-q4_K_M"
+        self.model = "qwen3:14b"
         self.total_tokens_used = 0
         self.total_cost_usd = 0.0
     
