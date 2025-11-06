@@ -49,6 +49,8 @@ def main():
         from search_params import SearchParams
         search_params_dict = search_info.get('search_params', {})
         
+        print(f"📋 Raw search_params from DB: {search_params_dict}", flush=True)
+        
         # Reconstruct SearchParams from the stored dict
         # Map form field names back to SearchParams attributes
         search_params = SearchParams(
@@ -69,6 +71,9 @@ def main():
         )
         
         print(f"✓ Search params loaded", flush=True)
+        print(f"   keywords_any={search_params.keywords_any}", flush=True)
+        print(f"   keywords_phrase={search_params.keywords_phrase}", flush=True)
+        print(f"   author_last_name={search_params.author_last_name}", flush=True)
         
         # Scrape
         print(f"🌐 Starting scrape...", flush=True)
