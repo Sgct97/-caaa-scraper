@@ -323,6 +323,7 @@ class Database:
                     SELECT 
                         id::text,
                         keyword,
+                        search_params,
                         status,
                         total_messages_found,
                         total_relevant_found,
