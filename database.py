@@ -306,7 +306,8 @@ class Database:
                     FROM searches s
                     LEFT JOIN analyses a ON s.id = a.search_id
                     WHERE s.id = %s
-                    GROUP BY s.id
+                    GROUP BY s.id, s.keyword, s.total_messages_found, s.total_relevant_found, 
+                             s.status, s.created_at, s.completed_at
                 """, (search_id,))
                 
                 return cur.fetchone()
