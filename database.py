@@ -267,9 +267,24 @@ class Database:
         with self.get_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute("""
-                    SELECT * FROM relevant_results
-                    WHERE search_id = %s
-                    ORDER BY result_position
+                    SELECT 
+                        sr.search_id,
+                        sr.message_id,
+                        m.caaa_message_id,
+                        m.subject,
+                        m.author,
+                        m.posted_date,
+                        m.body,
+                        a.is_relevant,
+                        a.confidence as confidence_score,
+                        a.ai_reasoning,
+                        sr.result_position as position,
+                        sr.result_page as page_number
+                    FROM search_results sr
+                    JOIN messages m ON sr.message_id = m.id
+                    LEFT JOIN analyses a ON sr.search_id = a.search_id AND sr.message_id = a.message_id
+                    WHERE sr.search_id = %s
+                    ORDER BY sr.result_position
                 """, (search_id,))
                 
                 return cur.fetchall()
