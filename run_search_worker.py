@@ -50,19 +50,20 @@ def main():
         search_params_dict = search_info.get('search_params', {})
         
         # Reconstruct SearchParams from the stored dict
+        # Map form field names back to SearchParams attributes
         search_params = SearchParams(
-            keyword=search_params_dict.get('s_key'),
+            keyword=search_params_dict.get('s_fname'),  # Basic keyword uses fname field
             keywords_all=search_params_dict.get('s_key_all'),
             keywords_phrase=search_params_dict.get('s_key_phrase'),
-            keywords_any=search_params_dict.get('s_key_any'),
-            keywords_exclude=search_params_dict.get('s_key_exclude'),
-            listserv=search_params_dict.get('s_listserv', 'all'),
+            keywords_any=search_params_dict.get('s_key_one'),  # 'any' maps to 's_key_one'
+            keywords_exclude=search_params_dict.get('s_key_x'),  # 'exclude' maps to 's_key_x'
+            listserv=search_params_dict.get('s_list', 'all'),
             date_from=search_params_dict.get('s_postdatefrom'),
             date_to=search_params_dict.get('s_postdateto'),
             posted_by=search_params_dict.get('s_postedby'),
-            author_last_name=search_params_dict.get('s_lastname'),
-            search_in=search_params_dict.get('s_searchin', 'subject_and_body'),
-            attachment_filter=search_params_dict.get('s_attachments', 'all'),
+            author_last_name=search_params_dict.get('s_lname'),  # Last name is 's_lname'
+            search_in='subject_only' if search_params_dict.get('s_cat') == '1' else 'subject_and_body',
+            attachment_filter='with_attachments' if search_params_dict.get('s_attachment') == '1' else ('without_attachments' if search_params_dict.get('s_attachment') == '0' else 'all'),
             max_messages=search_params_dict.get('max_messages', 100),
             max_pages=search_params_dict.get('max_pages', 10)
         )
