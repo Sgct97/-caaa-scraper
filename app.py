@@ -413,8 +413,11 @@ def run_search_sync(search_id: str, search_params, query: str):
     """Synchronous search execution (runs in background)"""
     
     try:
+        print(f"🔍 Starting scrape for search {search_id}...", flush=True)
+        
         # Scrape
         messages = orchestrator.scraper.scrape(search_params)
+        print(f"✓ Scrape complete: {len(messages)} messages found", flush=True)
         
         # Store messages
         for msg in messages:
@@ -422,19 +425,25 @@ def run_search_sync(search_id: str, search_params, query: str):
             orchestrator.db.add_search_result(search_id, message_id, msg['position'], msg['page'])
         
         orchestrator.db.update_search_status(search_id, 'running', total_found=len(messages))
+        print(f"✓ Stored {len(messages)} messages in database", flush=True)
         
         # Analyze relevance with AI
         if orchestrator.ai_analyzer:
+            print(f"🤖 Starting AI analysis...", flush=True)
             relevant_count = orchestrator._analyze_relevance(search_id, messages, query)
+            print(f"✓ AI analysis complete: {relevant_count} relevant", flush=True)
         else:
             relevant_count = len(messages)
         
         # Mark complete
         orchestrator.db.update_search_status(search_id, 'completed', total_relevant=relevant_count)
+        print(f"✅ Search {search_id} completed successfully!", flush=True)
         
     except Exception as e:
         orchestrator.db.update_search_status(search_id, 'failed')
-        print(f"❌ Search {search_id} failed: {e}")
+        print(f"❌ Search {search_id} failed: {e}", flush=True)
+        import traceback
+        traceback.print_exc()
 
 if __name__ == "__main__":
     import uvicorn
