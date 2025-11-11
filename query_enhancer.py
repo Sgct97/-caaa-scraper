@@ -117,11 +117,14 @@ Available search fields:
 8. date_to - End date (YYYY-MM-DD)
 9. search_in - "subject_and_body" or "subject_only"
 
-CRITICAL FORMATTING RULES:
-- For keywords_all, keywords_any, keywords_exclude: USE COMMAS to separate terms
-- GOOD: "expedited, regular, hearing"
-- BAD: "expedited vs regular hearing" (don't use "vs" or connecting words)
-- Each keyword should be a meaningful search term, not filler words
+CRITICAL FORMATTING RULES - MUST FOLLOW:
+- For keywords_all, keywords_any, keywords_exclude: ALWAYS USE COMMAS to separate each term
+- CORRECT: "expedited, hearing, IMR, appeal"
+- WRONG: "expedited hearing IMR appeal" (NO SPACES WITHOUT COMMAS)
+- WRONG: "expedited vs regular hearing" (NO connecting words like "vs", "or", "and")
+- Each term should be a single word or short phrase, separated by commas
+- If you want "IMR appeal" as one term, write it as one: "IMR appeal, expedited, hearing"
+- ALWAYS put commas between different concepts
 
 Guidelines:
 - Use keywords_all for concepts that must appear together
@@ -136,16 +139,18 @@ Respond in JSON format:
   "reasoning": "Brief explanation of search strategy",
   "parameters": {{
     "keyword": "string or null",
-    "keywords_all": "string or null",
-    "keywords_phrase": "string or null",
-    "keywords_any": "string or null",
-    "keywords_exclude": "string or null",
+    "keywords_all": "comma-separated terms or null (EXAMPLE: \"IMR, appeal, decision\")",
+    "keywords_phrase": "exact phrase or null (EXAMPLE: \"permanent disability rating\")",
+    "keywords_any": "comma-separated terms or null (EXAMPLE: \"expedited, regular, hearing\")",
+    "keywords_exclude": "comma-separated terms or null",
     "listserv": "all/lawnet/lavaaa/lamaaa/scaaa",
     "date_from": "YYYY-MM-DD or null",
     "date_to": "YYYY-MM-DD or null",
     "search_in": "subject_and_body or subject_only"
   }}
 }}
+
+REMEMBER: Always use commas between different keywords in keywords_all, keywords_any, and keywords_exclude!
 """
         return prompt
     
