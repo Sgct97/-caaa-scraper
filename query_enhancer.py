@@ -170,6 +170,17 @@ REMEMBER: Always use commas between different keywords in keywords_all, keywords
     def _create_search_params(self, ai_params: Dict) -> SearchParams:
         """Convert AI parameters to SearchParams object"""
         
+        # Helper to ensure keyword fields are strings, not arrays
+        def clean_keyword_field(value):
+            if value is None:
+                return None
+            if isinstance(value, list):
+                # AI returned an array - join with commas
+                return ", ".join(str(v).strip() for v in value if v)
+            if isinstance(value, str):
+                return value.strip() if value.strip() else None
+            return str(value)
+        
         # Parse date strings
         date_from = None
         date_to = None
@@ -186,13 +197,13 @@ REMEMBER: Always use commas between different keywords in keywords_all, keywords
             except:
                 pass
         
-        # Create SearchParams
+        # Create SearchParams - clean all keyword fields
         return SearchParams(
-            keyword=ai_params.get('keyword'),
-            keywords_all=ai_params.get('keywords_all'),
-            keywords_phrase=ai_params.get('keywords_phrase'),
-            keywords_any=ai_params.get('keywords_any'),
-            keywords_exclude=ai_params.get('keywords_exclude'),
+            keyword=clean_keyword_field(ai_params.get('keyword')),
+            keywords_all=clean_keyword_field(ai_params.get('keywords_all')),
+            keywords_phrase=clean_keyword_field(ai_params.get('keywords_phrase')),
+            keywords_any=clean_keyword_field(ai_params.get('keywords_any')),
+            keywords_exclude=clean_keyword_field(ai_params.get('keywords_exclude')),
             listserv=ai_params.get('listserv', 'all'),
             date_from=date_from,
             date_to=date_to,
