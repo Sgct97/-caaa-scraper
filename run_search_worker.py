@@ -53,6 +53,24 @@ def main():
         
         # Reconstruct SearchParams from the stored dict
         # Map form field names back to SearchParams attributes
+        from datetime import datetime
+        
+        # Parse date strings if present (format: MM/DD/YYYY)
+        date_from = search_params_dict.get('s_postdatefrom')
+        date_to = search_params_dict.get('s_postdateto')
+        
+        if date_from and isinstance(date_from, str):
+            try:
+                date_from = datetime.strptime(date_from, '%m/%d/%Y').date()
+            except:
+                date_from = None
+        
+        if date_to and isinstance(date_to, str):
+            try:
+                date_to = datetime.strptime(date_to, '%m/%d/%Y').date()
+            except:
+                date_to = None
+        
         search_params = SearchParams(
             keyword=search_params_dict.get('s_fname'),  # Basic keyword uses fname field
             keywords_all=search_params_dict.get('s_key_all'),
@@ -60,8 +78,8 @@ def main():
             keywords_any=search_params_dict.get('s_key_one'),  # 'any' maps to 's_key_one'
             keywords_exclude=search_params_dict.get('s_key_x'),  # 'exclude' maps to 's_key_x'
             listserv=search_params_dict.get('s_list', 'all'),
-            date_from=search_params_dict.get('s_postdatefrom'),
-            date_to=search_params_dict.get('s_postdateto'),
+            date_from=date_from,
+            date_to=date_to,
             posted_by=search_params_dict.get('s_postedby'),
             author_last_name=search_params_dict.get('s_lname'),  # Last name is 's_lname'
             search_in='subject_only' if search_params_dict.get('s_cat') == '1' else 'subject_and_body',
