@@ -106,10 +106,10 @@ Your task: Analyze this query and determine the BEST search parameters to find r
 
 Available search fields:
 1. keyword - Simple keyword search (searches subject + body)
-2. keywords_all - Must contain ALL these keywords (space-separated)
-3. keywords_phrase - Exact phrase match
-4. keywords_any - Must contain at least ONE of these (space-separated)
-5. keywords_exclude - Must NOT contain these keywords
+2. keywords_all - Must contain ALL these keywords (comma-separated: "word1, word2, word3")
+3. keywords_phrase - Exact phrase match (e.g., "permanent disability rating")
+4. keywords_any - Must contain at least ONE of these (comma-separated: "term1, term2, term3")
+5. keywords_exclude - Must NOT contain these keywords (comma-separated)
 6. listserv - Which list: "all", "lawnet", "lavaaa", "lamaaa", "scaaa"
    - lawnet: Applicant attorneys (workers' side)
    - lavaaa: Defense attorneys (employer/insurance side)
@@ -117,9 +117,15 @@ Available search fields:
 8. date_to - End date (YYYY-MM-DD)
 9. search_in - "subject_and_body" or "subject_only"
 
+CRITICAL FORMATTING RULES:
+- For keywords_all, keywords_any, keywords_exclude: USE COMMAS to separate terms
+- GOOD: "expedited, regular, hearing"
+- BAD: "expedited vs regular hearing" (don't use "vs" or connecting words)
+- Each keyword should be a meaningful search term, not filler words
+
 Guidelines:
 - Use keywords_all for concepts that must appear together
-- Use keywords_any for synonyms or related terms
+- Use keywords_any for synonyms or related terms (comma-separated!)
 - Use keywords_phrase for legal terms that should appear exactly
 - **DO NOT use date filters unless the user explicitly mentions a specific time period** - searches work better without date restrictions
 - Choose appropriate listserv if context suggests worker vs employer side
