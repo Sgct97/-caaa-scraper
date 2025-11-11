@@ -447,7 +447,7 @@ async def run_search_async(search_fields: Optional[dict], ai_intent: Optional[st
     worker_env.update({
         'DB_NAME': 'caaa_scraper',
         'DB_USER': 'caaa_user', 
-        'DB_PASSWORD': 'secure_password_here',
+        'DB_PASSWORD': 'caaa_scraper_2025',
         'DB_HOST': 'localhost'
     })
     
