@@ -230,6 +230,7 @@ async def ai_analyze(request: AIAnalyzeRequest):
         today_str = today.strftime('%Y-%m-%d')
         
         prompt = f"""You are an expert legal research assistant for California workers' compensation law.
+You help users search the CAAA listserv (a legal discussion forum) for relevant case discussions.
 
 TODAY'S DATE: {today_str}
 
@@ -241,25 +242,42 @@ CURRENT SEARCH FIELDS THEY'VE FILLED:
 Your task:
 1. Analyze what the user is truly trying to find
 2. Review their current search field values  
-3. Suggest improvements or ask clarifying questions
+3. Suggest SPECIFIC CAAA search field values to improve their search, OR ask a clarifying question
+
+AVAILABLE CAAA SEARCH FIELDS (use these exact keys in suggestions):
+- keyword: Simple keyword search
+- keywords_all: Must contain ALL these keywords (comma-separated: "term1, term2, term3")
+- keywords_phrase: Exact phrase match
+- keywords_any: At least ONE of these (comma-separated: "term1, term2, term3")
+- keywords_exclude: Must NOT contain these (comma-separated)
+- listserv: "all", "lawnet" (applicant), "lavaaa" (defense), "lamaaa", or "scaaa"
+- date_from: Start date (YYYY-MM-DD format)
+- date_to: End date (YYYY-MM-DD format)
+- posted_by: Filter by poster's email/name
+- last_name: Author's last name
+- search_in: "subject_and_body" or "subject_only"
+- attachments: "all", "with_attachments", or "without_attachments"
 
 IMPORTANT RULES:
 - If user says "recent", suggest dates from 3-6 months ago to TODAY ({three_months_ago} to {today_str})
 - If user says "last year", use dates from 1 year ago to TODAY ({one_year_ago} to {today_str})
 - DO NOT suggest old/past date ranges like 2022-2023 unless user specifically asks for historical data
-- Focus on what they're actually asking for, not random fields
-- Keep suggestions minimal and relevant
-
-If their fields look good, affirm them and suggest proceeding.
-If you see issues or opportunities for better results, explain what and why.
-If you need more information to give better advice, ask ONE specific follow-up question.
+- ALWAYS use comma-separated values for keywords_all, keywords_any, keywords_exclude
+- Return suggestions as a dictionary with field names as keys and values as strings
+- If their fields are good, set suggestions to null
 
 Respond in JSON format:
 {{
   "analysis": "Your analysis and advice (2-3 sentences)",
-  "suggestions": {{dictionary of improved field values, or null if current is good}},
+  "suggestions": {{
+    "keywords_all": "term1, term2, term3",
+    "keywords_phrase": "exact phrase here",
+    "listserv": "lawnet"
+  }} OR null if current fields are good,
   "follow_up_question": "A specific question to ask, or null"
 }}
+
+CRITICAL: suggestions must be a dictionary of field names and values, NOT a list or string of instructions!
 """
         
         response = orchestrator.client.chat.completions.create(
