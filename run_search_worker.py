@@ -28,7 +28,7 @@ def main():
     db_config = {
         'dbname': os.getenv('DB_NAME', 'caaa_scraper'),
         'user': os.getenv('DB_USER', 'caaa_user'),
-        'password': os.getenv('DB_PASSWORD', 'secure_password_here'),
+        'password': os.getenv('DB_PASSWORD', 'caaa_scraper_2025'),
         'host': os.getenv('DB_HOST', 'localhost')
     }
     
