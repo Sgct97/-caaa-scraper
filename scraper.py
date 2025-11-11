@@ -147,29 +147,13 @@ class CAAAScraper:
                 print(f"  ⚠️  Trying to find any submit button...")
                 page.click('button[type="submit"], input[type="submit"]', timeout=5000)
         
-        # Wait for results (AJAX loads results dynamically)
-        print(f"→ Waiting for results to load...")
+        # Wait for results
         try:
-            # Wait for the loading icon to appear, then disappear (indicates AJAX is complete)
-            page.wait_for_selector('#bk_content', timeout=5000)
-            page.wait_for_timeout(2000)  # Let AJAX start
-            
-            # Wait for results table or "no results" message (up to 30 seconds for slow searches)
-            page.wait_for_selector("table.table-striped tbody tr, .resultMsgExposition, .s_rnfne", timeout=30000)
-            page.wait_for_timeout(2000)  # Let content fully render
-            
-        except Exception as e:
-            print(f"  ⚠️  Timeout waiting for results: {e}")
-            page.wait_for_timeout(5000)  # Fallback wait
-            # Take screenshot to debug
-            try:
-                page.screenshot(path="/srv/caaa_scraper/debug_search_timeout.png")
-                print(f"  📸 Screenshot saved to debug_search_timeout.png")
-            except:
-                pass
-            print(f"  🔗 Current URL: {page.url}")
-            print(f"  📄 Page title: {page.title()}")
+            page.wait_for_load_state("networkidle", timeout=15000)
+        except:
+            pass
         
+        page.wait_for_timeout(5000)
         print(f"✓ Search submitted")
     
     def _extract_message_ids(self, 
