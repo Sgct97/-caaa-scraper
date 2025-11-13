@@ -70,7 +70,7 @@ class AIAnalyzer:
                     }
                 ],
                 response_format={"type": "json_object"},
-                temperature=0.3,  # Lower temperature for more consistent results
+                temperature=0.0,  # Zero temperature for deterministic results
                 max_tokens=500
             )
             

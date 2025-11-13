@@ -68,7 +68,7 @@ class QueryEnhancer:
                     }
                 ],
                 response_format={"type": "json_object"},
-                temperature=0.3,
+                temperature=0.0,
                 max_tokens=800
             )
             
