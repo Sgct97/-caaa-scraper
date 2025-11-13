@@ -32,9 +32,7 @@ def convert_decimals(obj, for_json_api=False):
     
     if isinstance(obj, Decimal):
         return float(obj)
-    elif for_json_api and isinstance(obj, datetime):
-        return obj.isoformat()
-    elif for_json_api and isinstance(obj, date):
+    elif for_json_api and isinstance(obj, (datetime, date)):
         return obj.isoformat()
     elif isinstance(obj, dict):
         return {k: convert_decimals(v, for_json_api) for k, v in obj.items()}
