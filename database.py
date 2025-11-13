@@ -287,7 +287,8 @@ class Database:
                     JOIN messages m ON sr.message_id = m.id
                     LEFT JOIN analyses a ON sr.search_id = a.search_id AND sr.message_id = a.message_id
                     WHERE sr.search_id = %s
-                    ORDER BY sr.result_position
+                      AND a.is_relevant = true
+                    ORDER BY a.confidence DESC, sr.result_position
                 """, (search_id,))
                 
                 return cur.fetchall()
