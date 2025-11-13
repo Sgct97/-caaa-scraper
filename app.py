@@ -319,10 +319,20 @@ CRITICAL: suggestions must be a dictionary of field names and values, NOT a list
         
         result = json.loads(response.choices[0].message.content)
         
+        # Force fix keyword formatting if AI didn't use commas
+        suggestions = result.get("suggestions")
+        if suggestions and isinstance(suggestions, dict):
+            for field in ['keywords_all', 'keywords_any', 'keywords_exclude']:
+                if field in suggestions and suggestions[field]:
+                    value = suggestions[field]
+                    # If there are spaces but no commas, add commas
+                    if isinstance(value, str) and ' ' in value and ',' not in value:
+                        suggestions[field] = ', '.join(value.split())
+        
         return {
             "success": True,
             "analysis": result.get("analysis", ""),
-            "suggestions": result.get("suggestions"),
+            "suggestions": suggestions,
             "follow_up_question": result.get("follow_up_question")
         }
         
