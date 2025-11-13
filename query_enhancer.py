@@ -178,7 +178,15 @@ REMEMBER: Always use commas between different keywords in keywords_all, keywords
                 # AI returned an array - join with commas
                 return ", ".join(str(v).strip() for v in value if v)
             if isinstance(value, str):
-                return value.strip() if value.strip() else None
+                value = value.strip()
+                if not value:
+                    return None
+                # If AI returned space-separated words without commas, fix it
+                # Check if there are multiple words but no commas
+                if ' ' in value and ',' not in value:
+                    # Split on spaces and rejoin with commas
+                    return ", ".join(word.strip() for word in value.split() if word.strip())
+                return value
             return str(value)
         
         # Parse date strings
