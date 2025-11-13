@@ -127,22 +127,23 @@ CRITICAL FORMATTING RULES - MUST FOLLOW:
 - ALWAYS put commas between different concepts
 
 Guidelines:
-- Use keywords_all for concepts that must appear together (this is your PRIMARY tool)
+- **USE keywords_all AS YOUR PRIMARY TOOL** - this finds messages containing all the important terms
 - Use keywords_any for synonyms or related terms (comma-separated!)
-- **RARELY use keywords_phrase** - only for well-established legal terms like "permanent disability rating" or "medical treatment utilization schedule" that appear verbatim in case law
-- For general concepts (like "IMR appeal" or "expedited hearing"), use keywords_all instead of keywords_phrase
+- **DO NOT USE keywords_phrase UNLESS EXPLICITLY TOLD TO** - exact phrases almost always return 0 results
+- The phrase "appeal IMR decision WCAB" does NOT exist in the database - use keywords_all: "IMR, appeal, WCAB, decision" instead
+- **NEVER create exact phrases on your own** - only use them if the user explicitly requests an exact phrase match
+- For ANY multi-word concept (like "IMR appeal" or "WCAB hearing"), break it into separate keywords in keywords_all
 - **DO NOT use date filters unless the user explicitly mentions a specific time period** - searches work better without date restrictions
 - Choose appropriate listserv if context suggests worker vs employer side
 - Think about legal synonyms and abbreviations (PD = permanent disability, TD = temporary disability, etc.)
-- BE CONSERVATIVE with exact phrases - they often return 0 results because the exact wording doesn't match
 
 Respond in JSON format:
 {{
   "reasoning": "Brief explanation of search strategy",
   "parameters": {{
     "keyword": "string or null",
-    "keywords_all": "comma-separated terms or null (EXAMPLE: \"IMR, appeal, decision\")",
-    "keywords_phrase": "exact phrase or null (EXAMPLE: \"permanent disability rating\")",
+    "keywords_all": "comma-separated terms or null (EXAMPLE: \"IMR, appeal, decision, WCAB\")",
+    "keywords_phrase": null (LEAVE THIS NULL - do not use exact phrases unless explicitly requested),
     "keywords_any": "comma-separated terms or null (EXAMPLE: \"expedited, regular, hearing\")",
     "keywords_exclude": "comma-separated terms or null",
     "listserv": "all/lawnet/lavaaa/lamaaa/scaaa",
@@ -152,7 +153,10 @@ Respond in JSON format:
   }}
 }}
 
-REMEMBER: Always use commas between different keywords in keywords_all, keywords_any, and keywords_exclude!
+CRITICAL RULES:
+1. ALWAYS use commas between different keywords in keywords_all, keywords_any, and keywords_exclude
+2. DO NOT use keywords_phrase - set it to null
+3. Put all important terms in keywords_all separated by commas
 """
         return prompt
     
