@@ -152,7 +152,7 @@ async def get_search_status(search_id: str):
         if not search_info:
             raise HTTPException(status_code=404, detail="Search not found")
         
-        return {
+        return convert_decimals({
             "success": True,
             "search_id": search_id,
             "status": search_info['status'],
@@ -163,7 +163,7 @@ async def get_search_status(search_id: str):
             },
             "started_at": search_info.get('started_at'),
             "completed_at": search_info.get('completed_at')
-        }
+        })
         
     except HTTPException:
         raise
