@@ -105,8 +105,8 @@ async def dashboard(request: Request):
     
     return templates.TemplateResponse("dashboard.html", {
         "request": request,
-        "recent_searches": recent_searches,
-        "stats": stats
+        "recent_searches": convert_decimals([dict(s) for s in recent_searches]) if recent_searches else [],
+        "stats": convert_decimals(dict(stats)) if stats else {}
     })
 
 @app.post("/api/search")
