@@ -280,15 +280,15 @@ Respond in JSON format:
 CRITICAL: suggestions must be a dictionary of field names and values, NOT a list or string of instructions!
 """
         
-            response = orchestrator.client.chat.completions.create(
-                model="qwen3:14b",
-                messages=[
-                    {"role": "system", "content": "You are a California workers' compensation legal research expert."},
-                    {"role": "user", "content": prompt}
-                ],
-                response_format={"type": "json_object"},
-                temperature=0.0
-            )
+        response = orchestrator.client.chat.completions.create(
+            model="qwen3:14b",
+            messages=[
+                {"role": "system", "content": "You are a California workers' compensation legal research expert."},
+                {"role": "user", "content": prompt}
+            ],
+            response_format={"type": "json_object"},
+            temperature=0.0
+        )
         
         result = json.loads(response.choices[0].message.content)
         
