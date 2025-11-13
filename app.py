@@ -18,6 +18,20 @@ from contextlib import asynccontextmanager
 
 from orchestrator import CAAAOrchestrator
 from database import Database
+from decimal import Decimal
+
+# Helper function to convert Decimal to float recursively
+def convert_decimals(obj):
+    """Recursively convert Decimal objects to float for JSON serialization"""
+    if isinstance(obj, Decimal):
+        return float(obj)
+    elif isinstance(obj, dict):
+        return {k: convert_decimals(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_decimals(item) for item in obj]
+    elif isinstance(obj, tuple):
+        return tuple(convert_decimals(item) for item in obj)
+    return obj
 
 # Database configuration
 db_config = {
@@ -173,24 +187,15 @@ async def get_search_results(search_id: str):
         # Get stats
         stats = orchestrator.db.get_search_stats(search_id)
         
-        # Convert results to dict and handle Decimal types
-        from decimal import Decimal
-        results_list = []
-        for r in results:
-            result_dict = dict(r)
-            # Convert Decimal to float
-            if 'confidence_score' in result_dict and isinstance(result_dict['confidence_score'], Decimal):
-                result_dict['confidence_score'] = float(result_dict['confidence_score'])
-            results_list.append(result_dict)
-        
-        return {
+        # Convert all database results to JSON-safe format
+        return convert_decimals({
             "success": True,
             "search_id": search_id,
             "query": search_info.get('keyword'),
             "status": search_info['status'],
-            "stats": stats,
-            "results": results_list
-        }
+            "stats": dict(stats) if stats else {},
+            "results": [dict(r) for r in results]
+        })
         
     except HTTPException:
         raise
