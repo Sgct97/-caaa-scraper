@@ -21,22 +21,27 @@ from database import Database
 from decimal import Decimal
 
 # Helper function to convert non-JSON-serializable types
-def convert_decimals(obj):
-    """Recursively convert Decimal, date, datetime objects for JSON serialization"""
+def convert_decimals(obj, for_json_api=False):
+    """Recursively convert Decimal objects for serialization
+    
+    Args:
+        obj: Object to convert
+        for_json_api: If True, also convert date/datetime to ISO strings for JSON API responses
+    """
     from datetime import date, datetime
     
     if isinstance(obj, Decimal):
         return float(obj)
-    elif isinstance(obj, datetime):
+    elif for_json_api and isinstance(obj, datetime):
         return obj.isoformat()
-    elif isinstance(obj, date):
+    elif for_json_api and isinstance(obj, date):
         return obj.isoformat()
     elif isinstance(obj, dict):
-        return {k: convert_decimals(v) for k, v in obj.items()}
+        return {k: convert_decimals(v, for_json_api) for k, v in obj.items()}
     elif isinstance(obj, list):
-        return [convert_decimals(item) for item in obj]
+        return [convert_decimals(item, for_json_api) for item in obj]
     elif isinstance(obj, tuple):
-        return tuple(convert_decimals(item) for item in obj)
+        return tuple(convert_decimals(item, for_json_api) for item in obj)
     return obj
 
 # Database configuration
@@ -169,7 +174,7 @@ async def get_search_status(search_id: str):
             },
             "started_at": search_info.get('started_at'),
             "completed_at": search_info.get('completed_at')
-        })
+        }, for_json_api=True)
         
     except HTTPException:
         raise
@@ -201,7 +206,7 @@ async def get_search_results(search_id: str):
             "status": search_info['status'],
             "stats": dict(stats) if stats else {},
             "results": [dict(r) for r in results]
-        })
+        }, for_json_api=True)
         
     except HTTPException:
         raise
