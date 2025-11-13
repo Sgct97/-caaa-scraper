@@ -228,8 +228,7 @@
                 <div class="border-2 rounded-xl p-6 transition-all
                             {% if result.is_relevant %}border-green-300 bg-green-50 hover:border-green-400 hover:shadow-lg
                             {% else %}border-red-200 bg-red-50 hover:border-red-300 hover:shadow-md opacity-75{% endif %}" 
-                     data-message-id="{{ result.message_id }}"
-                     data-message-data="{{ result|tojson|escape }}">
+                     data-message-id="{{ result.message_id }}">
                     
                     <!-- Relevance Badge -->
                     <div class="mb-3">
@@ -334,21 +333,27 @@
                 },
                 
                 expandMessage(messageId) {
-                    // Find the message card by data attribute
+                    // Find the message card
                     const messageCard = document.querySelector(`[data-message-id="${messageId}"]`);
                     if (!messageCard) {
                         console.error('Message not found:', messageId);
                         return;
                     }
                     
-                    // Get the full message data from the data attribute
-                    try {
-                        const messageData = JSON.parse(messageCard.dataset.messageData);
-                        this.modalMessage = messageData;
-                        this.showModal = true;
-                    } catch (e) {
-                        console.error('Error parsing message data:', e);
-                    }
+                    // Extract message data from DOM
+                    this.modalMessage = {
+                        message_id: messageId,
+                        subject: messageCard.querySelector('h3')?.textContent || 'No subject',
+                        from_name: messageCard.querySelector('.fa-user')?.parentElement?.textContent.trim() || 'Unknown',
+                        post_date: messageCard.querySelector('.fa-calendar')?.parentElement?.textContent.trim() || 'N/A',
+                        caaa_message_id: messageCard.querySelector('.text-xs.text-gray-500')?.textContent.replace('Message ID: ', '') || 'N/A',
+                        confidence_score: parseFloat(messageCard.querySelector('[class*="Match"]')?.textContent) / 100 || null,
+                        ai_reasoning: messageCard.querySelector('.bg-blue-50 .text-gray-700')?.textContent || null,
+                        body: messageCard.querySelector('.prose p')?.textContent || 'Content not available',
+                        is_relevant: messageCard.classList.contains('border-green-300')
+                    };
+                    
+                    this.showModal = true;
                 }
             }
         }
