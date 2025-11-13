@@ -246,25 +246,26 @@ Your task:
 
 AVAILABLE CAAA SEARCH FIELDS (use these exact keys in suggestions):
 - keyword: Simple keyword search
-- keywords_all: Must contain ALL these keywords (comma-separated: "term1, term2, term3")
-- keywords_phrase: Exact phrase match
+- keywords_all: Must contain ALL these keywords (comma-separated: "term1, term2, term3") - USE THIS AS YOUR PRIMARY TOOL
+- keywords_phrase: DO NOT USE THIS FIELD - it returns 0 results. Leave it null.
 - keywords_any: At least ONE of these (comma-separated: "term1, term2, term3")
 - keywords_exclude: Must NOT contain these (comma-separated)
 - listserv: "all", "lawnet" (applicant), "lavaaa" (defense), "lamaaa", or "scaaa"
-- date_from: Start date (YYYY-MM-DD format)
-- date_to: End date (YYYY-MM-DD format)
+- date_from: DO NOT USE unless user explicitly asks for a date range
+- date_to: DO NOT USE unless user explicitly asks for a date range
 - posted_by: Filter by poster's email/name
 - last_name: Author's last name
 - search_in: "subject_and_body" or "subject_only"
 - attachments: "all", "with_attachments", or "without_attachments"
 
-IMPORTANT RULES:
-- If user says "recent", suggest dates from 3-6 months ago to TODAY ({three_months_ago} to {today_str})
-- If user says "last year", use dates from 1 year ago to TODAY ({one_year_ago} to {today_str})
-- DO NOT suggest old/past date ranges like 2022-2023 unless user specifically asks for historical data
-- ALWAYS use comma-separated values for keywords_all, keywords_any, keywords_exclude
-- Return suggestions as a dictionary with field names as keys and values as strings
-- If their fields are good, set suggestions to null
+CRITICAL RULES:
+1. DO NOT use keywords_phrase - it always returns 0 results. Leave it null or omit it.
+2. DO NOT use date_from or date_to unless the user EXPLICITLY asks for "recent" or a specific time period
+3. The user did NOT ask for dates, so DO NOT include date_from or date_to in your suggestions
+4. ALWAYS use comma-separated values for keywords_all, keywords_any, keywords_exclude
+5. Use keywords_all as your primary tool - put all important terms there
+6. Return suggestions as a dictionary with field names as keys and values as strings
+7. If their fields are good, set suggestions to null
 
 Respond in JSON format:
 {{
