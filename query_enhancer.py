@@ -127,12 +127,14 @@ CRITICAL FORMATTING RULES - MUST FOLLOW:
 - ALWAYS put commas between different concepts
 
 Guidelines:
-- Use keywords_all for concepts that must appear together
+- Use keywords_all for concepts that must appear together (this is your PRIMARY tool)
 - Use keywords_any for synonyms or related terms (comma-separated!)
-- Use keywords_phrase for legal terms that should appear exactly
+- **RARELY use keywords_phrase** - only for well-established legal terms like "permanent disability rating" or "medical treatment utilization schedule" that appear verbatim in case law
+- For general concepts (like "IMR appeal" or "expedited hearing"), use keywords_all instead of keywords_phrase
 - **DO NOT use date filters unless the user explicitly mentions a specific time period** - searches work better without date restrictions
 - Choose appropriate listserv if context suggests worker vs employer side
 - Think about legal synonyms and abbreviations (PD = permanent disability, TD = temporary disability, etc.)
+- BE CONSERVATIVE with exact phrases - they often return 0 results because the exact wording doesn't match
 
 Respond in JSON format:
 {{
