@@ -127,15 +127,16 @@ Body: {body}
 
 Your task:
 1. Determine if this message matches the search query
-2. Consider it RELEVANT if:
-   - The search terms appear in the subject or body (even briefly)
-   - The topic is related to the search query
+2. Consider it RELEVANT if ANY of these are true:
+   - ANY search term appears ANYWHERE in the subject or body
+   - The topic is even remotely related to the search query
    - The author name matches (if searching by author)
-3. Only mark as NOT relevant if the message has no connection to the search terms
-4. Provide a confidence score (0.0 to 1.0)
+   - The message discusses similar concepts using different words
+3. ONLY mark as NOT relevant if the message is about a COMPLETELY DIFFERENT topic with NO overlap
+4. Provide a confidence score (0.0 to 1.0) - use 0.5 or higher for anything marginally related
 5. Explain your reasoning briefly
 
-BE LENIENT - if the search terms appear or the topic is related, mark as relevant.
+BE EXTREMELY LENIENT - if there is ANY connection whatsoever, mark as relevant. When in doubt, mark as RELEVANT.
 
 Respond in JSON format:
 {{

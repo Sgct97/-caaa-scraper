@@ -225,9 +225,25 @@
             {% elif results %}
             <div class="space-y-6">
                 {% for result in results %}
-                <div class="border-2 border-gray-100 rounded-xl p-6 hover:border-primary-300 hover:shadow-md transition-all" 
+                <div class="border-2 rounded-xl p-6 transition-all
+                            {% if result.is_relevant %}border-green-300 bg-green-50 hover:border-green-400 hover:shadow-lg
+                            {% else %}border-red-200 bg-red-50 hover:border-red-300 hover:shadow-md opacity-75{% endif %}" 
                      data-message-id="{{ result.message_id }}"
                      data-message-data="{{ result|tojson|escape }}">
+                    
+                    <!-- Relevance Badge -->
+                    <div class="mb-3">
+                        {% if result.is_relevant %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-500 text-white">
+                            <i class="fas fa-check-circle mr-2"></i>RELEVANT
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-red-500 text-white">
+                            <i class="fas fa-times-circle mr-2"></i>NOT RELEVANT
+                        </span>
+                        {% endif %}
+                    </div>
+                    
                     <!-- Result Header -->
                     <div class="flex items-start justify-between mb-4">
                         <div class="flex-1">

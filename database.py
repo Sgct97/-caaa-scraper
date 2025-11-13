@@ -266,7 +266,7 @@ class Database:
     # ============================================================
     
     def get_relevant_results(self, search_id: str) -> List[Dict[str, Any]]:
-        """Get all relevant messages for a search"""
+        """Get all messages for a search with AI analysis"""
         with self.get_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute("""
@@ -287,8 +287,10 @@ class Database:
                     JOIN messages m ON sr.message_id = m.id
                     LEFT JOIN analyses a ON sr.search_id = a.search_id AND sr.message_id = a.message_id
                     WHERE sr.search_id = %s
-                      AND a.is_relevant = true
-                    ORDER BY a.confidence DESC, sr.result_position
+                    ORDER BY 
+                        CASE WHEN a.is_relevant = true THEN 0 ELSE 1 END,
+                        a.confidence DESC NULLS LAST,
+                        sr.result_position
                 """, (search_id,))
                 
                 return cur.fetchall()
