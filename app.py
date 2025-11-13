@@ -173,13 +173,23 @@ async def get_search_results(search_id: str):
         # Get stats
         stats = orchestrator.db.get_search_stats(search_id)
         
+        # Convert results to dict and handle Decimal types
+        from decimal import Decimal
+        results_list = []
+        for r in results:
+            result_dict = dict(r)
+            # Convert Decimal to float
+            if 'confidence_score' in result_dict and isinstance(result_dict['confidence_score'], Decimal):
+                result_dict['confidence_score'] = float(result_dict['confidence_score'])
+            results_list.append(result_dict)
+        
         return {
             "success": True,
             "search_id": search_id,
             "query": search_info.get('keyword'),
             "status": search_info['status'],
             "stats": stats,
-            "results": [dict(r) for r in results]
+            "results": results_list
         }
         
     except HTTPException:
