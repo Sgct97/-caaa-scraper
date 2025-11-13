@@ -20,11 +20,17 @@ from orchestrator import CAAAOrchestrator
 from database import Database
 from decimal import Decimal
 
-# Helper function to convert Decimal to float recursively
+# Helper function to convert non-JSON-serializable types
 def convert_decimals(obj):
-    """Recursively convert Decimal objects to float for JSON serialization"""
+    """Recursively convert Decimal, date, datetime objects for JSON serialization"""
+    from datetime import date, datetime
+    
     if isinstance(obj, Decimal):
         return float(obj)
+    elif isinstance(obj, datetime):
+        return obj.isoformat()
+    elif isinstance(obj, date):
+        return obj.isoformat()
     elif isinstance(obj, dict):
         return {k: convert_decimals(v) for k, v in obj.items()}
     elif isinstance(obj, list):
