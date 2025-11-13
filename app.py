@@ -218,9 +218,9 @@ async def view_search(request: Request, search_id: str):
         return templates.TemplateResponse("search_results.html", {
             "request": request,
             "search_id": search_id,
-            "search_info": search_info,
-            "results": results,
-            "stats": stats
+            "search_info": convert_decimals(dict(search_info)) if search_info else {},
+            "results": convert_decimals([dict(r) for r in results]) if results else [],
+            "stats": convert_decimals(dict(stats)) if stats else {}
         })
         
     except HTTPException:
