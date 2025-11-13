@@ -9,12 +9,33 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Any
 import os
 import json
-from datetime import datetime
+from datetime import datetime, date
 import asyncio
 from contextlib import asynccontextmanager
+
+# Custom JSON encoder for FastAPI
+class CustomJSONResponse(JSONResponse):
+    def render(self, content: Any) -> bytes:
+        from decimal import Decimal
+        
+        def default(obj):
+            if isinstance(obj, Decimal):
+                return float(obj)
+            elif isinstance(obj, (datetime, date)):
+                return obj.isoformat()
+            raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
+        
+        return json.dumps(
+            content,
+            ensure_ascii=False,
+            allow_nan=False,
+            indent=None,
+            separators=(",", ":"),
+            default=default,
+        ).encode("utf-8")
 
 from orchestrator import CAAAOrchestrator
 from database import Database
@@ -66,12 +87,13 @@ async def lifespan(app: FastAPI):
     yield
     print("✓ Shutting down gracefully")
 
-# Initialize FastAPI app
+# Initialize FastAPI app with custom JSON encoder
 app = FastAPI(
     title="CAAA Legal Intelligence",
     description="AI-Powered Legal Research Platform",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
+    default_response_class=CustomJSONResponse
 )
 
 # Mount static files and templates
