@@ -108,7 +108,7 @@ class SearchRequest(BaseModel):
     search_fields: Optional[dict] = None
     ai_intent: Optional[str] = None
     use_ai_enhancement: bool = False
-    max_messages: int = 100
+    max_messages: int = 50
     max_pages: int = 10
 
 class AIAnalyzeRequest(BaseModel):
