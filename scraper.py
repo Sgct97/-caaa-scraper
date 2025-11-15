@@ -258,8 +258,8 @@ class CAAAScraper:
             True if next page exists and was navigated to, False otherwise
         """
         try:
-            # Look for pagination
-            pagination = page.query_selector("#seachResultsPaginationBar")
+            # Look for pagination with longer timeout
+            pagination = page.wait_for_selector("#seachResultsPaginationBar", timeout=5000, state="visible")
             if not pagination:
                 return False
             
@@ -270,6 +270,7 @@ class CAAAScraper:
             next_link = pagination.query_selector(f"a:has-text('{next_page_num}')")
             if next_link:
                 next_link.click()
+                page.wait_for_load_state("networkidle", timeout=10000)
                 page.wait_for_timeout(2000)
                 return True
             
@@ -277,6 +278,7 @@ class CAAAScraper:
             next_button = pagination.query_selector("a[title='Next Page']")
             if next_button:
                 next_button.click()
+                page.wait_for_load_state("networkidle", timeout=10000)
                 page.wait_for_timeout(2000)
                 return True
             
