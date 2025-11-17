@@ -25,13 +25,13 @@ class QueryEnhancer:
             api_key: OpenAI API key (or set OPENAI_API_KEY env var)
             model: Model to use (default: gpt-4o-mini)
         """
-        # Use Vast.ai GPU with Qwen 14B via SSH tunnel for fast, HIPAA-compliant processing
+        # Use Vast.ai GPU with Qwen 32B via SSH tunnel for fast, HIPAA-compliant processing
         ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434/v1")
         self.client = OpenAI(
             base_url=ollama_url,
             api_key="ollama"
         )
-        self.model = "qwen3:14b"
+        self.model = "qwen2.5:32b"
     
     def enhance_query(self, user_query: str) -> SearchParams:
         """
@@ -127,13 +127,20 @@ CRITICAL FORMATTING RULES - MUST FOLLOW:
 - ALWAYS put commas between different concepts
 
 Guidelines:
-- **USE keywords_all AS YOUR PRIMARY TOOL** - this finds messages containing all the important terms
-- Use keywords_any for synonyms or related terms (comma-separated!)
+- **USE keywords_any AS YOUR PRIMARY TOOL** - this finds messages containing ANY of the important terms (broadest results)
+- Use keywords_all ONLY when you need messages that contain MULTIPLE SPECIFIC terms together (narrow, focused searches)
+- For general queries about a topic, use keywords_any with relevant terms and synonyms
+- Example: "Paterson case changes" → keywords_any: "Paterson, amended, modified, overturned, changed, reversed"
+- Example: "recent changes to Paterson" → keywords_any: "Paterson, amended, modified, changed, reversed" AND date_from: 6 months ago
+- Example: "IMR appeal process" → keywords_any: "IMR, appeal, review, decision, WCAB"
 - **DO NOT USE keywords_phrase UNLESS EXPLICITLY TOLD TO** - exact phrases almost always return 0 results
-- The phrase "appeal IMR decision WCAB" does NOT exist in the database - use keywords_all: "IMR, appeal, WCAB, decision" instead
 - **NEVER create exact phrases on your own** - only use them if the user explicitly requests an exact phrase match
-- For ANY multi-word concept (like "IMR appeal" or "WCAB hearing"), break it into separate keywords in keywords_all
-- **DO NOT use date filters unless the user explicitly mentions a specific time period** - searches work better without date restrictions
+- **USE DATE FILTERS when user asks about temporal context:**
+  - "recent" / "latest" / "new" → date_from = 6 months ago (this is CRITICAL for relevance)
+  - "current year" / "this year" → date_from = start of current year
+  - "last year" → date_from and date_to for previous year
+  - Specific dates or ranges → use exact dates
+  - If NO temporal keywords, leave date filters null
 - Choose appropriate listserv if context suggests worker vs employer side
 - Think about legal synonyms and abbreviations (PD = permanent disability, TD = temporary disability, etc.)
 
@@ -142,9 +149,9 @@ Respond in JSON format:
   "reasoning": "Brief explanation of search strategy",
   "parameters": {{
     "keyword": "string or null",
-    "keywords_all": "comma-separated terms or null (EXAMPLE: \"IMR, appeal, decision, WCAB\")",
+    "keywords_all": "comma-separated terms or null (ONLY for narrow searches requiring ALL terms together)",
     "keywords_phrase": null (LEAVE THIS NULL - do not use exact phrases unless explicitly requested),
-    "keywords_any": "comma-separated terms or null (EXAMPLE: \"expedited, regular, hearing\")",
+    "keywords_any": "comma-separated terms or null (PRIMARY TOOL - EXAMPLE: \"Paterson, amended, modified, changed, reversed\")",
     "keywords_exclude": "comma-separated terms or null",
     "listserv": "all/lawnet/lavaaa/lamaaa/scaaa",
     "date_from": "YYYY-MM-DD or null",
@@ -156,7 +163,7 @@ Respond in JSON format:
 CRITICAL RULES:
 1. ALWAYS use commas between different keywords in keywords_all, keywords_any, and keywords_exclude
 2. DO NOT use keywords_phrase - set it to null
-3. Put all important terms in keywords_all separated by commas
+3. PREFER keywords_any over keywords_all for broader, more useful results
 """
         return prompt
     
@@ -168,7 +175,18 @@ CRITICAL RULES:
             
             print(f"\n→ AI reasoning: {data.get('reasoning', 'No reasoning provided')}")
             
-            return data.get('parameters', {})
+            params = data.get('parameters', {})
+            
+            # Validate that parameters is a dictionary, not a list
+            if isinstance(params, list):
+                print(f"⚠️  AI returned parameters as a list instead of a dictionary. Falling back.")
+                return {}
+            
+            if not isinstance(params, dict):
+                print(f"⚠️  AI returned invalid parameters type: {type(params)}. Falling back.")
+                return {}
+            
+            return params
         except (json.JSONDecodeError, KeyError, ValueError) as e:
             print(f"⚠️  Error parsing AI response: {e}")
             return {}

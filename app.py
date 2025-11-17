@@ -108,8 +108,8 @@ class SearchRequest(BaseModel):
     search_fields: Optional[dict] = None
     ai_intent: Optional[str] = None
     use_ai_enhancement: bool = False
-    max_messages: int = 50
-    max_pages: int = 10
+    max_messages: int = 10
+    max_pages: int = 2
 
 class AIAnalyzeRequest(BaseModel):
     intent: str
@@ -261,99 +261,105 @@ async def view_search(request: Request, search_id: str):
 
 @app.post("/api/ai/analyze")
 async def ai_analyze(request: AIAnalyzeRequest):
-    """AI analyzes user intent and current search fields, suggests improvements"""
+    """AI analyzes user intent - asks follow-up if vague, uses QueryEnhancer if specific"""
     
     try:
         if not orchestrator.client:
             raise HTTPException(status_code=503, detail="AI service not available")
         
-        # Build prompt for AI
-        from datetime import datetime, timedelta
-        today = datetime.now()
-        three_months_ago = (today - timedelta(days=90)).strftime('%Y-%m-%d')
-        six_months_ago = (today - timedelta(days=180)).strftime('%Y-%m-%d')
-        one_year_ago = (today - timedelta(days=365)).strftime('%Y-%m-%d')
-        today_str = today.strftime('%Y-%m-%d')
-        
-        prompt = f"""You are an expert legal research assistant for California workers' compensation law.
-You help users search the CAAA listserv (a legal discussion forum) for relevant case discussions.
+        # STEP 1: Check if query is too vague and needs clarification
+        vagueness_check = f"""Is this legal research query VAGUE or SPECIFIC?
 
-TODAY'S DATE: {today_str}
+Query: "{request.intent}"
 
-USER'S INTENT: "{request.intent}"
+VAGUE = mentions a case/topic but doesn't specify WHAT ASPECT to research
+Examples of VAGUE:
+- "Paterson case" (which aspect of Paterson?)
+- "recent changes to Paterson" (changes to WHAT about Paterson?)
+- "ramifications of X" (which ramification?)
+- Just a case name without context
 
-CURRENT SEARCH FIELDS THEY'VE FILLED:
-{json.dumps(request.current_fields, indent=2)}
+SPECIFIC = identifies BOTH the case/topic AND the specific legal issue
+Examples of SPECIFIC:
+- "How does Paterson affect QME panel selection?"
+- "Paterson's impact on apportionment calculations"
+- "Supreme Court decisions on permanent disability in 2023"
 
-Your task:
-1. Analyze what the user is truly trying to find
-2. Review their current search field values  
-3. Suggest SPECIFIC CAAA search field values to improve their search, OR ask a clarifying question
-
-AVAILABLE CAAA SEARCH FIELDS (use these exact keys in suggestions):
-- keyword: Simple keyword search
-- keywords_all: Must contain ALL these keywords (comma-separated: "term1, term2, term3") - USE THIS AS YOUR PRIMARY TOOL
-- keywords_phrase: DO NOT USE THIS FIELD - it returns 0 results. Leave it null.
-- keywords_any: At least ONE of these (comma-separated: "term1, term2, term3")
-- keywords_exclude: Must NOT contain these (comma-separated)
-- listserv: "all", "lawnet" (applicant), "lavaaa" (defense), "lamaaa", or "scaaa"
-- date_from: DO NOT USE unless user explicitly asks for a date range
-- date_to: DO NOT USE unless user explicitly asks for a date range
-- posted_by: Filter by poster's email/name
-- last_name: Author's last name
-- search_in: "subject_and_body" or "subject_only"
-- attachments: "all", "with_attachments", or "without_attachments"
-
-CRITICAL RULES:
-1. DO NOT use keywords_phrase - it always returns 0 results. Leave it null or omit it.
-2. DO NOT use date_from or date_to unless the user EXPLICITLY asks for "recent" or a specific time period
-3. The user did NOT ask for dates, so DO NOT include date_from or date_to in your suggestions
-4. ALWAYS use comma-separated values for keywords_all, keywords_any, keywords_exclude
-5. Use keywords_all as your primary tool - put all important terms there
-6. Return suggestions as a dictionary with field names as keys and values as strings
-7. If their fields are good, set suggestions to null
-
-Respond in JSON format:
+Return JSON:
 {{
-  "analysis": "Your analysis and advice (2-3 sentences)",
-  "suggestions": {{
-    "keywords_all": "term1, term2, term3",
-    "keywords_phrase": "exact phrase here",
-    "listserv": "lawnet"
-  }} OR null if current fields are good,
-  "follow_up_question": "A specific question to ask, or null"
+  "is_vague": true/false,
+  "follow_up_question": "ask what specific aspect" (ONLY if is_vague=true, else null)
 }}
 
-CRITICAL: suggestions must be a dictionary of field names and values, NOT a list or string of instructions!
-"""
-        
-        response = orchestrator.client.chat.completions.create(
-            model="qwen3:14b",
-            messages=[
-                {"role": "system", "content": "You are a California workers' compensation legal research expert."},
-                {"role": "user", "content": prompt}
-            ],
+If VAGUE: ask "What specific aspect of [topic] are you researching? For example: [list 3-4 common aspects]"
+If SPECIFIC: set is_vague=false and follow_up_question=null"""
+
+        vagueness_response = orchestrator.client.chat.completions.create(
+            model="qwen2.5:32b",
+            messages=[{"role": "user", "content": vagueness_check}],
             response_format={"type": "json_object"},
-            temperature=0.0
+            temperature=0.3
         )
         
-        result = json.loads(response.choices[0].message.content)
+        vagueness_result = json.loads(vagueness_response.choices[0].message.content)
+        print(f"🔍 Vagueness check: {vagueness_result}")
         
-        # Force fix keyword formatting if AI didn't use commas
-        suggestions = result.get("suggestions")
-        if suggestions and isinstance(suggestions, dict):
-            for field in ['keywords_all', 'keywords_any', 'keywords_exclude']:
-                if field in suggestions and suggestions[field]:
-                    value = suggestions[field]
-                    # If there are spaces but no commas, add commas
-                    if isinstance(value, str) and ' ' in value and ',' not in value:
-                        suggestions[field] = ', '.join(value.split())
+        # If vague, return follow-up question immediately
+        if vagueness_result.get("is_vague", False):
+            follow_up = vagueness_result.get("follow_up_question")
+            print(f"❓ Query is vague, asking follow-up: {follow_up}")
+            return {
+                "success": True,
+                "analysis": "Query needs clarification",
+                "suggestions": None,
+                "follow_up_question": follow_up
+            }
+        
+        # STEP 2: Query is specific - use QueryEnhancer to generate search params
+        print(f"✅ Query is specific, using QueryEnhancer")
+        from query_enhancer import QueryEnhancer
+        
+        enhancer = QueryEnhancer()
+        search_params = enhancer.enhance_query(request.intent)
+        
+        # Convert SearchParams to suggestions dictionary for frontend
+        suggestions = {}
+        
+        if search_params.keyword:
+            suggestions["keyword"] = search_params.keyword
+        if search_params.keywords_all:
+            suggestions["keywords_all"] = search_params.keywords_all
+        if search_params.keywords_phrase:
+            suggestions["keywords_phrase"] = search_params.keywords_phrase
+        if search_params.keywords_any:
+            suggestions["keywords_any"] = search_params.keywords_any
+        if search_params.keywords_exclude:
+            suggestions["keywords_exclude"] = search_params.keywords_exclude
+        if search_params.listserv and search_params.listserv != "all":
+            suggestions["listserv"] = search_params.listserv
+        if search_params.search_in and search_params.search_in != "subject_and_body":
+            suggestions["search_in"] = search_params.search_in
+        if search_params.attachment_filter and search_params.attachment_filter != "all":
+            suggestions["attachments"] = search_params.attachment_filter
+        if search_params.posted_by:
+            suggestions["posted_by"] = search_params.posted_by
+        if search_params.author_last_name:
+            suggestions["last_name"] = search_params.author_last_name
+        if search_params.date_from:
+            suggestions["date_from"] = str(search_params.date_from)
+        if search_params.date_to:
+            suggestions["date_to"] = str(search_params.date_to)
+        
+        # Remove empty values
+        suggestions = {k: v for k, v in suggestions.items() if v}
+        
+        print(f"✅ QueryEnhancer generated suggestions: {list(suggestions.keys())}")
         
         return {
             "success": True,
-            "analysis": result.get("analysis", ""),
-            "suggestions": suggestions,
-            "follow_up_question": result.get("follow_up_question")
+            "analysis": "Generated specific search parameters",
+            "suggestions": suggestions if suggestions else None,
+            "follow_up_question": None
         }
         
     except Exception as e:
@@ -361,44 +367,69 @@ CRITICAL: suggestions must be a dictionary of field names and values, NOT a list
 
 @app.post("/api/ai/follow-up")
 async def ai_follow_up(request: AIFollowUpRequest):
-    """Continue AI conversation with user's answer to follow-up question"""
+    """Continue AI conversation using QueryEnhancer with refined query"""
     
     try:
         if not orchestrator.client:
             raise HTTPException(status_code=503, detail="AI service not available")
         
-        # Build conversation history
-        messages = [
-            {"role": "system", "content": "You are a California workers' compensation legal research expert."}
-        ]
-        
-        # Add conversation history
-        for msg in request.conversation[-4:]:  # Last 4 messages for context
+        # Combine the conversation context into a refined query for QueryEnhancer
+        # Get the original question from conversation
+        original_query = ""
+        for msg in request.conversation:
             if msg['role'] == 'user':
-                messages.append({"role": "user", "content": msg['content']})
-            elif msg['role'] == 'ai':
-                messages.append({"role": "assistant", "content": msg['content']})
+                original_query = msg['content']
+                break
         
-        # Add latest answer
-        messages.append({
-            "role": "user",
-            "content": f"User's answer: {request.answer}\n\nCurrent fields: {json.dumps(request.current_fields)}\n\nBased on this, provide final search recommendations in JSON format with: analysis, suggestions, follow_up_question (or null if done)."
-        })
+        # Create refined query: original question + user's clarifying answer
+        refined_query = f"{original_query}. Specifically: {request.answer}"
         
-        response = orchestrator.client.chat.completions.create(
-            model="qwen3:14b",
-            messages=messages,
-            response_format={"type": "json_object"},
-            temperature=0.0
-        )
+        print(f"📝 Refined query for QueryEnhancer: {refined_query}")
         
-        result = json.loads(response.choices[0].message.content)
+        # Use QueryEnhancer with the refined query
+        from query_enhancer import QueryEnhancer
+        
+        enhancer = QueryEnhancer()
+        search_params = enhancer.enhance_query(refined_query)
+        
+        # Convert SearchParams to suggestions dictionary
+        suggestions = {}
+        
+        if search_params.keyword:
+            suggestions["keyword"] = search_params.keyword
+        if search_params.keywords_all:
+            suggestions["keywords_all"] = search_params.keywords_all
+        if search_params.keywords_phrase:
+            suggestions["keywords_phrase"] = search_params.keywords_phrase
+        if search_params.keywords_any:
+            suggestions["keywords_any"] = search_params.keywords_any
+        if search_params.keywords_exclude:
+            suggestions["keywords_exclude"] = search_params.keywords_exclude
+        if search_params.listserv and search_params.listserv != "all":
+            suggestions["listserv"] = search_params.listserv
+        if search_params.search_in and search_params.search_in != "subject_and_body":
+            suggestions["search_in"] = search_params.search_in
+        if search_params.attachment_filter and search_params.attachment_filter != "all":
+            suggestions["attachments"] = search_params.attachment_filter
+        if search_params.posted_by:
+            suggestions["posted_by"] = search_params.posted_by
+        if search_params.author_last_name:
+            suggestions["last_name"] = search_params.author_last_name
+        if search_params.date_from:
+            suggestions["date_from"] = str(search_params.date_from)
+        if search_params.date_to:
+            suggestions["date_to"] = str(search_params.date_to)
+        
+        # Remove empty values
+        suggestions = {k: v for k, v in suggestions.items() if v}
+        
+        print(f"✅ Follow-up QueryEnhancer generated: {list(suggestions.keys())}")
         
         return {
             "success": True,
-            "analysis": result.get("analysis", ""),
-            "suggestions": result.get("suggestions"),
-            "follow_up_question": result.get("follow_up_question")
+            "analysis": "Generated search parameters based on your clarification",
+            "suggestions": suggestions if suggestions else None,
+            "follow_up_question": None
         }
         
     except Exception as e:
@@ -502,6 +533,7 @@ async def run_search_async(search_fields: Optional[dict], ai_intent: Optional[st
     # Set environment variables for worker
     worker_env = os.environ.copy()
     worker_env.update({
+        'DISPLAY': ':99',
         'DB_NAME': 'caaa_scraper',
         'DB_USER': 'caaa_user', 
         'DB_PASSWORD': 'caaa_scraper_2025',
