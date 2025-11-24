@@ -112,19 +112,19 @@ BEFORE DOING ANYTHING ELSE, CHECK IF THE QUERY MENTIONS A PERSON'S NAME.
 USER QUERY: "{user_query}"{name_warning}
 
 Does this query mention a person's name (like "Chris Johnson", "John Smith", "Judge Lee", etc.)?
-- If YES: Extract the LAST NAME ONLY and use author_last_name field
+- CRITICAL: Distinguish between WHO SENT the message vs WHO is DISCUSSED in it
 - EXAMPLES: 
-  ✓ "Chris Johnson" → author_last_name: "Johnson"
-  ✓ "articles mentioning Chris Johnson" → author_last_name: "Johnson"
-  ✓ "what did John Smith say" → author_last_name: "Smith"
-  ✗ NEVER put person names in keywords - ONLY use author_last_name
+  ✓ "articles BY Chris Johnson" → author_last_name: "Johnson" (filter by sender)
+  ✓ "articles MENTIONING Chris Johnson" → keywords_any: "Johnson" OR "Chris Johnson" (search message content)
+  ✓ "what did John Smith say" → author_last_name: "Smith" (filter by sender)
+  ✓ "discussions ABOUT Judge Lee" → keywords_any: "Judge Lee, Lee" (search message content)
 
 TODAY'S DATE: {today.strftime('%Y-%m-%d')}
 
 Your task: Analyze this query and determine the BEST search parameters to find relevant messages.
 
 Available search fields:
-1. author_last_name - 🚨 USE THIS FOR PERSON NAMES! Extract last name only (e.g., "Chris Johnson" → "Johnson")
+1. author_last_name - 🚨 Filter by WHO SENT the message (e.g., "articles BY Johnson" → "Johnson")
 2. author_first_name - Author's first name (optional, use with last name)
 3. posted_by - Filter by poster email or name
 4. keyword - Simple keyword search (searches subject + body)
@@ -140,50 +140,49 @@ Available search fields:
 12. date_to - End date (YYYY-MM-DD)
 13. search_in - "subject_and_body" or "subject_only"
 
-CRITICAL FORMATTING RULES - MUST FOLLOW:
-- For keywords_all, keywords_any, keywords_exclude: ALWAYS USE COMMAS to separate each term
-- CORRECT: "expedited, hearing, IMR, appeal"
-- WRONG: "expedited hearing IMR appeal" (NO SPACES WITHOUT COMMAS)
-- WRONG: "expedited vs regular hearing" (NO connecting words like "vs", "or", "and")
-- Each term should be a single word or short phrase, separated by commas
-- If you want "IMR appeal" as one term, write it as one: "IMR appeal, expedited, hearing"
-- ALWAYS put commas between different concepts
+FORMATTING RULES:
+- Multi-term fields (keywords_all, keywords_any, keywords_exclude) require COMMA separation
+- Each distinct concept/synonym = separate comma-separated item
+- Multi-word phrases can be one item: "labor code, workers compensation, permanent disability"
+- NO connecting words (and/or/vs) - just commas: "term1, term2, term3"
 
-Guidelines:
-- **USE keywords_any AS YOUR PRIMARY TOOL** - this finds messages containing ANY of the important terms (broadest results)
-- Use keywords_all ONLY when you need messages that contain MULTIPLE SPECIFIC terms together (narrow, focused searches)
-- **USE keywords_exclude to filter OUT unwanted topics** - very powerful for narrowing results
-- For general queries about a topic, use keywords_any with relevant terms and synonyms
+SEARCH STRATEGY - Analyze the query and choose the RIGHT tool:
 
-EXAMPLES:
-1. "Paterson case changes" → keywords_any: "Paterson, amended, modified, overturned, changed, reversed"
-2. "recent changes to Paterson" → keywords_any: "Paterson, amended, modified, changed, reversed" AND date_from: 6 months ago, date_to: null
-3. "recent articles mentioning Chris Johnson" → author_last_name: "Johnson" AND date_from: 6 months ago, date_to: null (NO keywords)
-4. "What did Judge Smith say about apportionment?" → keywords_any: "apportionment" AND author_last_name: "Smith"
-5. "IMR appeal process" → keywords_any: "IMR, appeal, review, decision, WCAB"
-6. "QME issues but not apportionment" → keywords_any: "QME" AND keywords_exclude: "apportionment"
-7. "permanent disability excluding psych cases" → keywords_any: "permanent disability, PD" AND keywords_exclude: "psychiatric, psychological, psych"
-8. "articles from applicant attorneys about LC 4663" → keywords_any: "LC 4663, Labor Code 4663" AND listserv: "lawnet"
-9. "defense attorney discussions on utilization review" → keywords_any: "utilization review, UR" AND listserv: "lavaaa"
-10. "posts with attachments about IMR" → keywords_any: "IMR" AND attachment_filter: "with_attachments"
+1. **Field Selection Principles:**
+   - keywords_any = BROAD search (finds ANY matching term) → Use when you want comprehensive results
+   - keywords_all = NARROW search (requires ALL terms) → Use when multiple concepts MUST co-occur
+   - keywords_exclude = FILTER OUT unwanted results → Use when query explicitly excludes topics
+   - keyword = SIMPLE search → Use for straightforward single-concept queries
+   - keywords_phrase = EXACT MATCH → Avoid unless explicitly requested (returns few/no results)
 
-- **DO NOT USE keywords_phrase UNLESS EXPLICITLY TOLD TO** - exact phrases almost always return 0 results
-- **NEVER create exact phrases on your own** - only use them if the user explicitly requests an exact phrase match
-- **USE DATE FILTERS when user asks about temporal context:**
-  - "recent" / "latest" / "new" → date_from = 6 months ago, date_to = null (NEVER set date_to for "recent")
-  - "current year" / "this year" → date_from = start of current year, date_to = null
-  - "last year" → date_from and date_to for previous year ONLY
-  - Specific dates or ranges → use exact dates
-  - If NO temporal keywords, leave BOTH date_from and date_to as null
-  - CRITICAL: For "recent", ONLY set date_from, NEVER set date_to
-- **RECOGNIZE NAMES and use author filters (CRITICAL FOR RELEVANCE):**
-  - If query mentions a PERSON'S NAME in any context (articles mentioning X, posts by X, what X said, etc.), use author_last_name field
-  - Patterns: "articles mentioning X", "posts by X", "X wrote", "according to X", "X discussed", "X's opinion"
-  - Extract the LAST NAME ONLY (e.g., "Chris Johnson" → author_last_name: "Johnson", NOT keywords)
-  - DO NOT put person names in keywords_any - use author_last_name field instead
-  - Example: "recent articles mentioning Chris Johnson" → author_last_name: "Johnson" AND date_from: 6 months ago (NO keywords needed)
-- Choose appropriate listserv if context suggests worker vs employer side
-- Think about legal synonyms and abbreviations (PD = permanent disability, TD = temporary disability, etc.)
+2. **Person Names - Distinguish AUTHOR vs MENTIONED:**
+   - "articles BY X" / "posts FROM X" / "what X said" / "X wrote" → author_last_name (filter by WHO SENT IT)
+   - "articles MENTIONING X" / "discussions ABOUT X" / "references to X" → keywords_any (search IN message body)
+   - Extract LAST NAME for author_last_name field
+   - For "mentioning" queries, include full name or last name in keywords_any
+
+3. **Temporal Keywords - USE DATE FILTERS:**
+   - "recent"/"latest"/"new" → date_from = 6 months ago, date_to = null
+   - "this year"/"current year" → date_from = start of year, date_to = null
+   - Specific dates/ranges → use exact dates
+   - NO temporal keywords → leave date fields null
+
+4. **Negative Keywords - USE EXCLUSION:**
+   - "but not X", "excluding X", "except X" → keywords_exclude
+   - Be thoughtful about synonyms to exclude (e.g., excluding "psych" should also exclude "psychological", "psychiatric")
+
+5. **Synonym Strategy:**
+   - Think broadly about alternative terms, abbreviations, and related concepts
+   - Legal context: consider abbreviations (LC = Labor Code, PD = permanent disability)
+   - Use commas to separate all distinct terms
+
+6. **Context Clues:**
+   - "applicant attorney"/"worker's attorney" → listserv: "lawnet"
+   - "defense attorney"/"employer attorney" → listserv: "lavaaa"
+   - "with documents"/"attachments" → attachment_filter: "with_attachments"
+   - "subject line only" → search_in: "subject_only"
+
+CRITICAL: Your goal is to maximize recall (find all relevant messages) while maintaining precision (avoid irrelevant results). Choose fields that best balance these goals for the specific query.
 
 Respond in JSON format:
 {{
@@ -206,11 +205,10 @@ Respond in JSON format:
 }}
 
 CRITICAL RULES:
-1. IF QUERY MENTIONS A PERSON'S NAME (e.g., "Chris Johnson", "John Smith"), ALWAYS use author_last_name field with LAST NAME ONLY
-2. ALWAYS use commas between different keywords in keywords_all, keywords_any, and keywords_exclude
-3. DO NOT use keywords_phrase - set it to null
-4. PREFER keywords_any over keywords_all for broader, more useful results
-5. For "recent" queries, set date_from to 6 months ago and leave date_to as null
+1. Person names → ALWAYS use author_last_name (extract last name only)
+2. Multi-term keyword fields → ALWAYS comma-separate
+3. Avoid keywords_phrase unless explicitly requested
+4. Balance recall vs precision based on query intent
 """
         return prompt
     

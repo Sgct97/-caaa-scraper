@@ -268,34 +268,44 @@ async def ai_analyze(request: AIAnalyzeRequest):
             raise HTTPException(status_code=503, detail="AI service not available")
         
         # STEP 1: Check if query is too vague and needs clarification
-        vagueness_check = f"""Is this legal research query VAGUE or SPECIFIC?
+        vagueness_check = f"""Analyze this query and determine if it has enough information to search effectively.
 
 Query: "{request.intent}"
 
-VAGUE = mentions a case/topic but doesn't specify WHAT ASPECT to research
-Examples of VAGUE:
-- "Paterson case" (which aspect of Paterson?)
-- "recent changes to Paterson" (changes to WHAT about Paterson?)
-- "ramifications of X" (which ramification?)
-- Just a case name without context
+A query is VAGUE if:
+1. Multiple interpretations exist that would lead to VERY DIFFERENT searches
+2. Key information is missing that would significantly change what we search for
+3. The query is so broad that any search would return too many irrelevant results
 
-SPECIFIC = identifies the case/topic AND the specific legal issue OR mentions a PERSON'S NAME
-Examples of SPECIFIC:
-- "How does Paterson affect QME panel selection?"
-- "Paterson's impact on apportionment calculations"
-- "Supreme Court decisions on permanent disability in 2023"
-- "Recent articles mentioning Chris Johnson" (has person name + timeframe)
-- "Articles by John Smith" (has person name)
-- "What did Judge Lee say about X?" (has person name + topic)
+A query is SPECIFIC if:
+1. We can confidently determine what to search for
+2. The search intent is unambiguous (or ambiguity doesn't matter much)
+3. We have enough information to create targeted search parameters
+
+CRITICAL DISTINCTIONS TO CHECK:
+- Person name WITHOUT context → VAGUE (could mean BY them or ABOUT them)
+  - "Chris Johnson" → VAGUE
+  - "articles BY Chris Johnson" → SPECIFIC
+  - "articles MENTIONING Chris Johnson" → SPECIFIC
+  
+- Topic without WHAT aspect → Often VAGUE
+  - Just a case name → VAGUE (which aspect?)
+  - "Case X's impact on Y" → SPECIFIC (clear aspect)
+  
+- Overly broad → May be VAGUE
+  - "recent changes" → VAGUE (changes to what?)
+  - "recent changes to settlement procedures" → SPECIFIC
+
+When VAGUE, craft a clarifying question that:
+1. Identifies the ambiguity/missing info
+2. Offers 2-3 specific alternatives
+3. Helps narrow the search effectively
 
 Return JSON:
 {{
   "is_vague": true/false,
-  "follow_up_question": "ask what specific aspect" (ONLY if is_vague=true, else null)
-}}
-
-If VAGUE: ask "What specific aspect of [topic] are you researching? For example: [list 3-4 common aspects]"
-If SPECIFIC: set is_vague=false and follow_up_question=null"""
+  "follow_up_question": "clarifying question" OR null
+}}"""
 
         vagueness_response = orchestrator.client.chat.completions.create(
             model="qwen2.5:32b",
