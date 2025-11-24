@@ -8,6 +8,7 @@ from fastapi import FastAPI, Request, BackgroundTasks, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List, Any
 import os
@@ -94,6 +95,15 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
     default_response_class=CustomJSONResponse
+)
+
+# Enable CORS for Vercel frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, restrict to your Vercel domain
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Mount static files and templates
@@ -254,6 +264,31 @@ async def view_search(request: Request, search_id: str):
             "stats": convert_decimals(dict(stats)) if stats else {}
         })
         
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/search/{search_id}")
+async def get_search_results_json(search_id: str):
+    """Get search results as JSON (for Vercel frontend)"""
+    
+    try:
+        search_info = orchestrator.db.get_search_info(search_id)
+        
+        if not search_info:
+            raise HTTPException(status_code=404, detail="Search not found")
+        
+        results = orchestrator.db.get_relevant_results(search_id)
+        stats = orchestrator.db.get_search_stats(search_id)
+        
+        return {
+            "success": True,
+            "search_id": search_id,
+            "search_info": convert_decimals(dict(search_info)) if search_info else {},
+            "results": convert_decimals([dict(r) for r in results]) if results else [],
+            "stats": convert_decimals(dict(stats)) if stats else {}
+        }
     except HTTPException:
         raise
     except Exception as e:
