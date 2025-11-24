@@ -1,0 +1,24 @@
+# Ignore Python backend files (runs on droplet, not Vercel)
+app.py
+query_enhancer.py
+ai_analyzer.py
+orchestrator.py
+scraper.py
+search_params.py
+db.py
+venv/
+__pycache__/
+*.pyc
+
+# Ignore backend-only directories
+static/
+templates/
+database.db
+
+# Ignore config files
+.env
+start_app.sh
+
+# Ignore test files
+test_*.py
+debug_*.py
