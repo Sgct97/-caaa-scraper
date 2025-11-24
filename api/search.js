@@ -1,5 +1,14 @@
 // Proxy for /api/search
 export default async function handler(req, res) {
+    // Enable CORS
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+    
     const BACKEND_URL = 'http://134.199.196.31:8000';
     
     try {
@@ -12,15 +21,14 @@ export default async function handler(req, res) {
         });
         
         const data = await response.json();
-        res.status(response.status).json(data);
+        return res.status(response.status).json(data);
         
     } catch (error) {
         console.error('Proxy error:', error);
-        res.status(500).json({ 
+        return res.status(500).json({ 
             success: false, 
             error: 'Backend connection failed',
-            detail: error.message 
+            detail: error.message
         });
     }
 }
-
