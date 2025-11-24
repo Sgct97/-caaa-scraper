@@ -21,13 +21,13 @@ class AIAnalyzer:
             api_key: OpenAI API key (or set OPENAI_API_KEY env var)
             model: Model to use (default: gpt-4o-mini for cost efficiency)
         """
-        # Use Vast.ai GPU with Qwen 14B via SSH tunnel for fast, HIPAA-compliant processing
+        # Use Vast.ai GPU with Qwen 32B via SSH tunnel for fast, HIPAA-compliant processing
         ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434/v1")
         self.client = OpenAI(
             base_url=ollama_url,
             api_key="ollama"
         )
-        self.model = "qwen3:14b"
+        self.model = "qwen2.5:32b"
         self.total_tokens_used = 0
         self.total_cost_usd = 0.0
     
@@ -115,34 +115,60 @@ class AIAnalyzer:
         if len(body) > max_body_length:
             body = body[:max_body_length] + "... [truncated]"
         
-        prompt = f"""Analyze if this listserv message is relevant to the search query.
+        prompt = f"""You are an expert California workers' compensation attorney analyzing a listserv message from CAAA (California Applicants' Attorneys Association) to determine if it provides substantive information that helps answer a specific legal question.
 
-SEARCH QUERY: "{search_keyword}"
+CONTEXT:
+This message is from a professional legal discussion forum where experienced workers' compensation attorneys discuss case strategies, statutory interpretations, procedural questions, and share practical insights from their practice.
+
+USER'S LEGAL QUESTION:
+"{search_keyword}"
 {f'ADDITIONAL CONTEXT: {context}' if context else ''}
 
-MESSAGE:
+LISTSERV MESSAGE:
 From: {from_name}
 Subject: {subject}
-Body: {body}
 
-Your task:
-1. Determine if this message matches the search query
-2. Consider it RELEVANT if ANY of these are true:
-   - ANY search term appears ANYWHERE in the subject or body
-   - The topic is even remotely related to the search query
-   - The author name matches (if searching by author)
-   - The message discusses similar concepts using different words
-3. ONLY mark as NOT relevant if the message is about a COMPLETELY DIFFERENT topic with NO overlap
-4. Provide a confidence score (0.0 to 1.0) - use 0.5 or higher for anything marginally related
-5. Explain your reasoning briefly
+{body}
 
-BE EXTREMELY LENIENT - if there is ANY connection whatsoever, mark as relevant. When in doubt, mark as RELEVANT.
+ANALYSIS REQUIREMENTS:
+
+Evaluate whether this message provides actionable legal insight that helps answer the user's question. Consider:
+
+1. SUBSTANTIVE LEGAL CONTENT: Does the message discuss the specific legal doctrine, statute, regulation, or procedural rule that the question addresses?
+
+2. PRACTICAL GUIDANCE: Does it provide real-world experience, strategic advice, or tactical recommendations relevant to the question?
+
+3. AUTHORITATIVE REFERENCES: Does it cite applicable case law, Labor Code sections, WCAB decisions, regulations, or administrative directives that bear on the question?
+
+4. PROCEDURAL CLARITY: If the question involves procedure, does the message explain the actual steps, timing, filing requirements, or jurisdictional issues?
+
+5. DIRECT RESPONSIVENESS: Does the attorney appear to be directly answering this question or a materially identical question?
+
+MARK AS RELEVANT (is_relevant: true) IF:
+- The message directly addresses the legal issue raised in the question
+- It provides a legal answer, analysis, or framework that resolves the question
+- It discusses the same procedural mechanism, statute, or rule that the question concerns
+- It contains practical attorney experience handling this exact scenario
+- It cites binding or persuasive authority that answers the question
+
+MARK AS NOT RELEVANT (is_relevant: false) IF:
+- The message merely contains keywords but discusses an unrelated issue
+- It's a tangential discussion that doesn't help answer the question
+- The legal context is different (e.g., different benefit type, different procedural posture)
+- It's administrative chatter, meeting announcements, or off-topic discussion
+
+CONFIDENCE SCORING:
+0.95-1.0: This message directly answers the question with legal authority or clear guidance
+0.80-0.94: Highly relevant - discusses the exact issue with substantive analysis
+0.60-0.79: Relevant - provides useful related information that partially addresses the question
+0.40-0.59: Marginally relevant - touches on related concepts but doesn't answer the question
+0.00-0.39: Not relevant - different topic or only superficial keyword overlap
 
 Respond in JSON format:
 {{
   "is_relevant": true/false,
   "confidence": 0.0-1.0,
-  "reasoning": "Brief explanation (1-2 sentences)"
+  "reasoning": "Explain specifically what legal information this message provides (or fails to provide) in relation to the user's question"
 }}
 """
         return prompt

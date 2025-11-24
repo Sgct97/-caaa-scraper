@@ -279,11 +279,14 @@ Examples of VAGUE:
 - "ramifications of X" (which ramification?)
 - Just a case name without context
 
-SPECIFIC = identifies BOTH the case/topic AND the specific legal issue
+SPECIFIC = identifies the case/topic AND the specific legal issue OR mentions a PERSON'S NAME
 Examples of SPECIFIC:
 - "How does Paterson affect QME panel selection?"
 - "Paterson's impact on apportionment calculations"
 - "Supreme Court decisions on permanent disability in 2023"
+- "Recent articles mentioning Chris Johnson" (has person name + timeframe)
+- "Articles by John Smith" (has person name)
+- "What did Judge Lee say about X?" (has person name + topic)
 
 Return JSON:
 {{
@@ -343,6 +346,8 @@ If SPECIFIC: set is_vague=false and follow_up_question=null"""
             suggestions["attachments"] = search_params.attachment_filter
         if search_params.posted_by:
             suggestions["posted_by"] = search_params.posted_by
+        if search_params.author_first_name:
+            suggestions["first_name"] = search_params.author_first_name
         if search_params.author_last_name:
             suggestions["last_name"] = search_params.author_last_name
         if search_params.date_from:
@@ -413,6 +418,8 @@ async def ai_follow_up(request: AIFollowUpRequest):
             suggestions["attachments"] = search_params.attachment_filter
         if search_params.posted_by:
             suggestions["posted_by"] = search_params.posted_by
+        if search_params.author_first_name:
+            suggestions["first_name"] = search_params.author_first_name
         if search_params.author_last_name:
             suggestions["last_name"] = search_params.author_last_name
         if search_params.date_from:

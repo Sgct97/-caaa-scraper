@@ -258,34 +258,63 @@ class CAAAScraper:
             True if next page exists and was navigated to, False otherwise
         """
         try:
-            # Look for pagination with longer timeout
+            # Look for pagination bar (note: "seach" is a typo on CAAA's site)
             pagination = page.wait_for_selector("#seachResultsPaginationBar", timeout=5000, state="visible")
             if not pagination:
                 return False
             
-            # Look for next page link (page number or "next" button)
+            # Get current page from the pagination bar to verify we're on the right page
+            current_page_attr = pagination.get_attribute("data-currentpage")
+            print(f"  → Current page: {current_page_attr}, looking for page {current_page + 1}")
+            
+            # Strategy 1: Try clicking the specific page number link
             next_page_num = current_page + 1
+            next_page_selector = f"a:has-text('{next_page_num}')"
+            next_link = pagination.query_selector(next_page_selector)
             
-            # Try clicking the page number
-            next_link = pagination.query_selector(f"a:has-text('{next_page_num}')")
-            if next_link:
+            if next_link and next_link.is_visible():
+                print(f"  → Clicking page number link: {next_page_num}")
                 next_link.click()
-                page.wait_for_load_state("networkidle", timeout=10000)
-                page.wait_for_timeout(2000)
+                page.wait_for_timeout(3000)
+                page.wait_for_selector("#seachResultsPaginationBar", timeout=10000)
                 return True
             
-            # Try clicking ">" (next) button
-            next_button = pagination.query_selector("a[title='Next Page']")
-            if next_button:
-                next_button.click()
-                page.wait_for_load_state("networkidle", timeout=10000)
-                page.wait_for_timeout(2000)
+            # Strategy 2: Try clicking "Next" button with class bucketPagingButtonNextPage
+            next_button = pagination.query_selector(".bucketPagingButtonNextPage")
+            if next_button and next_button.is_visible():
+                print(f"  → Clicking 'Next' button")
+                
+                # Extract the JavaScript function call from href
+                href = next_button.get_attribute("href") or ""
+                if href.startswith("javascript:"):
+                    # Execute the JavaScript directly
+                    js_code = href.replace("javascript:", "")
+                    print(f"  → Executing: {js_code[:50]}...")
+                    page.evaluate(js_code)
+                else:
+                    # Fallback to regular click
+                    next_button.click()
+                
+                page.wait_for_timeout(3000)
+                page.wait_for_selector("#seachResultsPaginationBar", timeout=10000)
                 return True
             
+            # Strategy 3: Look for any link with text "Next" in the pagination area
+            next_text_link = pagination.query_selector("a:has-text('Next')")
+            if next_text_link and next_text_link.is_visible():
+                print(f"  → Clicking 'Next' text link")
+                next_text_link.click()
+                page.wait_for_timeout(3000)
+                page.wait_for_selector("#seachResultsPaginationBar", timeout=10000)
+                return True
+            
+            print(f"  → No next page button found")
             return False
             
         except Exception as e:
             print(f"  ⚠️  Error navigating to next page: {e}")
+            import traceback
+            traceback.print_exc()
             return False
     
     def _fetch_message_content(self, page: Page, message_info: Dict) -> Optional[Dict]:
@@ -390,19 +419,10 @@ class CAAAScraper:
         # Try multiple strategies to find body content
         main_body = ""
         
-        # Strategy 1: Look for div with dir="ltr"
+        # Strategy 1: Get ALL content from the message (including quotes for full context)
         for div in soup.find_all('div', {'dir': 'ltr'}):
             if not div.find_parent('blockquote'):
-                text_parts = []
-                for child in div.children:
-                    if child.name == 'blockquote':
-                        break
-                    if hasattr(child, 'get_text'):
-                        text_parts.append(child.get_text().strip())
-                    elif isinstance(child, str):
-                        text_parts.append(child.strip())
-                
-                main_body = ' '.join([t for t in text_parts if t])
+                main_body = div.get_text(separator=' ', strip=True)
                 if main_body and len(main_body) > 20:
                     break
         
@@ -425,9 +445,7 @@ class CAAAScraper:
                         skip_until_body = False
                 
                 if not skip_until_body:
-                    # Stop at quoted content markers
-                    if line.startswith('>') or line.startswith('On ') and ' wrote:' in line:
-                        break
+                    # Include all content (don't stop at quotes - AI needs full context)
                     if line.strip():
                         body_lines.append(line)
             

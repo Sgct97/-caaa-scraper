@@ -294,7 +294,7 @@
                     
                     <!-- Message Body -->
                     <div class="prose prose-sm max-w-none">
-                        <p class="text-gray-700">{{ result.body[:500] }}{% if result.body|length > 500 %}...{% endif %}</p>
+                        <p class="text-gray-700 whitespace-pre-wrap">{{ result.body }}</p>
                     </div>
                     
                     <!-- Action Buttons -->

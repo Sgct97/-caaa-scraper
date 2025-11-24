@@ -596,7 +596,12 @@
                     let html = '<div class="space-y-1">';
                     for (let key in suggestions) {
                         if (suggestions[key]) {
-                            html += `<div><strong>${this.fieldLabel(key)}:</strong> ${suggestions[key]}</div>`;
+                            let value = suggestions[key];
+                            // Convert objects/arrays to strings properly
+                            if (typeof value === 'object') {
+                                value = JSON.stringify(value);
+                            }
+                            html += `<div><strong>${this.fieldLabel(key)}:</strong> ${value}</div>`;
                         }
                     }
                     html += '</div>';
