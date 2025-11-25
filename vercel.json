@@ -1,9 +1,9 @@
 {
   "routes": [
     { "src": "/static/(.*)", "dest": "/static/$1" },
-    { "src": "/", "dest": "/templates/dashboard.html" },
-    { "src": "/search/(.*)", "dest": "/templates/search_results.html" },
-    { "src": "/results", "dest": "/templates/search_results.html" }
+    { "src": "/", "dest": "/frontend/index.html" },
+    { "src": "/search/(.*)", "dest": "/frontend/results.html" },
+    { "src": "/results", "dest": "/frontend/results.html" }
   ],
   "headers": [
     {
