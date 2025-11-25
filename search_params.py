@@ -139,6 +139,10 @@ class SearchParams:
         elif self.attachment_filter == "without_attachments":
             form_data['s_attachment'] = '0'
         
+        # Add scraper control params (not sent to CAAA form but needed by worker)
+        form_data['max_messages'] = self.max_messages
+        form_data['max_pages'] = self.max_pages
+        
         return form_data
     
     def __str__(self) -> str:
