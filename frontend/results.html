@@ -151,50 +151,51 @@
         <div class="glass rounded-xl p-8 mb-8">
             <div class="flex items-start justify-between mb-6">
                 <div class="flex-1">
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ search_info.keyword }}</h1>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2" x-text="searchData?.keyword || 'Search Results'"></h1>
                     <div class="flex items-center space-x-4 text-sm text-gray-600">
                         <span>
                             <i class="fas fa-calendar text-gray-400 mr-1"></i>
-                            {{ search_info.created_at.strftime('%b %d, %Y %I:%M %p') if search_info.created_at else 'N/A' }}
+                            <span x-text="searchData?.created_at || 'N/A'"></span>
                         </span>
-                        <span class="px-3 py-1 rounded-full font-semibold
-                            {% if search_info.status == 'completed' %}bg-green-100 text-green-700
-                            {% elif search_info.status == 'running' %}bg-yellow-100 text-yellow-700
-                            {% elif search_info.status == 'failed' %}bg-red-100 text-red-700
-                            {% else %}bg-gray-100 text-gray-700{% endif %}">
+                        <span class="px-3 py-1 rounded-full font-semibold"
+                              :class="{
+                                  'bg-green-100 text-green-700': searchData?.status === 'completed',
+                                  'bg-yellow-100 text-yellow-700': searchData?.status === 'running',
+                                  'bg-red-100 text-red-700': searchData?.status === 'failed',
+                                  'bg-gray-100 text-gray-700': !searchData?.status || (searchData?.status !== 'completed' && searchData?.status !== 'running' && searchData?.status !== 'failed')
+                              }">
                             <i class="fas fa-circle text-xs mr-1"></i>
-                            {{ search_info.status|upper }}
+                            <span x-text="searchData?.status?.toUpperCase() || 'UNKNOWN'"></span>
                         </span>
                     </div>
                 </div>
                 
-                {% if search_info.status == 'running' %}
                 <button 
+                    x-show="searchData?.status === 'running'"
                     @click="refreshStatus"
                     class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition">
                     <i class="fas fa-sync-alt mr-2"></i>
                     Refresh Status
                 </button>
-                {% endif %}
             </div>
             
             <!-- Stats -->
             <div class="grid grid-cols-3 gap-6">
                 <div class="text-center p-4 bg-blue-50 rounded-lg">
-                    <div class="text-3xl font-bold text-primary-600">{{ stats.total_messages_found or 0 }}</div>
+                    <div class="text-3xl font-bold text-primary-600" x-text="stats?.total_messages_found || 0"></div>
                     <div class="text-sm text-gray-600 font-medium mt-1">Messages Found</div>
                 </div>
                 <div class="text-center p-4 bg-purple-50 rounded-lg">
-                    <div class="text-3xl font-bold text-purple-600">{{ stats.analyzed_count or 0 }}</div>
+                    <div class="text-3xl font-bold text-purple-600" x-text="stats?.analyzed_count || 0"></div>
                     <div class="text-sm text-gray-600 font-medium mt-1">Analyzed by AI</div>
                 </div>
                 <div class="text-center p-4 bg-green-50 rounded-lg">
-                    <div class="text-3xl font-bold text-green-600">{{ stats.total_relevant_found or 0 }}</div>
+                    <div class="text-3xl font-bold text-green-600" x-text="stats?.total_relevant_found || 0"></div>
                     <div class="text-sm text-gray-600 font-medium mt-1">
                         Relevant Results
-                        {% if stats.avg_confidence %}
-                        <span class="text-xs">({{ (stats.avg_confidence * 100)|round|int }}% avg confidence)</span>
-                        {% endif %}
+                        <span x-show="stats?.avg_confidence" class="text-xs">
+                            (<span x-text="Math.round((stats?.avg_confidence || 0) * 100)"></span>% avg confidence)
+                        </span>
                     </div>
                 </div>
             </div>
@@ -208,117 +209,105 @@
                     Relevant Results
                 </h2>
                 
-                {% if results %}
-                <div class="text-sm text-gray-600">
-                    Showing {{ results|length }} result{{ 's' if results|length != 1 else '' }}
+                <div x-show="results && results.length > 0" class="text-sm text-gray-600">
+                    Showing <span x-text="results?.length || 0"></span> result<span x-show="results?.length !== 1">s</span>
                 </div>
-                {% endif %}
             </div>
             
-            {% if search_info.status == 'running' %}
-            <div class="text-center py-12">
+            <div x-show="searchData?.status === 'running'" class="text-center py-12">
                 <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-primary-600 mb-4"></div>
                 <p class="text-lg text-gray-600 font-medium">Processing your search...</p>
                 <p class="text-sm text-gray-500 mt-2">This may take a few minutes</p>
             </div>
             
-            {% elif results %}
-            <div class="space-y-6">
-                {% for result in results %}
-                <div class="border-2 rounded-xl p-6 transition-all
-                            {% if result.is_relevant %}border-green-300 bg-green-50 hover:border-green-400 hover:shadow-lg
-                            {% else %}border-red-200 bg-red-50 hover:border-red-300 hover:shadow-md opacity-75{% endif %}" 
-                     data-message-id="{{ result.message_id }}">
+            <div x-show="results && results.length > 0" class="space-y-6">
+                <template x-for="result in results" :key="result.message_id">
+                <div class="border-2 rounded-xl p-6 transition-all"
+                     :class="{
+                         'border-green-300 bg-green-50 hover:border-green-400 hover:shadow-lg': result.is_relevant,
+                         'border-red-200 bg-red-50 hover:border-red-300 hover:shadow-md opacity-75': !result.is_relevant
+                     }"
+                     :data-message-id="result.message_id">
                     
                     <!-- Relevance Badge -->
                     <div class="mb-3">
-                        {% if result.is_relevant %}
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-500 text-white">
+                        <span x-show="result.is_relevant" class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-500 text-white">
                             <i class="fas fa-check-circle mr-2"></i>RELEVANT
                         </span>
-                        {% else %}
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-red-500 text-white">
+                        <span x-show="!result.is_relevant" class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-red-500 text-white">
                             <i class="fas fa-times-circle mr-2"></i>NOT RELEVANT
                         </span>
-                        {% endif %}
                     </div>
                     
                     <!-- Result Header -->
                     <div class="flex items-start justify-between mb-4">
                         <div class="flex-1">
-                            <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ result.subject }}</h3>
+                            <h3 class="text-xl font-semibold text-gray-900 mb-2" x-text="result.subject"></h3>
                             <div class="flex items-center space-x-4 text-sm text-gray-600">
                                 <span>
                                     <i class="fas fa-user text-gray-400 mr-1"></i>
-                                    {{ result.from_name }}
+                                    <span x-text="result.from_name"></span>
                                 </span>
                                 <span>
                                     <i class="fas fa-calendar text-gray-400 mr-1"></i>
-                                    {{ result.post_date.strftime('%b %d, %Y') if result.post_date else 'N/A' }}
+                                    <span x-text="result.post_date || 'N/A'"></span>
                                 </span>
-                                {% if result.listserv %}
-                                <span>
+                                <span x-show="result.listserv">
                                     <i class="fas fa-envelope text-gray-400 mr-1"></i>
-                                    {{ result.listserv }}
+                                    <span x-text="result.listserv"></span>
                                 </span>
-                                {% endif %}
                             </div>
                         </div>
                         
                         <!-- Confidence Badge -->
-                        {% if result.confidence %}
-                        <div class="ml-4">
-                            <div class="px-4 py-2 bg-gradient-to-r 
-                                {% if result.confidence >= 0.8 %}from-green-500 to-emerald-500
-                                {% elif result.confidence >= 0.6 %}from-blue-500 to-cyan-500
-                                {% else %}from-yellow-500 to-orange-500{% endif %}
-                                text-white rounded-lg font-semibold text-sm">
-                                {{ (result.confidence * 100)|round|int }}% Match
+                        <div x-show="result.confidence" class="ml-4">
+                            <div class="px-4 py-2 bg-gradient-to-r text-white rounded-lg font-semibold text-sm"
+                                 :class="{
+                                     'from-green-500 to-emerald-500': result.confidence >= 0.8,
+                                     'from-blue-500 to-cyan-500': result.confidence >= 0.6 && result.confidence < 0.8,
+                                     'from-yellow-500 to-orange-500': result.confidence < 0.6
+                                 }">
+                                <span x-text="Math.round((result.confidence || 0) * 100)"></span>% Match
                             </div>
                         </div>
-                        {% endif %}
                     </div>
                     
                     <!-- AI Reasoning -->
-                    {% if result.ai_reasoning %}
-                    <div class="bg-blue-50 border-l-4 border-primary-500 p-4 rounded mb-4">
+                    <div x-show="result.ai_reasoning" class="bg-blue-50 border-l-4 border-primary-500 p-4 rounded mb-4">
                         <div class="flex items-start">
                             <i class="fas fa-robot text-primary-600 mt-1 mr-3"></i>
                             <div>
                                 <p class="text-sm font-semibold text-gray-900 mb-1">AI Analysis:</p>
-                                <p class="text-sm text-gray-700">{{ result.ai_reasoning }}</p>
+                                <p class="text-sm text-gray-700" x-text="result.ai_reasoning"></p>
                             </div>
                         </div>
                     </div>
-                    {% endif %}
                     
                     <!-- Message Body -->
                     <div class="prose prose-sm max-w-none">
-                        <p class="text-gray-700 whitespace-pre-wrap">{{ result.body }}</p>
+                        <p class="text-gray-700 whitespace-pre-wrap" x-text="result.body"></p>
                     </div>
                     
                     <!-- Action Buttons -->
                     <div class="mt-4 pt-4 border-t flex items-center justify-between">
                         <div class="text-xs text-gray-500">
-                            Message ID: {{ result.caaa_message_id }}
+                            Message ID: <span x-text="result.caaa_message_id"></span>
                         </div>
                         <button 
-                            @click="expandMessage('{{ result.message_id }}')"
+                            @click="expandMessage(result.message_id)"
                             class="text-sm text-primary-600 hover:text-primary-700 font-medium">
                             Read Full Message <i class="fas fa-arrow-right ml-1"></i>
                         </button>
                     </div>
                 </div>
-                {% endfor %}
+                </template>
             </div>
             
-            {% else %}
-            <div class="text-center py-12 text-gray-500">
+            <div x-show="!loading && (!results || results.length === 0) && searchData?.status !== 'running'" class="text-center py-12 text-gray-500">
                 <i class="fas fa-search text-6xl text-gray-300 mb-4"></i>
                 <p class="text-lg font-medium">No relevant results found</p>
                 <p class="text-sm mt-2">The AI analyzed all messages but none met the relevance threshold for this query.</p>
             </div>
-            {% endif %}
         </div>
     </div>
 
