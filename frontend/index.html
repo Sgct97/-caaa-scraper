@@ -467,59 +467,6 @@
             </div>
         </div>
 
-        <!-- Recent Searches -->
-        <div class="glass rounded-xl p-8">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                <i class="fas fa-history text-primary-600 mr-3"></i>
-                Recent Searches
-            </h2>
-            
-            {% if recent_searches %}
-            <div class="space-y-4">
-                {% for search in recent_searches %}
-                <a href="/search/{{ search.id }}" 
-                   class="block p-6 border-2 border-gray-100 rounded-xl hover:border-primary-300 hover:shadow-md transition-all">
-                    <div class="flex items-start justify-between">
-                        <div class="flex-1">
-                            <div class="flex items-center space-x-3 mb-2">
-                                <h3 class="text-lg font-semibold text-gray-900">{{ search.keyword }}</h3>
-                                <span class="px-3 py-1 text-xs font-semibold rounded-full
-                                    {% if search.status == 'completed' %}bg-green-100 text-green-700
-                                    {% elif search.status == 'running' %}bg-yellow-100 text-yellow-700
-                                    {% elif search.status == 'failed' %}bg-red-100 text-red-700
-                                    {% else %}bg-gray-100 text-gray-700{% endif %}">
-                                    {{ search.status|upper }}
-                                </span>
-                            </div>
-                            <div class="flex items-center space-x-6 text-sm text-gray-600">
-                                <span>
-                                    <i class="fas fa-file-alt text-gray-400 mr-1"></i>
-                                    {{ search.total_messages_found or 0 }} found
-                                </span>
-                                <span>
-                                    <i class="fas fa-check-circle text-green-500 mr-1"></i>
-                                    {{ search.total_relevant_found or 0 }} relevant
-                                </span>
-                                <span>
-                                    <i class="fas fa-clock text-gray-400 mr-1"></i>
-                                    {{ search.created_at.strftime('%b %d, %Y %I:%M %p') if search.created_at else 'N/A' }}
-                                </span>
-                            </div>
-                        </div>
-                        <div>
-                            <i class="fas fa-chevron-right text-gray-400"></i>
-                        </div>
-                    </div>
-                </a>
-                {% endfor %}
-            </div>
-            {% else %}
-            <div class="text-center py-12 text-gray-500">
-                <i class="fas fa-search text-6xl text-gray-300 mb-4"></i>
-                <p class="text-lg">No searches yet. Start your first AI-powered search above!</p>
-            </div>
-            {% endif %}
-        </div>
     </div>
 
     <script>
