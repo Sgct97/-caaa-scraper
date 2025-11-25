@@ -114,10 +114,11 @@ USER QUERY: "{user_query}"{name_warning}
 Does this query mention a person's name (like "Chris Johnson", "John Smith", "Judge Lee", etc.)?
 - CRITICAL: Distinguish between WHO SENT the message vs WHO is DISCUSSED in it
 - EXAMPLES: 
-  ✓ "articles BY Chris Johnson" → author_last_name: "Johnson" (filter by sender)
-  ✓ "articles MENTIONING Chris Johnson" → keywords_any: "Johnson" OR "Chris Johnson" (search message content)
-  ✓ "what did John Smith say" → author_last_name: "Smith" (filter by sender)
+  ✓ "articles BY Chris Johnson" → author_first_name: "Chris", author_last_name: "Johnson" (filter by sender)
+  ✓ "articles MENTIONING Chris Johnson" → keywords_any: "Chris Johnson, Johnson" (search message content)
+  ✓ "what did John Smith say" → author_first_name: "John", author_last_name: "Smith" (filter by sender)
   ✓ "discussions ABOUT Judge Lee" → keywords_any: "Judge Lee, Lee" (search message content)
+  ✓ "messages posted BY Ray Saedi" → author_first_name: "Ray", author_last_name: "Saedi" (filter by sender)
 
 TODAY'S DATE: {today.strftime('%Y-%m-%d')}
 
@@ -156,9 +157,11 @@ SEARCH STRATEGY - Analyze the query and choose the RIGHT tool:
    - keywords_phrase = EXACT MATCH → Avoid unless explicitly requested (returns few/no results)
 
 2. **Person Names - Distinguish AUTHOR vs MENTIONED:**
-   - "articles BY X" / "posts FROM X" / "what X said" / "X wrote" → author_last_name (filter by WHO SENT IT)
+   - "articles BY X" / "posts FROM X" / "what X said" / "X wrote" → author_last_name + author_first_name (filter by WHO SENT IT)
    - "articles MENTIONING X" / "discussions ABOUT X" / "references to X" → keywords_any (search IN message body)
-   - Extract LAST NAME for author_last_name field
+   - 🚨 When filtering by author, ALWAYS extract BOTH:
+     * author_first_name: "Ray" (from "Ray Saedi")
+     * author_last_name: "Saedi" (from "Ray Saedi")
    - For "mentioning" queries, include full name or last name in keywords_any
 
 3. **Temporal Keywords - USE DATE FILTERS:**
