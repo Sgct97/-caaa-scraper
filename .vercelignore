@@ -1,9 +1,0 @@
-# Ignore EVERYTHING except what we need
-*
-
-# Only include these
-!public/
-!api/
-!vercel.json
-!package.json
-!.vercelignore
