@@ -100,7 +100,7 @@ app = FastAPI(
 # Enable CORS for Vercel frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, restrict to your Vercel domain
+    allow_origins=["https://caaa-scraper.vercel.app", "http://localhost:8000", "http://134.199.196.31:8000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
