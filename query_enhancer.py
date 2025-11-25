@@ -114,32 +114,32 @@ USER QUERY: "{user_query}"{name_warning}
 Does this query mention a person's name (like "Chris Johnson", "John Smith", "Judge Lee", etc.)?
 - CRITICAL: Distinguish between WHO SENT the message vs WHO is DISCUSSED in it
 - EXAMPLES: 
-  ✓ "articles BY Chris Johnson" → author_first_name: "Chris", author_last_name: "Johnson" (filter by sender)
+  ✓ "articles BY Chris Johnson" → posted_by: "Chris Johnson" (filter by sender - use FULL NAME)
   ✓ "articles MENTIONING Chris Johnson" → keywords_any: "Chris Johnson, Johnson" (search message content)
-  ✓ "what did John Smith say" → author_first_name: "John", author_last_name: "Smith" (filter by sender)
+  ✓ "what did John Smith say" → posted_by: "John Smith" (filter by sender - use FULL NAME)
   ✓ "discussions ABOUT Judge Lee" → keywords_any: "Judge Lee, Lee" (search message content)
-  ✓ "messages posted BY Ray Saedi" → author_first_name: "Ray", author_last_name: "Saedi" (filter by sender)
+  ✓ "messages posted BY Ray Saedi" → posted_by: "Ray Saedi" (filter by sender - use FULL NAME)
+  ✓ "articles by Johnson" → author_last_name: "Johnson" (only last name given)
 
 TODAY'S DATE: {today.strftime('%Y-%m-%d')}
 
 Your task: Analyze this query and determine the BEST search parameters to find relevant messages.
 
 Available search fields:
-1. author_last_name - 🚨 Filter by WHO SENT the message (e.g., "articles BY Johnson" → "Johnson")
-2. author_first_name - Author's first name (optional, use with last name)
-3. posted_by - Filter by poster email or name
-4. keyword - Simple keyword search (searches subject + body)
-5. keywords_all - Must contain ALL these keywords (comma-separated: "word1, word2, word3")
-6. keywords_phrase - Exact phrase match (e.g., "permanent disability rating")
-7. keywords_any - Must contain at least ONE of these (comma-separated: "term1, term2, term3")
-8. keywords_exclude - Must NOT contain these keywords (comma-separated)
-9. listserv - Which list: "all", "lawnet", "lavaaa", "lamaaa", "scaaa"
+1. posted_by - 🚨 USE FOR FULL NAMES! Filter by WHO SENT the message (e.g., "articles BY Ray Saedi" → "Ray Saedi")
+2. author_last_name - Filter by last name ONLY if no first name given (e.g., "articles BY Johnson" → "Johnson")
+3. keyword - Simple keyword search (searches subject + body)
+4. keywords_all - Must contain ALL these keywords (comma-separated: "word1, word2, word3")
+5. keywords_phrase - Exact phrase match (e.g., "permanent disability rating")
+6. keywords_any - Must contain at least ONE of these (comma-separated: "term1, term2, term3")
+7. keywords_exclude - Must NOT contain these keywords (comma-separated)
+8. listserv - Which list: "all", "lawnet", "lavaaa", "lamaaa", "scaaa"
    - lawnet: Applicant attorneys (workers' side)
    - lavaaa: Defense attorneys (employer/insurance side)
-10. attachment_filter - "all", "with_attachments", "without_attachments"
-11. date_from - Start date (YYYY-MM-DD)
-12. date_to - End date (YYYY-MM-DD)
-13. search_in - "subject_and_body" or "subject_only"
+9. attachment_filter - "all", "with_attachments", "without_attachments"
+10. date_from - Start date (YYYY-MM-DD)
+11. date_to - End date (YYYY-MM-DD)
+12. search_in - "subject_and_body" or "subject_only"
 
 FORMATTING RULES:
 - Multi-term fields (keywords_all, keywords_any, keywords_exclude) require COMMA separation
@@ -157,12 +157,13 @@ SEARCH STRATEGY - Analyze the query and choose the RIGHT tool:
    - keywords_phrase = EXACT MATCH → Avoid unless explicitly requested (returns few/no results)
 
 2. **Person Names - Distinguish AUTHOR vs MENTIONED:**
-   - "articles BY X" / "posts FROM X" / "what X said" / "X wrote" → author_last_name + author_first_name (filter by WHO SENT IT)
+   - "articles BY X" / "posts FROM X" / "what X said" / "X wrote" → posted_by with FULL NAME (filter by WHO SENT IT)
    - "articles MENTIONING X" / "discussions ABOUT X" / "references to X" → keywords_any (search IN message body)
-   - 🚨 When filtering by author, ALWAYS extract BOTH:
-     * author_first_name: "Ray" (from "Ray Saedi")
-     * author_last_name: "Saedi" (from "Ray Saedi")
+   - 🚨 For author queries with full names: Use posted_by field
+     * "posted by Ray Saedi" → posted_by: "Ray Saedi" (full name)
+     * "articles by John Smith" → posted_by: "John Smith" (full name)
    - For "mentioning" queries, include full name or last name in keywords_any
+   - Only use author_last_name if ONLY a last name is provided (e.g., "articles by Johnson")
 
 3. **Temporal Keywords - USE DATE FILTERS:**
    - "recent"/"latest"/"new" → date_from = 6 months ago, date_to = null

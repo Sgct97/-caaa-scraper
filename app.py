@@ -391,8 +391,6 @@ Return JSON:
             suggestions["attachments"] = search_params.attachment_filter
         if search_params.posted_by:
             suggestions["posted_by"] = search_params.posted_by
-        if search_params.author_first_name:
-            suggestions["first_name"] = search_params.author_first_name
         if search_params.author_last_name:
             suggestions["last_name"] = search_params.author_last_name
         if search_params.date_from:
@@ -463,8 +461,6 @@ async def ai_follow_up(request: AIFollowUpRequest):
             suggestions["attachments"] = search_params.attachment_filter
         if search_params.posted_by:
             suggestions["posted_by"] = search_params.posted_by
-        if search_params.author_first_name:
-            suggestions["first_name"] = search_params.author_first_name
         if search_params.author_last_name:
             suggestions["last_name"] = search_params.author_last_name
         if search_params.date_from:
