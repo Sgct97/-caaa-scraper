@@ -56,7 +56,7 @@
         </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="searchResults()">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="searchResults()" x-init="init()">
         <!-- Full Message Modal -->
         <div x-show="showModal" 
              @click.self="showModal = false"
@@ -325,11 +325,40 @@
     <script>
         function searchResults() {
             return {
+                searchId: new URLSearchParams(window.location.search).get('id') || window.location.pathname.split('/').pop(),
+                searchData: null,
+                results: [],
+                stats: {},
+                loading: true,
+                error: null,
                 showModal: false,
                 modalMessage: null,
                 
+                async init() {
+                    await this.fetchResults();
+                    // Poll for updates every 3 seconds if search is still running
+                    if (this.searchData?.status === 'running') {
+                        setInterval(() => this.fetchResults(), 3000);
+                    }
+                },
+                
+                async fetchResults() {
+                    try {
+                        const response = await fetch(`/api/search/${this.searchId}`);
+                        const data = await response.json();
+                        
+                        this.searchData = data.search_info;
+                        this.results = data.results || [];
+                        this.stats = data.stats || {};
+                        this.loading = false;
+                    } catch (err) {
+                        this.error = err.message;
+                        this.loading = false;
+                    }
+                },
+                
                 async refreshStatus() {
-                    window.location.reload();
+                    await this.fetchResults();
                 },
                 
                 expandMessage(messageId) {
