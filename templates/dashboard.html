@@ -739,7 +739,7 @@
                             this.statusType = 'success';
                             
                             setTimeout(() => {
-                                window.location.href = `/search/${data.search_id}`;
+                                window.location.href = `/results.html?id=${data.search_id}`;
                             }, 1000);
                         } else {
                             throw new Error(data.detail || 'Search failed');
