@@ -1,9 +1,8 @@
 {
-  "routes": [
-    { "src": "/static/(.*)", "dest": "/static/$1" },
-    { "src": "/", "dest": "/frontend/index.html" },
-    { "src": "/search/(.*)", "dest": "/frontend/results.html" },
-    { "src": "/results", "dest": "/frontend/results.html" }
+  "rewrites": [
+    { "source": "/", "destination": "/frontend/index.html" },
+    { "source": "/search/:id", "destination": "/frontend/results.html" },
+    { "source": "/results", "destination": "/frontend/results.html" }
   ],
   "headers": [
     {
