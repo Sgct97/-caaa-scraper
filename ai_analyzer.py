@@ -130,7 +130,15 @@ Subject: {subject}
 
 {body}
 
-ANALYSIS REQUIREMENTS:
+🚨 CRITICAL RULE - AUTHOR-FOCUSED SEARCHES 🚨
+IF the user's question is ONLY asking for messages FROM or MENTIONING a specific person (examples: "messages from Ray Saedi", "posts by John Smith", "find ALL messages from author: Johnson", "anything mentioning Sarah"), then:
+- IGNORE all content analysis rules below
+- Mark as RELEVANT (is_relevant: true) if the message is FROM that person OR clearly MENTIONS that person
+- Set confidence to 0.95 if from that person, 0.85 if mentioning them
+- Reasoning: Simply state "Message from [name]" or "Message mentions [name]"
+- DO NOT judge content quality, substantiveness, or legal insight
+
+ANALYSIS REQUIREMENTS (for content-based searches):
 
 Evaluate whether this message provides actionable legal insight that helps answer the user's question. Consider:
 
