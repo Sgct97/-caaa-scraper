@@ -372,8 +372,22 @@
                         
                         <!-- Options & Submit -->
                         <div class="flex items-center justify-between pt-6 border-t">
-                            <div class="text-sm text-gray-600">
-                                <span>Max: <span class="font-semibold text-primary-600">50</span> messages</span>
+                            <div class="flex items-center space-x-3">
+                                <label class="text-sm font-semibold text-gray-700">
+                                    Max Messages:
+                                </label>
+                                <select 
+                                    x-model.number="maxMessages"
+                                    class="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all bg-white font-semibold text-primary-600"
+                                    :disabled="searching">
+                                    <option value="10">10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                    <option value="75">75</option>
+                                    <option value="100">100</option>
+                                    <option value="150">150</option>
+                                    <option value="200">200</option>
+                                </select>
                             </div>
                             
                             <button 
@@ -408,7 +422,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-gray-600 font-medium">Total Searches</p>
-                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats.total_searches or 0 }}</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-1">0</p>
                     </div>
                     <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
                         <i class="fas fa-search text-primary-600 text-xl"></i>
@@ -420,7 +434,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-gray-600 font-medium">Messages Analyzed</p>
-                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats.total_messages or 0 }}</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-1">0</p>
                     </div>
                     <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                         <i class="fas fa-file-alt text-purple-600 text-xl"></i>
@@ -432,7 +446,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-gray-600 font-medium">Relevant Results</p>
-                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats.total_relevant or 0 }}</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-1">0</p>
                     </div>
                     <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                         <i class="fas fa-check-circle text-green-600 text-xl"></i>
@@ -444,7 +458,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-gray-600 font-medium">Active Searches</p>
-                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats.running_searches or 0 }}</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-1">0</p>
                     </div>
                     <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
                         <i class="fas fa-spinner fa-pulse text-yellow-600 text-xl"></i>
@@ -453,7 +467,59 @@
             </div>
         </div>
 
-        <!-- Recent Searches removed for static deployment -->
+        <!-- Recent Searches -->
+        <div class="glass rounded-xl p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                <i class="fas fa-history text-primary-600 mr-3"></i>
+                Recent Searches
+            </h2>
+            
+            {% if recent_searches %}
+            <div class="space-y-4">
+                {% for search in recent_searches %}
+                <a href="/search/{{ search.id }}" 
+                   class="block p-6 border-2 border-gray-100 rounded-xl hover:border-primary-300 hover:shadow-md transition-all">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <h3 class="text-lg font-semibold text-gray-900">{{ search.keyword }}</h3>
+                                <span class="px-3 py-1 text-xs font-semibold rounded-full
+                                    {% if search.status == 'completed' %}bg-green-100 text-green-700
+                                    {% elif search.status == 'running' %}bg-yellow-100 text-yellow-700
+                                    {% elif search.status == 'failed' %}bg-red-100 text-red-700
+                                    {% else %}bg-gray-100 text-gray-700{% endif %}">
+                                    {{ search.status|upper }}
+                                </span>
+                            </div>
+                            <div class="flex items-center space-x-6 text-sm text-gray-600">
+                                <span>
+                                    <i class="fas fa-file-alt text-gray-400 mr-1"></i>
+                                    {{ search.total_messages_found or 0 }} found
+                                </span>
+                                <span>
+                                    <i class="fas fa-check-circle text-green-500 mr-1"></i>
+                                    {{ search.total_relevant_found or 0 }} relevant
+                                </span>
+                                <span>
+                                    <i class="fas fa-clock text-gray-400 mr-1"></i>
+                                    {{ search.created_at.strftime('%b %d, %Y %I:%M %p') if search.created_at else 'N/A' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-12 text-gray-500">
+                <i class="fas fa-search text-6xl text-gray-300 mb-4"></i>
+                <p class="text-lg">No searches yet. Start your first AI-powered search above!</p>
+            </div>
+            {% endif %}
+        </div>
     </div>
 
     <script>
@@ -484,6 +550,7 @@
                 searching: false,
                 statusMessage: '',
                 statusType: '',
+                maxMessages: 50,  // Default max messages to search
                 
                 hasAnySearchCriteria() {
                     return Object.values(this.searchFields).some(val => 
@@ -660,7 +727,7 @@
                                 search_fields: this.searchFields,
                                 ai_intent: this.aiIntent,
                                 use_ai_enhancement: false,  // Already manually configured
-                                max_messages: 50,
+                                max_messages: this.maxMessages,
                                 max_pages: 10
                             })
                         });
@@ -672,7 +739,7 @@
                             this.statusType = 'success';
                             
                             setTimeout(() => {
-                                window.location.href = `/results.html?id=${data.search_id}`;
+                                window.location.href = `/search/${data.search_id}`;
                             }, 1000);
                         } else {
                             throw new Error(data.detail || 'Search failed');
