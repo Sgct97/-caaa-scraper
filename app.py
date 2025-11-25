@@ -556,18 +556,35 @@ async def run_search_async(search_fields: Optional[dict], ai_intent: Optional[st
     # If no AI intent provided, construct one from search parameters for relevance analysis
     if not ai_intent or ai_intent.strip() == "":
         intent_parts = []
+        has_content_criteria = False
+        
+        # Check for content-based criteria
         if search_params.keywords_all:
             intent_parts.append(f"messages containing all: {search_params.keywords_all}")
+            has_content_criteria = True
         if search_params.keywords_phrase:
             intent_parts.append(f"exact phrase: {search_params.keywords_phrase}")
+            has_content_criteria = True
         if search_params.keywords_any:
             intent_parts.append(f"containing: {search_params.keywords_any}")
-        if search_params.author_last_name:
-            intent_parts.append(f"by author: {search_params.author_last_name}")
-        if search_params.posted_by:
-            intent_parts.append(f"posted by: {search_params.posted_by}")
+            has_content_criteria = True
         
-        ai_intent = "Looking for " + ", ".join(intent_parts) if intent_parts else "all messages matching search criteria"
+        # Author criteria
+        author_criteria = []
+        if search_params.author_last_name:
+            author_criteria.append(f"author: {search_params.author_last_name}")
+        if search_params.posted_by:
+            author_criteria.append(f"posted by: {search_params.posted_by}")
+        
+        # If ONLY author criteria (no content keywords), make it clear we want ALL messages from that person
+        if author_criteria and not has_content_criteria:
+            ai_intent = f"Find ALL messages from {', '.join(author_criteria)}. Any message from this person is relevant regardless of content."
+        elif intent_parts or author_criteria:
+            # Has content criteria - combine everything normally
+            ai_intent = "Looking for " + ", ".join(intent_parts + author_criteria)
+        else:
+            ai_intent = "all messages matching search criteria"
+        
         print(f"📝 Generated AI intent from search fields: {ai_intent}", flush=True)
     
     # Create search record
