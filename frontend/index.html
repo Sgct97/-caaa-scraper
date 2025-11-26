@@ -191,7 +191,7 @@
                                             </div>
                                             
                                             <!-- AI Follow-up Question -->
-                                            <div x-show="msg.question" class="mt-4">
+                                            <div x-show="msg.question && $index === aiConversation.length - 1" class="mt-4">
                                                 <p class="text-sm font-semibold text-gray-900 mb-2" x-text="msg.question"></p>
                                                 <input 
                                                     type="text"
