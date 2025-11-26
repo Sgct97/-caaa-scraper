@@ -391,6 +391,8 @@ Return JSON:
             suggestions["attachments"] = search_params.attachment_filter
         if search_params.posted_by:
             suggestions["posted_by"] = search_params.posted_by
+        if search_params.author_first_name:
+            suggestions["first_name"] = search_params.author_first_name
         if search_params.author_last_name:
             suggestions["last_name"] = search_params.author_last_name
         if search_params.date_from:
@@ -461,6 +463,8 @@ async def ai_follow_up(request: AIFollowUpRequest):
             suggestions["attachments"] = search_params.attachment_filter
         if search_params.posted_by:
             suggestions["posted_by"] = search_params.posted_by
+        if search_params.author_first_name:
+            suggestions["first_name"] = search_params.author_first_name
         if search_params.author_last_name:
             suggestions["last_name"] = search_params.author_last_name
         if search_params.date_from:
@@ -557,6 +561,7 @@ async def run_search_async(search_fields: Optional[dict], ai_intent: Optional[st
             date_from=date_from,
             date_to=date_to,
             posted_by=clean_field(search_fields.get('posted_by')),
+            author_first_name=clean_field(search_fields.get('first_name')),  # Map 'first_name' to 'author_first_name'
             author_last_name=clean_field(search_fields.get('last_name')),  # Map 'last_name' to 'author_last_name'
             search_in=search_fields.get('search_in', 'subject_and_body') or 'subject_and_body',
             attachment_filter=search_fields.get('attachments', 'all') or 'all'  # Map 'attachments' to 'attachment_filter'

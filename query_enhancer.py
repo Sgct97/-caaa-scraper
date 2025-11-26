@@ -111,23 +111,28 @@ BEFORE DOING ANYTHING ELSE, CHECK IF THE QUERY MENTIONS A PERSON'S NAME.
 
 USER QUERY: "{user_query}"{name_warning}
 
-Does this query mention a person's name (like "Chris Johnson", "John Smith", "Judge Lee", etc.)?
-- CRITICAL: Distinguish between WHO SENT the message vs WHO is DISCUSSED in it
+Does this query mention a person's name (like "Chris Johnson", "Dr. Smith", "Judge Lee", etc.)?
+- CRITICAL: Three types of person searches:
+  1. WHO SENT the message (listserv poster) → posted_by
+  2. MEDICAL/LEGAL EXPERT discussed (QME, doctor, witness) → author_first_name/author_last_name
+  3. GENERAL mentions or case names → keywords_any
+
 - EXAMPLES: 
-  ✓ "articles BY Chris Johnson" → posted_by: "Chris Johnson" (filter by sender - use FULL NAME)
-  ✓ "articles MENTIONING Chris Johnson" → keywords_any: "Chris Johnson, Johnson" (search message content)
-  ✓ "what did John Smith say" → posted_by: "John Smith" (filter by sender - use FULL NAME)
-  ✓ "discussions ABOUT Judge Lee" → keywords_any: "Judge Lee, Lee" (search message content)
-  ✓ "messages posted BY Ray Saedi" → posted_by: "Ray Saedi" (filter by sender - use FULL NAME)
-  ✓ "articles by Johnson" → author_last_name: "Johnson" (only last name given)
+  ✓ "messages BY Ray Saedi" → posted_by: "Ray Saedi" (who sent to listserv)
+  ✓ "QME Dr. John Smith" → author_first_name: "John", author_last_name: "Smith" (medical expert)
+  ✓ "expert testimony from Dr. Johnson" → author_last_name: "Johnson" (medical expert)
+  ✓ "discussions about Paterson case" → keywords_any: "Paterson" (case name, NOT a person)
+  ✓ "what did attorney Chris Johnson post" → posted_by: "Chris Johnson" (listserv sender)
 
 TODAY'S DATE: {today.strftime('%Y-%m-%d')}
 
 Your task: Analyze this query and determine the BEST search parameters to find relevant messages.
 
 Available search fields:
-1. posted_by - 🚨 USE FOR FULL NAMES! Filter by WHO SENT the message (e.g., "articles BY Ray Saedi" → "Ray Saedi")
-2. author_last_name - Filter by last name ONLY if no first name given (e.g., "articles BY Johnson" → "Johnson")
+1. posted_by - 🚨 Filter by WHO SENT the message (e.g., "messages BY Ray Saedi" → "Ray Saedi")
+2. author_first_name + author_last_name - 🏥 For WITNESS/EXPERT searches (QMEs, doctors, medical experts)
+   - "QME Dr. John Smith" → author_first_name: "John", author_last_name: "Smith"
+   - "expert testimony from Dr. Johnson" → author_last_name: "Johnson"
 3. keyword - Simple keyword search (searches subject + body)
 4. keywords_all - Must contain ALL these keywords (comma-separated: "word1, word2, word3")
 5. keywords_phrase - Exact phrase match (e.g., "permanent disability rating")
@@ -156,14 +161,24 @@ SEARCH STRATEGY - Analyze the query and choose the RIGHT tool:
    - keyword = SIMPLE search → Use for straightforward single-concept queries
    - keywords_phrase = EXACT MATCH → Avoid unless explicitly requested (returns few/no results)
 
-2. **Person Names - Distinguish AUTHOR vs MENTIONED:**
-   - "articles BY X" / "posts FROM X" / "what X said" / "X wrote" → posted_by with FULL NAME (filter by WHO SENT IT)
-   - "articles MENTIONING X" / "discussions ABOUT X" / "references to X" → keywords_any (search IN message body)
-   - 🚨 For author queries with full names: Use posted_by field
-     * "posted by Ray Saedi" → posted_by: "Ray Saedi" (full name)
-     * "articles by John Smith" → posted_by: "John Smith" (full name)
-   - For "mentioning" queries, include full name or last name in keywords_any
-   - Only use author_last_name if ONLY a last name is provided (e.g., "articles by Johnson")
+2. **Person Names - THREE DISTINCT CATEGORIES:**
+   
+   A. **Listserv Message Sender** (use posted_by):
+      - "messages BY Ray Saedi" / "what did John Smith post" / "posts FROM attorney X"
+      - This is WHO SENT the message to the listserv
+      - Always use FULL NAME: posted_by: "Ray Saedi"
+   
+   B. **Medical/Legal Expert or Witness** (use author_first_name + author_last_name):
+      - "QME Dr. John Smith" → author_first_name: "John", author_last_name: "Smith"
+      - "expert Dr. Johnson" → author_last_name: "Johnson"
+      - "testimony from Dr. Sarah Lee" → author_first_name: "Sarah", author_last_name: "Lee"
+      - "witness reports by Johnson" → author_last_name: "Johnson"
+      - Use BOTH names when available, or just last name if that's all provided
+   
+   C. **General Mentions or Case Names** (use keywords_any):
+      - "discussions about Paterson" / "Paterson case" → keywords_any: "Paterson"
+      - "references to Judge Smith" → keywords_any: "Judge Smith, Smith"
+      - 🚨 CRITICAL: "Paterson case" is a CASE NAME, not a person → keywords_any ONLY
 
 3. **Temporal Keywords - USE DATE FILTERS:**
    - "recent"/"latest"/"new" → date_from = 6 months ago, date_to = null
@@ -198,9 +213,9 @@ Respond in JSON format:
     "keywords_any": "comma-separated terms or null (PRIMARY TOOL - EXAMPLE: \"Paterson, amended, modified, changed, reversed\")",
     "keywords_exclude": "comma-separated terms or null",
     "listserv": "all/lawnet/lavaaa/lamaaa/scaaa",
-    "author_first_name": "first name or null",
-    "author_last_name": "last name only or null (use for person names - EXAMPLE: \"Johnson\")",
-    "posted_by": "email or name or null",
+    "author_first_name": "first name or null (for WITNESS/EXPERT: 'QME Dr. John Smith' → 'John')",
+    "author_last_name": "last name or null (for WITNESS/EXPERT: 'QME Dr. John Smith' → 'Smith')",
+    "posted_by": "full name or null (for WHO SENT message: 'posted by Ray Saedi' → 'Ray Saedi')",
     "attachment_filter": "all/with_attachments/without_attachments",
     "date_from": "YYYY-MM-DD or null (for 'recent' use 6 months ago)",
     "date_to": "YYYY-MM-DD or null (ONLY for specific date ranges, NOT for 'recent')",
