@@ -651,6 +651,7 @@
                 async answerFollowUp() {
                     if (!this.followUpAnswer.trim()) return;
                     
+                    // Add user's answer to conversation
                     this.aiConversation.push({
                         role: 'user',
                         content: this.followUpAnswer
@@ -663,6 +664,10 @@
                     this.aiAnalyzing = true;
                     
                     try {
+                        // Create AbortController with 60 second timeout
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 60000);
+                        
                         const response = await fetch('/api/ai/follow-up', {
                             method: 'POST',
                             headers: {
@@ -672,8 +677,15 @@
                                 answer: answer,
                                 conversation: this.aiConversation,
                                 current_fields: this.searchFields
-                            })
+                            }),
+                            signal: controller.signal
                         });
+                        
+                        clearTimeout(timeoutId);
+                        
+                        if (!response.ok) {
+                            throw new Error(`Server error: ${response.status}`);
+                        }
                         
                         const data = await response.json();
                         
@@ -684,9 +696,19 @@
                                 suggestions: data.suggestions,
                                 question: data.follow_up_question
                             });
+                        } else {
+                            throw new Error(data.error || 'Unknown error');
                         }
                     } catch (error) {
-                        this.statusMessage = `AI Error: ${error.message}`;
+                        // Remove the user's answer from conversation on error
+                        this.aiConversation.pop();
+                        
+                        let errorMsg = error.message;
+                        if (error.name === 'AbortError') {
+                            errorMsg = 'AI is taking too long. Please try again.';
+                        }
+                        
+                        this.statusMessage = `AI Error: ${errorMsg}`;
                         this.statusType = 'error';
                     } finally {
                         this.aiAnalyzing = false;
