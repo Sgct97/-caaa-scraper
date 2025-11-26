@@ -82,12 +82,6 @@
                         </span>
                     </div>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <div class="text-sm text-gray-600">
-                        <i class="fas fa-robot text-primary-500"></i>
-                        <span class="font-semibold">AI-Powered</span>
-                    </div>
-                </div>
             </div>
         </div>
     </nav>
@@ -106,7 +100,7 @@
             </div>
             
             <!-- Main Search Interface -->
-            <div class="max-w-6xl mx-auto" x-data="searchApp()">
+            <div class="max-w-6xl mx-auto" x-data="searchApp()" x-init="init()">
                 <div class="glass rounded-2xl p-8 search-box-shadow">
                     
                     <!-- AI Intent Box (Always Visible) -->
@@ -441,7 +435,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-gray-600 font-medium">Total Searches</p>
-                        <p class="text-3xl font-bold text-gray-900 mt-1">0</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-1" x-text="stats.total_searches"></p>
                     </div>
                     <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
                         <i class="fas fa-search text-primary-600 text-xl"></i>
@@ -453,7 +447,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-gray-600 font-medium">Messages Analyzed</p>
-                        <p class="text-3xl font-bold text-gray-900 mt-1">0</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-1" x-text="stats.total_messages"></p>
                     </div>
                     <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                         <i class="fas fa-file-alt text-purple-600 text-xl"></i>
@@ -465,7 +459,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-gray-600 font-medium">Relevant Results</p>
-                        <p class="text-3xl font-bold text-gray-900 mt-1">0</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-1" x-text="stats.total_relevant"></p>
                     </div>
                     <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                         <i class="fas fa-check-circle text-green-600 text-xl"></i>
@@ -477,7 +471,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-gray-600 font-medium">Active Searches</p>
-                        <p class="text-3xl font-bold text-gray-900 mt-1">0</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-1" x-text="stats.running_searches"></p>
                     </div>
                     <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
                         <i class="fas fa-spinner fa-pulse text-yellow-600 text-xl"></i>
@@ -517,6 +511,28 @@
                 statusMessage: '',
                 statusType: '',
                 maxMessages: 50,  // Default max messages to search
+                stats: {
+                    total_searches: 0,
+                    total_messages: 0,
+                    total_relevant: 0,
+                    running_searches: 0
+                },
+                
+                async init() {
+                    await this.fetchStats();
+                    // Refresh stats every 10 seconds
+                    setInterval(() => this.fetchStats(), 10000);
+                },
+                
+                async fetchStats() {
+                    try {
+                        const response = await fetch('/api/stats');
+                        const data = await response.json();
+                        this.stats = data;
+                    } catch (err) {
+                        console.error('Error fetching stats:', err);
+                    }
+                },
                 
                 hasAnySearchCriteria() {
                     return Object.values(this.searchFields).some(val => 

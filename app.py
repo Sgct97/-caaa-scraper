@@ -483,6 +483,25 @@ async def ai_follow_up(request: AIFollowUpRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/api/stats")
+async def get_platform_stats():
+    """Get platform statistics for dashboard"""
+    try:
+        stats = orchestrator.db.get_platform_stats()
+        return convert_decimals(dict(stats)) if stats else {
+            "total_searches": 0,
+            "total_messages": 0,
+            "total_relevant": 0,
+            "running_searches": 0
+        }
+    except Exception as e:
+        return {
+            "total_searches": 0,
+            "total_messages": 0,
+            "total_relevant": 0,
+            "running_searches": 0
+        }
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
