@@ -192,9 +192,10 @@
                 <button 
                     x-show="searchData?.status === 'running'"
                     @click="refreshStatus"
-                    class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition">
-                    <i class="fas fa-sync-alt mr-2"></i>
-                    Refresh Status
+                    :disabled="refreshing"
+                    class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fas mr-2" :class="refreshing ? 'fa-spinner fa-spin' : 'fa-sync-alt'"></i>
+                    <span x-text="refreshing ? 'Refreshing...' : 'Refresh Status'"></span>
                 </button>
             </div>
             
@@ -338,6 +339,7 @@
                 results: [],
                 stats: {},
                 loading: true,
+                refreshing: false,
                 error: null,
                 showModal: false,
                 modalMessage: null,
@@ -366,7 +368,9 @@
                 },
                 
                 async refreshStatus() {
+                    this.refreshing = true;
                     await this.fetchResults();
+                    setTimeout(() => this.refreshing = false, 500);
                 },
                 
                 expandMessage(messageId) {
