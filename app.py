@@ -523,9 +523,13 @@ async def run_search_async(search_fields: Optional[dict], ai_intent: Optional[st
                            use_ai: bool, max_messages: int, max_pages: int) -> str:
     """Run search asynchronously"""
     
+    print(f"🔵 run_search_async called", flush=True)
+    
     # Import here to avoid circular dependency
     from search_params import SearchParams
     from query_enhancer import QueryEnhancer
+    
+    print(f"🔵 Imports successful", flush=True)
     
     # Build search params from manual fields
     if search_fields:
@@ -612,8 +616,10 @@ async def run_search_async(search_fields: Optional[dict], ai_intent: Optional[st
         print(f"📝 Generated AI intent from search fields: {ai_intent}", flush=True)
     
     # Create search record
+    print(f"🔵 Creating search in database", flush=True)
     search_id = orchestrator.db.create_search(search_params)
     orchestrator.db.update_search_status(search_id, 'running')
+    print(f"🔵 Search {search_id} created, spawning worker", flush=True)
     
     # Run as subprocess to avoid Playwright threading issues
     import subprocess
