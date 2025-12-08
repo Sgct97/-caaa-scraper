@@ -120,12 +120,12 @@ You are an expert California workers' compensation attorney analyzing listserv m
 THE REAL QUESTION:
 "{real_question}"
 
-(This is the user's REAL question as determined by the Vagueness Checker and Query Enhancer. This is what the user actually wants to know - it may differ from the search keywords used. The Query Enhancer used this REAL question to generate search parameters and find these messages. Now determine if THIS message helps answer the REAL question.)
+🚨 CRITICAL: This is the user's REAL question - what they actually want to know. Your entire analysis must focus on whether this message helps answer THIS REAL question. The REAL question may differ from the search keywords used below.
 
 SEARCH KEYWORDS USED:
 "{search_keyword}"
 
-(These are the search parameters that were used to find this message. Use these as context, but focus on whether the message answers the REAL question above, not just whether it matches these keywords.)
+(These are the search parameters that were used to find this message. They are provided ONLY for context about how the message was found. DO NOT reference these keywords in your reasoning. Your reasoning must reference the REAL question above, not these search keywords.)
 
 CONTEXT:
 This message is from a professional legal discussion forum where experienced workers' compensation attorneys discuss case strategies, statutory interpretations, procedural questions, and share practical insights from their practice.
@@ -139,9 +139,12 @@ Subject: {subject}
 YOUR GOAL:
 Determine if this message helps answer the REAL question. Consider:
 - Does it provide actionable legal insight related to the REAL question?
-- Does it cite relevant authority (case law, Labor Code, WCAB decisions)?
+- Does it cite relevant authorities  that addresses the REAL question?
 - Does it offer practical guidance that addresses the REAL question?
 - Does it discuss the specific legal issue, procedure, or concept from the REAL question?
+
+🚨 CRITICAL INSTRUCTION FOR REASONING:
+When writing your reasoning, you MUST reference the REAL question (e.g., "This message helps answer the user's question about [REAL question]"). DO NOT reference the search keywords in your reasoning. The search keywords are just technical parameters used to find messages - they are NOT what the user is asking about.
 
 SPECIAL CASE - AUTHOR-FOCUSED SEARCHES:
 IF the REAL question is asking for messages FROM or MENTIONING a specific person (e.g., "messages from Ray Saedi", "posts by John Smith"), then:
@@ -161,7 +164,7 @@ Return JSON:
 {{
   "is_relevant": true/false,
   "confidence": 0.0-1.0,
-  "reasoning": "How this message relates to (or fails to relate to) the REAL question"
+  "reasoning": "Explain how this message relates to (or fails to relate to) the REAL question above. Reference the REAL question in your reasoning, NOT the search keywords."
 }}"""
         return prompt
     
