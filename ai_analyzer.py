@@ -33,14 +33,16 @@ class AIAnalyzer:
     
     def analyze_relevance(self, 
                          message: Dict[str, str],
+                         real_question: str,
                          search_keyword: str,
                          additional_context: Optional[str] = None) -> Dict:
         """
-        Analyze if a message is relevant to the search keyword
+        Analyze if a message is relevant to the REAL question
         
         Args:
             message: Dict with keys: subject, body, from_name
-            search_keyword: The keyword/phrase being searched
+            real_question: The user's REAL question (what they actually want to know)
+            search_keyword: The search keywords/parameters used (for context)
             additional_context: Optional additional search context
         
         Returns:
@@ -53,7 +55,7 @@ class AIAnalyzer:
         """
         
         # Build prompt
-        prompt = self._build_prompt(message, search_keyword, additional_context)
+        prompt = self._build_prompt(message, real_question, search_keyword, additional_context)
         
         try:
             # Call OpenAI
@@ -93,7 +95,7 @@ class AIAnalyzer:
                 'ai_model': self.model
             }
     
-    def _build_prompt(self, message: Dict, search_keyword: str, context: Optional[str]) -> str:
+    def _build_prompt(self, message: Dict, real_question: str, search_keyword: str, context: Optional[str]) -> str:
         """Build the prompt for OpenAI"""
         
         subject = message.get('subject', 'No subject')
@@ -105,7 +107,62 @@ class AIAnalyzer:
         if len(body) > max_body_length:
             body = body[:max_body_length] + "... [truncated]"
         
-        prompt = f"""You are an expert California workers' compensation attorney analyzing a listserv message from CAAA (California Applicants' Attorneys Association) to determine if it provides substantive information that helps answer a specific legal question.
+        prompt = f"""You are the Relevance Analyzer in a 3-part legal research system:
+
+SYSTEM OVERVIEW:
+1. Vagueness Checker → Identified the REAL question
+2. Query Enhancer → Generated search parameters based on REAL question
+3. YOU (Relevance Analyzer) → Determine if each message answers the REAL question
+
+YOUR SPECIFIC ROLE:
+You are an expert California workers' compensation attorney analyzing listserv messages from CAAA (California Applicants' Attorneys Association). Your job is to determine if each message provides substantive information that helps answer the user's REAL legal question.
+
+THE REAL QUESTION:
+"{real_question}"
+
+(This is the user's REAL question as determined by the Vagueness Checker and Query Enhancer. This is what the user actually wants to know - it may differ from the search keywords used. The Query Enhancer used this REAL question to generate search parameters and find these messages. Now determine if THIS message helps answer the REAL question.)
+
+SEARCH KEYWORDS USED:
+"{search_keyword}"
+
+(These are the search parameters that were used to find this message. Use these as context, but focus on whether the message answers the REAL question above, not just whether it matches these keywords.)
+
+CONTEXT:
+This message is from a professional legal discussion forum where experienced workers' compensation attorneys discuss case strategies, statutory interpretations, procedural questions, and share practical insights from their practice.
+
+MESSAGE TO ANALYZE:
+From: {from_name}
+Subject: {subject}
+
+{body}
+
+YOUR GOAL:
+Determine if this message helps answer the REAL question. Consider:
+- Does it provide actionable legal insight related to the REAL question?
+- Does it cite relevant authority (case law, Labor Code, WCAB decisions)?
+- Does it offer practical guidance that addresses the REAL question?
+- Does it discuss the specific legal issue, procedure, or concept from the REAL question?
+
+SPECIAL CASE - AUTHOR-FOCUSED SEARCHES:
+IF the REAL question is asking for messages FROM or MENTIONING a specific person (e.g., "messages from Ray Saedi", "posts by John Smith"), then:
+- Mark as RELEVANT if the message is FROM that person OR clearly MENTIONS them
+- Set confidence to 0.95 if from that person, 0.85 if mentioning them
+- Reasoning: Simply state "Message from [name]" or "Message mentions [name]"
+- DO NOT judge content quality - if it's from/mentions the person, it's relevant
+
+CONFIDENCE SCORING:
+0.95-1.0: Directly answers the REAL question with legal authority or clear guidance
+0.80-0.94: Highly relevant - discusses the exact issue with substantive analysis
+0.60-0.79: Relevant - provides useful related information that partially addresses the REAL question
+0.40-0.59: Marginally relevant - touches on related concepts but doesn't answer the REAL question
+0.00-0.39: Not relevant - different topic or only superficial keyword overlap
+
+Return JSON:
+{{
+  "is_relevant": true/false,
+  "confidence": 0.0-1.0,
+  "reasoning": "How this message relates to (or fails to relate to) the REAL question"
+}}"""
 
 CONTEXT:
 This message is from a professional legal discussion forum where experienced workers' compensation attorneys discuss case strategies, statutory interpretations, procedural questions, and share practical insights from their practice.
@@ -239,7 +296,7 @@ if __name__ == "__main__":
             'from_name': 'John Smith'
         }
         
-        result1 = analyzer.analyze_relevance(message1, "workers compensation")
+        result1 = analyzer.analyze_relevance(message1, "workers compensation", "workers compensation")
         print("Test 1: Clearly relevant message")
         print(f"  Relevant: {result1['is_relevant']}")
         print(f"  Confidence: {result1['confidence']}")
@@ -254,7 +311,7 @@ if __name__ == "__main__":
             'from_name': 'Office Manager'
         }
         
-        result2 = analyzer.analyze_relevance(message2, "workers compensation")
+        result2 = analyzer.analyze_relevance(message2, "workers compensation", "workers compensation")
         print("Test 2: Not relevant message")
         print(f"  Relevant: {result2['is_relevant']}")
         print(f"  Confidence: {result2['confidence']}")

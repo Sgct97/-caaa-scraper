@@ -96,132 +96,78 @@ class QueryEnhancer:
         if detected_names:
             name_warning = f"\n🚨🚨🚨 DETECTED PERSON NAME(S): {', '.join(detected_names)} 🚨🚨🚨\n→ YOU MUST USE author_last_name FIELD FOR: {', '.join([name.split()[-1] for name in detected_names])}\n"
         
-        prompt = f"""🚨🚨🚨 RULE #1: PERSON NAMES 🚨🚨🚨
-BEFORE DOING ANYTHING ELSE, CHECK IF THE QUERY MENTIONS A PERSON'S NAME.
+        prompt = f"""You are the Query Enhancer in a 3-part legal research system:
 
-USER QUERY: "{user_query}"{name_warning}
+SYSTEM OVERVIEW:
+1. Vagueness Checker → Already identified the REAL question (either from original query or after follow-ups)
+2. YOU (Query Enhancer) → Translate the REAL question into optimized search parameters
+3. Relevance Analyzer → Will score messages using your parameters to see if they answer the REAL question
 
-Does this query mention a person's name (like "Chris Johnson", "Dr. Smith", "Judge Lee", etc.)?
-- CRITICAL: Three types of person searches:
-  1. WHO SENT the message (listserv poster) → posted_by
-  2. MEDICAL/LEGAL EXPERT discussed (QME, doctor, witness) → author_first_name/author_last_name
-  3. GENERAL mentions or case names → keywords_any
+YOUR SPECIFIC ROLE:
+You are an expert California workers' compensation attorney and legal research specialist. The Vagueness Checker has already ensured we have the user's REAL legal question. Your job is to translate that REAL question into search parameters that will retrieve the most relevant messages from a CAAA listserv database.
 
-- EXAMPLES: 
-  ✓ "messages BY Ramin Saedi" → posted_by: "Ramin Saedi" (full name - who sent to listserv)
-  ✓ "written by Chris Johnson" → posted_by: "Chris Johnson" (full name - who sent to listserv)
-  ✓ "articles by Johnson" → author_last_name: "Johnson" (last name only given)
-  ✓ "QME Dr. John Smith" → author_first_name: "John", author_last_name: "Smith" (medical expert - BOTH names)
-  ✓ "expert Dr. Sarah Lee" → author_first_name: "Sarah", author_last_name: "Lee" (medical expert - BOTH names)
-  ✓ "expert testimony from Dr. Johnson" → author_last_name: "Johnson" (medical expert - only last name given)
-  ✓ "discussions about Paterson case" → keywords_any: "Paterson" (case name, NOT a person)
+THE REAL QUESTION:
+"{user_query}"
+
+(This is the user's REAL question - either it was clear from the start, or the Vagueness Checker asked follow-ups to clarify it. Your job is to translate THIS question into search parameters.)
+
+YOUR GOAL:
+Generate search parameters that maximize the chance that:
+- The scraper finds messages relevant to the REAL question
+- The Relevance Analyzer can identify which messages actually answer the REAL question
+- The user gets actionable legal information
+
+AVAILABLE SEARCH FIELDS:
+1. posted_by - Filter by WHO SENT the message (e.g., "messages BY Ray Saedi" → "Ray Saedi")
+2. author_first_name + author_last_name - For WITNESS/EXPERT searches (QMEs, doctors, medical experts)
+3. keyword - Simple keyword search (searches subject + body)
+4. keywords_all - Must contain ALL these keywords (comma-separated) - Use for narrow searches
+5. keywords_phrase - Exact phrase match - Avoid unless explicitly requested
+6. keywords_any - Must contain at least ONE of these (comma-separated) - PRIMARY TOOL for broad searches
+7. keywords_exclude - Must NOT contain these keywords (comma-separated)
+8. listserv - Which list: "all", "lawnet", "lavaaa", "lamaaa", "scaaa"
+9. attachment_filter - "all", "with_attachments", "without_attachments"
+10. date_from - Start date (YYYY-MM-DD) - Use for temporal queries ("recent" = 6 months ago)
+11. date_to - End date (YYYY-MM-DD) - Only for specific date ranges
+12. search_in - "subject_and_body" or "subject_only"
+
+SEARCH STRATEGY PRINCIPLES:
+- keywords_any = BROAD search → Use when you want comprehensive results (PRIMARY TOOL)
+- keywords_all = NARROW search → Use when multiple concepts MUST co-occur
+- Person names: Distinguish WHO SENT (posted_by) vs EXPERT MENTIONED (author_first_name/author_last_name)
+- Temporal keywords ("recent", "latest", "new") → Use date_from filter
+- Think about synonyms, abbreviations (QME, IMR, LC, PD), and related legal concepts
 
 TODAY'S DATE: {today.strftime('%Y-%m-%d')}
 
-Your task: Analyze this query and determine the BEST search parameters to find relevant messages.
+HOW TO TRANSLATE THE REAL QUESTION INTO SEARCH PARAMETERS:
+1. **Identify the core legal concepts** in the REAL question - what is the user actually trying to learn?
+2. **Think about how attorneys would discuss this** - what terms, phrases, or case names would appear in relevant messages?
+3. **Consider the search field that best captures the intent** - is this about a person (posted_by/author fields), a topic (keywords), a time period (date filters), or a combination?
+4. **Optimize for recall** - Use keywords_any (broad) rather than keywords_all (narrow) unless the REAL question requires multiple concepts together
+5. **Include synonyms and related terms** - Think about how the same concept might be expressed differently (e.g., "permanent disability" vs "PD" vs "impairment rating")
+6. **Use temporal filters when appropriate** - If the REAL question asks about "recent" or "latest" information, apply date filters
+7. **Consider the listserv context** - If the REAL question is about applicant-side or defense-side perspectives, filter by listserv
 
-Available search fields:
-1. posted_by - 🚨 Filter by WHO SENT the message (e.g., "messages BY Ray Saedi" → "Ray Saedi")
-2. author_first_name + author_last_name - 🏥 For WITNESS/EXPERT searches (QMEs, doctors, medical experts)
-   - "QME Dr. John Smith" → author_first_name: "John", author_last_name: "Smith"
-   - "expert testimony from Dr. Johnson" → author_last_name: "Johnson"
-3. keyword - Simple keyword search (searches subject + body)
-4. keywords_all - Must contain ALL these keywords (comma-separated: "word1, word2, word3")
-5. keywords_phrase - Exact phrase match (e.g., "permanent disability rating")
-6. keywords_any - Must contain at least ONE of these (comma-separated: "term1, term2, term3")
-7. keywords_exclude - Must NOT contain these keywords (comma-separated)
-8. listserv - Which list: "all", "lawnet", "lavaaa", "lamaaa", "scaaa"
-   - lawnet: Applicant attorneys (workers' side)
-   - lavaaa: Defense attorneys (employer/insurance side)
-9. attachment_filter - "all", "with_attachments", "without_attachments"
-10. date_from - Start date (YYYY-MM-DD)
-11. date_to - End date (YYYY-MM-DD)
-12. search_in - "subject_and_body" or "subject_only"
-
-FORMATTING RULES:
-- Multi-term fields (keywords_all, keywords_any, keywords_exclude) require COMMA separation
-- Each distinct concept/synonym = separate comma-separated item
-- Multi-word phrases can be one item: "labor code, workers compensation, permanent disability"
-- NO connecting words (and/or/vs) - just commas: "term1, term2, term3"
-
-SEARCH STRATEGY - Analyze the query and choose the RIGHT tool:
-
-1. **Field Selection Principles:**
-   - keywords_any = BROAD search (finds ANY matching term) → Use when you want comprehensive results
-   - keywords_all = NARROW search (requires ALL terms) → Use when multiple concepts MUST co-occur
-   - keywords_exclude = FILTER OUT unwanted results → Use when query explicitly excludes topics
-   - keyword = SIMPLE search → Use for straightforward single-concept queries
-   - keywords_phrase = EXACT MATCH → Avoid unless explicitly requested (returns few/no results)
-
-2. **Person Names - THREE DISTINCT CATEGORIES:**
-   
-   A. **Listserv Message Sender** (use posted_by):
-      - "messages BY Ramin Saedi" / "written by Chris Johnson" / "posts FROM attorney X"
-      - This is WHO SENT the message to the listserv
-      - 🚨 ALWAYS use FULL NAME: posted_by: "Ramin Saedi" (not just "Saedi")
-      - If ONLY last name given: use author_last_name instead
-   
-   B. **Medical/Legal Expert or Witness** (use author_first_name + author_last_name):
-      - 🚨 CRITICAL: Extract BOTH first AND last name when provided!
-      - "QME Dr. John Smith" → author_first_name: "John", author_last_name: "Smith" (BOTH)
-      - "expert Dr. Sarah Lee" → author_first_name: "Sarah", author_last_name: "Lee" (BOTH)
-      - "testimony from Dr. Johnson" → author_last_name: "Johnson" (only last name given)
-      - NEVER extract only last name when first name is also provided!
-   
-   C. **General Mentions or Case Names** (use keywords_any):
-      - "discussions about Paterson" / "Paterson case" → keywords_any: "Paterson"
-      - "references to Judge Smith" → keywords_any: "Judge Smith, Smith"
-      - 🚨 CRITICAL: "Paterson case" is a CASE NAME, not a person → keywords_any ONLY
-
-3. **Temporal Keywords - USE DATE FILTERS:**
-   - "recent"/"latest"/"new" → date_from = 6 months ago, date_to = null
-   - "this year"/"current year" → date_from = start of year, date_to = null
-   - Specific dates/ranges → use exact dates
-   - NO temporal keywords → leave date fields null
-
-4. **Negative Keywords - USE EXCLUSION:**
-   - "but not X", "excluding X", "except X" → keywords_exclude
-   - Be thoughtful about synonyms to exclude (e.g., excluding "psych" should also exclude "psychological", "psychiatric")
-
-5. **Synonym Strategy:**
-   - Think broadly about alternative terms, abbreviations, and related concepts
-   - Legal context: consider abbreviations (LC = Labor Code, PD = permanent disability)
-   - Use commas to separate all distinct terms
-
-6. **Context Clues:**
-   - "applicant attorney"/"worker's attorney" → listserv: "lawnet"
-   - "defense attorney"/"employer attorney" → listserv: "lavaaa"
-   - "with documents"/"attachments" → attachment_filter: "with_attachments"
-   - "subject line only" → search_in: "subject_only"
-
-CRITICAL: Your goal is to maximize recall (find all relevant messages) while maintaining precision (avoid irrelevant results). Choose fields that best balance these goals for the specific query.
-
-Respond in JSON format:
+Translate the REAL question into the best possible search parameters optimized for finding answers. Your parameters should maximize the likelihood that the scraper finds messages that actually help answer the REAL question. Return JSON:
 {{
-  "reasoning": "Brief explanation of search strategy",
+  "reasoning": "How these parameters help find answers to the REAL question",
   "parameters": {{
     "keyword": "string or null",
-    "keywords_all": "comma-separated terms or null (ONLY for narrow searches requiring ALL terms together)",
-    "keywords_phrase": null (LEAVE THIS NULL - do not use exact phrases unless explicitly requested),
-    "keywords_any": "comma-separated terms or null (PRIMARY TOOL - EXAMPLE: \"Paterson, amended, modified, changed, reversed\")",
+    "keywords_all": "comma-separated terms or null",
+    "keywords_phrase": null,
+    "keywords_any": "comma-separated terms or null",
     "keywords_exclude": "comma-separated terms or null",
     "listserv": "all/lawnet/lavaaa/lamaaa/scaaa",
-    "author_first_name": "first name or null (🚨 EXTRACT BOTH: 'expert Dr. John Smith' → 'John')",
-    "author_last_name": "last name or null (🚨 EXTRACT BOTH: 'expert Dr. John Smith' → 'Smith')",
-    "posted_by": "FULL NAME or null (🚨 'written by Ramin Saedi' → 'Ramin Saedi', NOT just 'Saedi')",
+    "author_first_name": "first name or null",
+    "author_last_name": "last name or null",
+    "posted_by": "FULL NAME or null",
     "attachment_filter": "all/with_attachments/without_attachments",
-    "date_from": "YYYY-MM-DD or null (for 'recent' use 6 months ago)",
-    "date_to": "YYYY-MM-DD or null (ONLY for specific date ranges, NOT for 'recent')",
+    "date_from": "YYYY-MM-DD or null",
+    "date_to": "YYYY-MM-DD or null",
     "search_in": "subject_and_body or subject_only"
   }}
-}}
-
-CRITICAL RULES:
-1. Person names → ALWAYS use author_last_name (extract last name only)
-2. Multi-term keyword fields → ALWAYS comma-separate
-3. Avoid keywords_phrase unless explicitly requested
-4. Balance recall vs precision based on query intent
-"""
+}}"""
         return prompt
     
     def _parse_ai_response(self, response) -> Dict:

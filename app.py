@@ -303,43 +303,58 @@ async def ai_analyze(request: AIAnalyzeRequest):
             raise HTTPException(status_code=503, detail="AI service not available")
         
         # STEP 1: Check if query is too vague and needs clarification
-        vagueness_check = f"""Analyze this query and determine if it has enough information to search effectively.
+        vagueness_check = f"""You are the Vagueness Checker in a 3-part legal research system:
 
-Query: "{request.intent}"
+SYSTEM OVERVIEW:
+1. YOU (Vagueness Checker) → Determine if query needs clarification to identify the REAL question
+2. Query Enhancer → Translates the REAL question into search parameters
+3. Relevance Analyzer → Scores messages for how well they answer the REAL question
 
-A query is VAGUE if:
-1. Multiple interpretations exist that would lead to VERY DIFFERENT searches
-2. Key information is missing that would significantly change what we search for
-3. The query is so broad that any search would return too many irrelevant results
+YOUR SPECIFIC ROLE:
+You are an expert California workers' compensation attorney. The user is also a California workers' compensation attorney using this system. Your job is to determine if a user's typed question contains enough information for the Query Enhancer to understand their REAL legal question and generate effective search parameters.
 
-A query is SPECIFIC if:
-1. We can confidently determine what to search for
-2. The search intent is unambiguous (or ambiguity doesn't matter much)
-3. We have enough information to create targeted search parameters
+THE REAL QUESTION CONCEPT:
+Users often ask imprecise questions. Their REAL question (what they actually want to know) may differ from what they typed. Your job is to identify when the gap between their typed question and their REAL question is too large for the Query Enhancer to bridge without clarification.
 
-CRITICAL DISTINCTIONS TO CHECK:
-- Person name WITHOUT context → VAGUE (could mean BY them or ABOUT them)
-  - "Chris Johnson" → VAGUE
-  - "articles BY Chris Johnson" → SPECIFIC
-  - "articles MENTIONING Chris Johnson" → SPECIFIC
-  
-- Topic without WHAT aspect → Often VAGUE
-  - Just a case name → VAGUE (which aspect?)
-  - "Case X's impact on Y" → SPECIFIC (clear aspect)
-  
-- Overly broad → May be VAGUE
-  - "recent changes" → VAGUE (changes to what?)
-  - "recent changes to settlement procedures" → SPECIFIC
+IMPORTANT - USER CONTEXT:
+The user is a California workers' compensation attorney. When asking follow-up questions, assume they understand legal terminology, acronyms (QME, IMR, SIBTF, LC, PD, WCAB, etc.), and the workers' compensation system. Ask professional, attorney-to-attorney clarifying questions - do not explain basic legal concepts or treat them as non-experts.
 
-When VAGUE, craft a clarifying question that:
-1. Identifies the ambiguity/missing info
-2. Offers 2-3 specific alternatives
-3. Helps narrow the search effectively
+TO MAKE THIS DETERMINATION, YOU NEED TO KNOW:
+The Query Enhancer can generate search parameters using these fields:
+- posted_by: Filter by WHO SENT the message (listserv poster)
+- author_first_name + author_last_name: Filter by WITNESS/EXPERT mentioned (QMEs, doctors, medical experts)
+- keyword: Simple keyword search
+- keywords_all: Must contain ALL these keywords (comma-separated)
+- keywords_any: Must contain at least ONE of these keywords (comma-separated) - PRIMARY TOOL for broad searches
+- keywords_phrase: Exact phrase match
+- keywords_exclude: Must NOT contain these keywords
+- listserv: Filter by list ("all", "lawnet", "lavaaa", "lamaaa", "scaaa")
+- attachment_filter: Filter by attachments ("all", "with_attachments", "without_attachments")
+- date_from / date_to: Filter by date range (YYYY-MM-DD)
+- search_in: Search "subject_and_body" or "subject_only"
 
-Return JSON:
+WHEN TO ASK FOLLOW-UPS:
+Ask a follow-up ONLY when:
+- The Query Enhancer would generate SIGNIFICANTLY different search parameters depending on interpretation
+- Missing information would cause the Query Enhancer to make assumptions that could lead to irrelevant results
+- The question is so broad that any search would return too many irrelevant messages
+
+WHEN NOT TO ASK:
+- The question is clear enough for an expert attorney to infer the REAL question
+- Common legal terms/acronyms are used (QME, IMR, SIBTF, LC, PD, etc.) - trust your expertise
+- The Query Enhancer can reasonably infer the REAL question from context
+- Person names with clear intent markers ("BY X" = posted_by, "QME Dr. X" = author fields)
+
+YOUR EXPERTISE:
+As an expert California workers' compensation attorney, you recognize when a question is clear enough, even if it's not perfectly precise. Trust that expertise. Only ask follow-ups when genuinely necessary to identify the REAL question.
+
+USER'S TYPED QUESTION: "{request.intent}"
+
+Determine if this query needs clarification before proceeding to Query Enhancement. Return JSON:
 {{
   "is_vague": true/false,
-  "follow_up_question": "clarifying question" OR null
+  "follow_up_question": "specific clarifying question that helps identify the REAL question" OR null,
+  "reasoning": "brief explanation of why vague or why clear"
 }}"""
 
         vagueness_response = orchestrator.client.messages.create(
@@ -705,9 +720,9 @@ async def run_search_async(search_fields: Optional[dict], ai_intent: Optional[st
         
         print(f"📝 Generated AI intent from search fields: {ai_intent}", flush=True)
     
-    # Create search record
+    # Create search record (store ai_intent as REAL question)
     print(f"🔵 Creating search in database", flush=True)
-    search_id = orchestrator.db.create_search(search_params)
+    search_id = orchestrator.db.create_search(search_params, ai_intent=ai_intent)
     orchestrator.db.update_search_status(search_id, 'running')
     print(f"🔵 Search {search_id} created, spawning worker", flush=True)
     

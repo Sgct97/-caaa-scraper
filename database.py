@@ -54,14 +54,21 @@ class Database:
     # SEARCHES
     # ============================================================
     
-    def create_search(self, search_params: SearchParams) -> str:
+    def create_search(self, search_params: SearchParams, ai_intent: Optional[str] = None) -> str:
         """
         Create a new search record
+        
+        Args:
+            search_params: SearchParams object
+            ai_intent: The REAL question (for relevance analysis)
         
         Returns:
             search_id (UUID as string)
         """
         form_data = search_params.to_form_data()
+        # Store ai_intent in search_params JSONB for later retrieval
+        if ai_intent:
+            form_data['ai_intent'] = ai_intent
         print(f"🔍 DEBUG create_search - form_data: {form_data}", flush=True)
         
         with self.get_connection() as conn:

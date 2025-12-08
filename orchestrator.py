@@ -225,6 +225,15 @@ class CAAAOrchestrator:
     def _analyze_relevance(self, search_id: str, messages: List[Dict], user_query: str) -> int:
         """Analyze message relevance with AI"""
         
+        # Get REAL question from database (stored as ai_intent in search_params)
+        search_info = self.db.get_search_info(search_id)
+        real_question = user_query  # Fallback to user_query if not found
+        if search_info and search_info.get('search_params'):
+            stored_intent = search_info['search_params'].get('ai_intent')
+            if stored_intent:
+                real_question = stored_intent
+                print(f"📝 Using REAL question from database: {real_question[:80]}...")
+        
         relevant_count = 0
         
         for i, msg in enumerate(messages):
@@ -244,10 +253,11 @@ class CAAAOrchestrator:
                 print(f"    ✓ Already analyzed (skipping)")
                 continue
             
-            # Analyze with AI
+            # Analyze with AI (pass both REAL question and search keywords)
             try:
                 analysis = self.ai_analyzer.analyze_relevance(
                     message=msg,
+                    real_question=real_question,
                     search_keyword=user_query
                 )
                 
