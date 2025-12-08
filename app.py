@@ -686,12 +686,15 @@ async def run_search_async(search_fields: Optional[dict], ai_intent: Optional[st
     search_params.max_messages = max_messages
     search_params.max_pages = max_pages
     
-    # If no AI intent provided, construct one from search parameters for relevance analysis
-    if not ai_intent or ai_intent.strip() == "":
+    # CRITICAL: If user provided manual search_fields, reconstruct ai_intent from ACTUAL fields being used
+    # This ensures the REAL question matches what the user is actually searching for, not the original query
+    if search_fields:
+        # User is using manual fields (either applied AI suggestions or manually entered)
+        # Reconstruct ai_intent from the ACTUAL search parameters to ensure relevance analysis uses correct question
         intent_parts = []
         has_content_criteria = False
         
-        # Check for content-based criteria
+        # Content-based criteria
         if search_params.keywords_all:
             intent_parts.append(f"messages containing all: {search_params.keywords_all}")
             has_content_criteria = True
@@ -701,22 +704,129 @@ async def run_search_async(search_fields: Optional[dict], ai_intent: Optional[st
         if search_params.keywords_any:
             intent_parts.append(f"containing: {search_params.keywords_any}")
             has_content_criteria = True
+        if search_params.keyword:
+            intent_parts.append(f"keyword: {search_params.keyword}")
+            has_content_criteria = True
+        if search_params.keywords_exclude:
+            intent_parts.append(f"excluding: {search_params.keywords_exclude}")
+            has_content_criteria = True
         
-        # Author criteria
+        # Author/Person criteria
         author_criteria = []
-        if search_params.author_last_name:
-            author_criteria.append(f"author: {search_params.author_last_name}")
         if search_params.posted_by:
             author_criteria.append(f"posted by: {search_params.posted_by}")
+        if search_params.author_first_name and search_params.author_last_name:
+            author_criteria.append(f"expert: {search_params.author_first_name} {search_params.author_last_name}")
+        elif search_params.author_first_name:
+            author_criteria.append(f"expert first name: {search_params.author_first_name}")
+        elif search_params.author_last_name:
+            author_criteria.append(f"expert: {search_params.author_last_name}")
+        
+        # Temporal criteria
+        temporal_criteria = []
+        if search_params.date_from:
+            temporal_criteria.append(f"from {search_params.date_from}")
+        if search_params.date_to:
+            temporal_criteria.append(f"until {search_params.date_to}")
+        
+        # Listserv filter
+        listserv_info = ""
+        if search_params.listserv and search_params.listserv != "all":
+            listserv_info = f" on {search_params.listserv} listserv"
+        
+        # Attachment filter
+        attachment_info = ""
+        if search_params.attachment_filter == "with_attachments":
+            attachment_info = " with attachments"
+        elif search_params.attachment_filter == "without_attachments":
+            attachment_info = " without attachments"
+        
+        # Search scope
+        search_scope = ""
+        if search_params.search_in == "subject_only":
+            search_scope = " (subject line only)"
+        
+        # Construct the REAL question from all criteria
+        all_criteria = intent_parts + author_criteria + temporal_criteria
+        base_intent = ", ".join(all_criteria) if all_criteria else "all messages"
         
         # If ONLY author criteria (no content keywords), make it clear we want ALL messages from that person
-        if author_criteria and not has_content_criteria:
-            ai_intent = f"Find ALL messages from {', '.join(author_criteria)}. Any message from this person is relevant regardless of content."
-        elif intent_parts or author_criteria:
-            # Has content criteria - combine everything normally
-            ai_intent = "Looking for " + ", ".join(intent_parts + author_criteria)
+        if author_criteria and not has_content_criteria and not temporal_criteria:
+            ai_intent = f"Find ALL messages from {', '.join(author_criteria)}{listserv_info}{attachment_info}{search_scope}. Any message from this person is relevant regardless of content."
+        elif all_criteria:
+            ai_intent = f"Looking for {base_intent}{listserv_info}{attachment_info}{search_scope}"
         else:
-            ai_intent = "all messages matching search criteria"
+            ai_intent = f"all messages matching search criteria{listserv_info}{attachment_info}{search_scope}"
+        
+        print(f"📝 Reconstructed AI intent from ACTUAL search fields: {ai_intent}", flush=True)
+    # If no AI intent provided and no search_fields, construct one from search parameters for relevance analysis
+    elif not ai_intent or ai_intent.strip() == "":
+        intent_parts = []
+        has_content_criteria = False
+        
+        # Content-based criteria
+        if search_params.keywords_all:
+            intent_parts.append(f"messages containing all: {search_params.keywords_all}")
+            has_content_criteria = True
+        if search_params.keywords_phrase:
+            intent_parts.append(f"exact phrase: {search_params.keywords_phrase}")
+            has_content_criteria = True
+        if search_params.keywords_any:
+            intent_parts.append(f"containing: {search_params.keywords_any}")
+            has_content_criteria = True
+        if search_params.keyword:
+            intent_parts.append(f"keyword: {search_params.keyword}")
+            has_content_criteria = True
+        if search_params.keywords_exclude:
+            intent_parts.append(f"excluding: {search_params.keywords_exclude}")
+            has_content_criteria = True
+        
+        # Author/Person criteria
+        author_criteria = []
+        if search_params.posted_by:
+            author_criteria.append(f"posted by: {search_params.posted_by}")
+        if search_params.author_first_name and search_params.author_last_name:
+            author_criteria.append(f"expert: {search_params.author_first_name} {search_params.author_last_name}")
+        elif search_params.author_first_name:
+            author_criteria.append(f"expert first name: {search_params.author_first_name}")
+        elif search_params.author_last_name:
+            author_criteria.append(f"expert: {search_params.author_last_name}")
+        
+        # Temporal criteria
+        temporal_criteria = []
+        if search_params.date_from:
+            temporal_criteria.append(f"from {search_params.date_from}")
+        if search_params.date_to:
+            temporal_criteria.append(f"until {search_params.date_to}")
+        
+        # Listserv filter
+        listserv_info = ""
+        if search_params.listserv and search_params.listserv != "all":
+            listserv_info = f" on {search_params.listserv} listserv"
+        
+        # Attachment filter
+        attachment_info = ""
+        if search_params.attachment_filter == "with_attachments":
+            attachment_info = " with attachments"
+        elif search_params.attachment_filter == "without_attachments":
+            attachment_info = " without attachments"
+        
+        # Search scope
+        search_scope = ""
+        if search_params.search_in == "subject_only":
+            search_scope = " (subject line only)"
+        
+        # Construct the REAL question from all criteria
+        all_criteria = intent_parts + author_criteria + temporal_criteria
+        base_intent = ", ".join(all_criteria) if all_criteria else "all messages"
+        
+        # If ONLY author criteria (no content keywords), make it clear we want ALL messages from that person
+        if author_criteria and not has_content_criteria and not temporal_criteria:
+            ai_intent = f"Find ALL messages from {', '.join(author_criteria)}{listserv_info}{attachment_info}{search_scope}. Any message from this person is relevant regardless of content."
+        elif all_criteria:
+            ai_intent = f"Looking for {base_intent}{listserv_info}{attachment_info}{search_scope}"
+        else:
+            ai_intent = f"all messages matching search criteria{listserv_info}{attachment_info}{search_scope}"
         
         print(f"📝 Generated AI intent from search fields: {ai_intent}", flush=True)
     
