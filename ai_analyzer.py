@@ -163,69 +163,6 @@ Return JSON:
   "confidence": 0.0-1.0,
   "reasoning": "How this message relates to (or fails to relate to) the REAL question"
 }}"""
-
-CONTEXT:
-This message is from a professional legal discussion forum where experienced workers' compensation attorneys discuss case strategies, statutory interpretations, procedural questions, and share practical insights from their practice.
-
-USER'S LEGAL QUESTION:
-"{search_keyword}"
-{f'ADDITIONAL CONTEXT: {context}' if context else ''}
-
-LISTSERV MESSAGE:
-From: {from_name}
-Subject: {subject}
-
-{body}
-
-🚨 CRITICAL RULE - AUTHOR-FOCUSED SEARCHES 🚨
-IF the user's question is ONLY asking for messages FROM or MENTIONING a specific person (examples: "messages from Ray Saedi", "posts by John Smith", "find ALL messages from author: Johnson", "anything mentioning Sarah"), then:
-- IGNORE all content analysis rules below
-- Mark as RELEVANT (is_relevant: true) if the message is FROM that person OR clearly MENTIONS that person
-- Set confidence to 0.95 if from that person, 0.85 if mentioning them
-- Reasoning: Simply state "Message from [name]" or "Message mentions [name]"
-- DO NOT judge content quality, substantiveness, or legal insight
-
-ANALYSIS REQUIREMENTS (for content-based searches):
-
-Evaluate whether this message provides actionable legal insight that helps answer the user's question. Consider:
-
-1. SUBSTANTIVE LEGAL CONTENT: Does the message discuss the specific legal doctrine, statute, regulation, or procedural rule that the question addresses?
-
-2. PRACTICAL GUIDANCE: Does it provide real-world experience, strategic advice, or tactical recommendations relevant to the question?
-
-3. AUTHORITATIVE REFERENCES: Does it cite applicable case law, Labor Code sections, WCAB decisions, regulations, or administrative directives that bear on the question?
-
-4. PROCEDURAL CLARITY: If the question involves procedure, does the message explain the actual steps, timing, filing requirements, or jurisdictional issues?
-
-5. DIRECT RESPONSIVENESS: Does the attorney appear to be directly answering this question or a materially identical question?
-
-MARK AS RELEVANT (is_relevant: true) IF:
-- The message directly addresses the legal issue raised in the question
-- It provides a legal answer, analysis, or framework that resolves the question
-- It discusses the same procedural mechanism, statute, or rule that the question concerns
-- It contains practical attorney experience handling this exact scenario
-- It cites binding or persuasive authority that answers the question
-
-MARK AS NOT RELEVANT (is_relevant: false) IF:
-- The message merely contains keywords but discusses an unrelated issue
-- It's a tangential discussion that doesn't help answer the question
-- The legal context is different (e.g., different benefit type, different procedural posture)
-- It's administrative chatter, meeting announcements, or off-topic discussion
-
-CONFIDENCE SCORING:
-0.95-1.0: This message directly answers the question with legal authority or clear guidance
-0.80-0.94: Highly relevant - discusses the exact issue with substantive analysis
-0.60-0.79: Relevant - provides useful related information that partially addresses the question
-0.40-0.59: Marginally relevant - touches on related concepts but doesn't answer the question
-0.00-0.39: Not relevant - different topic or only superficial keyword overlap
-
-Respond in JSON format:
-{{
-  "is_relevant": true/false,
-  "confidence": 0.0-1.0,
-  "reasoning": "Explain specifically what legal information this message provides (or fails to provide) in relation to the user's question"
-}}
-"""
         return prompt
     
     def _parse_response(self, response) -> Dict:
