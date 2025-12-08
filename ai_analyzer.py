@@ -207,6 +207,145 @@ Return JSON:
         rate = cost_per_1k.get(model, 0.001)  # Default to gpt-3.5-turbo rate
         return (tokens / 1000) * rate
     
+    def synthesize_doctor_evaluation(self, doctor_name: str, messages: list[Dict]) -> Dict:
+        """
+        Synthesize all messages about a doctor to determine if they are "good" or "bad"
+        from a California workers' compensation attorney's perspective.
+        
+        Args:
+            doctor_name: Name of the doctor being evaluated
+            messages: List of message dicts with keys: subject, body, from_name, etc.
+        
+        Returns:
+            Dict with:
+                - score: int (0-100) - Overall quality score
+                - evaluation: str ("good", "bad", or "mixed")
+                - reasoning: str - Detailed explanation
+                - cost_usd: float - API cost
+        """
+        if not messages:
+            return {
+                'score': 0,
+                'evaluation': 'unknown',
+                'reasoning': 'No messages found about this doctor.',
+                'cost_usd': 0.0
+            }
+        
+        prompt = self._build_synthesis_prompt(doctor_name, messages)
+        
+        try:
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=2000,
+                system="You are an expert California workers' compensation attorney evaluating medical experts.",
+                messages=[{"role": "user", "content": prompt}]
+            )
+            
+            # Parse response
+            response_text = response.content[0].text
+            
+            # Extract JSON from response
+            json_match = regex.search(r'\{.*\}', response_text, regex.DOTALL)
+            if json_match:
+                result = json.loads(json_match.group())
+            else:
+                # Fallback parsing
+                result = {
+                    'score': 50,
+                    'evaluation': 'mixed',
+                    'reasoning': response_text
+                }
+            
+            # Validate and normalize score
+            score = int(result.get('score', 50))
+            score = max(0, min(100, score))  # Clamp to 0-100
+            
+            evaluation = result.get('evaluation', 'mixed').lower()
+            if evaluation not in ['good', 'bad', 'mixed']:
+                evaluation = 'mixed'
+            
+            # Track usage
+            tokens_used = response.usage.input_tokens + response.usage.output_tokens
+            self.total_tokens_used += tokens_used
+            cost = self._calculate_cost(tokens_used, self.model)
+            self.total_cost_usd += cost
+            
+            return {
+                'score': score,
+                'evaluation': evaluation,
+                'reasoning': result.get('reasoning', response_text),
+                'cost_usd': cost
+            }
+            
+        except Exception as e:
+            print(f"⚠️  Synthesis error: {e}", flush=True)
+            import traceback
+            traceback.print_exc()
+            return {
+                'score': 50,
+                'evaluation': 'error',
+                'reasoning': f'Error during synthesis: {str(e)}',
+                'cost_usd': 0.0
+            }
+    
+    def _build_synthesis_prompt(self, doctor_name: str, messages: list[Dict]) -> str:
+        """Build the synthesis prompt for doctor evaluation"""
+        
+        # Format messages for prompt
+        messages_text = ""
+        for i, msg in enumerate(messages[:50], 1):  # Limit to 50 messages to avoid token limits
+            messages_text += f"\n--- Message {i} ---\n"
+            messages_text += f"From: {msg.get('from_name', 'Unknown')}\n"
+            messages_text += f"Subject: {msg.get('subject', 'No subject')}\n"
+            messages_text += f"Body: {msg.get('body', '')[:1000]}\n"  # Limit body length
+        
+        prompt = f"""You are an expert California workers' compensation attorney evaluating a medical expert/doctor based on discussions from a professional legal listserv.
+
+DOCTOR BEING EVALUATED: {doctor_name}
+
+You have access to {len(messages)} messages from experienced California workers' compensation attorneys discussing this doctor. Your job is to synthesize ALL of these messages to determine:
+
+1. Is this doctor "good" or "bad" from an attorney's perspective?
+2. What is their overall quality score (0-100)?
+3. What are the key factors attorneys mention?
+
+EVALUATION CRITERIA (from attorney perspective):
+- Quality of medical reports (thoroughness, accuracy, clarity)
+- Consistency with legal standards and regulations
+- Responsiveness to attorney requests
+- Credibility and reliability
+- Patterns of positive vs negative experiences
+- Any red flags or concerns mentioned
+- Overall reputation among attorneys
+
+MESSAGES TO ANALYZE:
+{messages_text}
+
+YOUR TASK:
+Synthesize ALL messages to provide a comprehensive evaluation. Consider:
+- What patterns emerge across multiple messages?
+- Are there consistent positive or negative themes?
+- What specific strengths or weaknesses are mentioned?
+- How do attorneys generally view this doctor?
+
+Return JSON:
+{{
+  "score": <0-100 integer>,
+  "evaluation": "good" | "bad" | "mixed",
+  "reasoning": "<detailed explanation of your evaluation, citing specific examples from the messages>"
+}}
+
+SCORING GUIDE:
+- 80-100: Excellent doctor, highly recommended by attorneys
+- 60-79: Good doctor with some positive feedback
+- 40-59: Mixed reviews, some concerns
+- 20-39: Generally negative feedback, significant concerns
+- 0-19: Poor doctor, multiple red flags, not recommended
+
+Be thorough and cite specific examples from the messages in your reasoning."""
+        
+        return prompt
+    
     def get_usage_stats(self) -> Dict:
         """Get cumulative usage statistics"""
         return {

@@ -103,6 +103,40 @@
             <div class="max-w-6xl mx-auto" x-data="searchApp()" x-init="init()">
                 <div class="glass rounded-2xl p-8 search-box-shadow">
                     
+                    <!-- Query Type Selector -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                            <i class="fas fa-list-ul text-primary-500 mr-2"></i>
+                            Query Type
+                        </label>
+                        <select 
+                            x-model="queryType"
+                            @change="queryTypeChanged"
+                            class="w-full md:w-64 px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all bg-white font-semibold text-gray-700"
+                            :disabled="searching">
+                            <option value="general">General Question</option>
+                            <option value="doctor_evaluation">Doctor Good/Bad</option>
+                        </select>
+                    </div>
+
+                    <!-- Doctor Name Input (Only shown for Doctor Good/Bad) -->
+                    <div x-show="queryType === 'doctor_evaluation'" class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                            <i class="fas fa-user-md text-primary-500 mr-2"></i>
+                            Doctor Name
+                        </label>
+                        <input 
+                            type="text"
+                            x-model="doctorName"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition-all"
+                            placeholder="e.g., Dr. John Smith or Smith"
+                            :disabled="searching">
+                        <p class="mt-2 text-xs text-gray-500">
+                            <i class="fas fa-info-circle text-blue-500 mr-1"></i>
+                            Enter the doctor's name. The system will search for all messages mentioning this doctor and provide an evaluation.
+                        </p>
+                    </div>
+                    
                     <!-- AI Intent Box (Always Visible) -->
                     <div class="mb-6">
                         <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
@@ -505,6 +539,10 @@
     <script>
         function searchApp() {
             return {
+                // Query Type
+                queryType: 'general',
+                doctorName: '',
+                
                 // AI Intent
                 aiIntent: '',
                 aiAnalyzing: false,
@@ -737,25 +775,57 @@
                     }
                 },
                 
+                queryTypeChanged() {
+                    // Reset doctor name when switching away from doctor evaluation
+                    if (this.queryType !== 'doctor_evaluation') {
+                        this.doctorName = '';
+                    }
+                    // Clear AI conversation when switching query types
+                    this.aiConversation = [];
+                    this.aiIntent = '';
+                },
+                
                 async submitSearch() {
-                    if (!this.hasAnySearchCriteria()) return;
+                    // For doctor evaluation, require doctor name
+                    if (this.queryType === 'doctor_evaluation' && !this.doctorName.trim()) {
+                        this.statusMessage = 'Please enter a doctor name for evaluation.';
+                        this.statusType = 'error';
+                        return;
+                    }
+                    
+                    // For general queries, require search criteria
+                    if (this.queryType === 'general' && !this.hasAnySearchCriteria()) {
+                        return;
+                    }
                     
                     this.searching = true;
                     this.statusMessage = '';
                     
                     try {
+                        // Build request body based on query type
+                        const requestBody = {
+                            query_type: this.queryType,
+                            max_messages: this.maxMessages,
+                            max_pages: 10
+                        };
+                        
+                        if (this.queryType === 'doctor_evaluation') {
+                            // For doctor evaluation, use doctor name as AI intent
+                            requestBody.ai_intent = `Evaluate doctor: ${this.doctorName.trim()}`;
+                            requestBody.use_ai_enhancement = true;
+                        } else {
+                            // For general queries, use existing logic
+                            requestBody.search_fields = this.searchFields;
+                            requestBody.ai_intent = this.aiIntent;
+                            requestBody.use_ai_enhancement = false;
+                        }
+                        
                         const response = await fetch('/api/search', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                             },
-                            body: JSON.stringify({
-                                search_fields: this.searchFields,
-                                ai_intent: this.aiIntent,
-                                use_ai_enhancement: false,  // Already manually configured
-                                max_messages: this.maxMessages,
-                                max_pages: 10
-                            })
+                            body: JSON.stringify(requestBody)
                         });
                         
                         const data = await response.json();

@@ -268,6 +268,41 @@ class Database:
                 
                 return cur.fetchone()[0]
     
+    def save_synthesis_result(self, search_id: str, synthesis: dict):
+        """
+        Save synthesis result for doctor evaluation searches
+        
+        Args:
+            search_id: Search ID
+            synthesis: Dict with keys: score, evaluation, reasoning, cost_usd
+        """
+        with self.get_connection() as conn:
+            with conn.cursor() as cur:
+                # Update search_params JSONB to include synthesis result
+                cur.execute("""
+                    UPDATE searches
+                    SET search_params = search_params || %s::jsonb
+                    WHERE id = %s
+                """, (
+                    Json({'synthesis_result': synthesis}),
+                    search_id
+                ))
+    
+    def get_synthesis_result(self, search_id: str) -> Optional[dict]:
+        """Get synthesis result for a search"""
+        with self.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT search_params->'synthesis_result' as synthesis_result
+                    FROM searches
+                    WHERE id = %s
+                """, (search_id,))
+                
+                result = cur.fetchone()
+                if result and result[0]:
+                    return result[0]
+                return None
+    
     # ============================================================
     # QUERIES
     # ============================================================

@@ -115,6 +115,7 @@ templates = Jinja2Templates(directory="templates")
 # ============================================================
 
 class SearchRequest(BaseModel):
+    query_type: str = "general"  # "general" or "doctor_evaluation"
     search_fields: Optional[dict] = None
     ai_intent: Optional[str] = None
     use_ai_enhancement: bool = False
@@ -157,16 +158,22 @@ async def create_search(search_req: SearchRequest, background_tasks: BackgroundT
     try:
         # DEBUG: Log what we received
         print(f"📥 Received search request:")
+        print(f"   query_type: {search_req.query_type}")
         print(f"   search_fields: {search_req.search_fields}")
         print(f"   ai_intent: {search_req.ai_intent}")
         print(f"   use_ai_enhancement: {search_req.use_ai_enhancement}")
         
-        # Validate that we have either search fields or AI intent
+        # Validate based on query type
+        if search_req.query_type == "doctor_evaluation":
+            if not search_req.ai_intent:
+                raise HTTPException(status_code=400, detail="Doctor evaluation requires ai_intent with doctor name")
+        else:
         if not search_req.search_fields and not search_req.ai_intent:
             raise HTTPException(status_code=400, detail="Must provide search fields or AI intent")
         
         # Start search in background
         search_id = await run_search_async(
+            search_req.query_type,
             search_req.search_fields,
             search_req.ai_intent,
             search_req.use_ai_enhancement,
@@ -228,15 +235,24 @@ async def get_search_results(search_id: str):
         # Get stats
         stats = orchestrator.db.get_search_stats(search_id)
         
+        # Get synthesis result if this is a doctor evaluation
+        synthesis_result = orchestrator.db.get_synthesis_result(search_id)
+        
         # Convert all database results to JSON-safe format
-        return convert_decimals({
+        response = {
             "success": True,
             "search_id": search_id,
             "query": search_info.get('keyword'),
             "status": search_info['status'],
             "stats": dict(stats) if stats else {},
             "results": [dict(r) for r in results]
-        }, for_json_api=True)
+        }
+        
+        # Add synthesis result if available
+        if synthesis_result:
+            response["synthesis"] = synthesis_result
+        
+        return convert_decimals(response, for_json_api=True)
         
     except HTTPException:
         raise
@@ -282,13 +298,22 @@ async def get_search_results_json(search_id: str):
         results = orchestrator.db.get_relevant_results(search_id)
         stats = orchestrator.db.get_search_stats(search_id)
         
-        return {
+        # Get synthesis result if this is a doctor evaluation
+        synthesis_result = orchestrator.db.get_synthesis_result(search_id)
+        
+        response = {
             "success": True,
             "search_id": search_id,
             "search_info": convert_decimals(dict(search_info)) if search_info else {},
             "results": convert_decimals([dict(r) for r in results]) if results else [],
             "stats": convert_decimals(dict(stats)) if stats else {}
         }
+        
+        # Add synthesis result if available
+        if synthesis_result:
+            response["synthesis"] = synthesis_result
+        
+        return response
     except HTTPException:
         raise
     except Exception as e:
@@ -624,7 +649,7 @@ async def refresh_cookies_page():
 # Helper Functions
 # ============================================================
 
-async def run_search_async(search_fields: Optional[dict], ai_intent: Optional[str], 
+async def run_search_async(query_type: str, search_fields: Optional[dict], ai_intent: Optional[str], 
                            use_ai: bool, max_messages: int, max_pages: int) -> str:
     """Run search asynchronously"""
     
@@ -677,7 +702,14 @@ async def run_search_async(search_fields: Optional[dict], ai_intent: Optional[st
         )
     elif use_ai and ai_intent and orchestrator.query_enhancer:
         # Use AI to generate search params
-        search_params = orchestrator.query_enhancer.enhance_query(ai_intent)
+        # For doctor evaluation, force AI enhancement to find doctor
+        if query_type == "doctor_evaluation":
+            # Extract doctor name from ai_intent (format: "Evaluate doctor: Dr. John Smith")
+            doctor_name = ai_intent.replace("Evaluate doctor:", "").strip()
+            # Use QueryEnhancer to find the doctor
+            search_params = orchestrator.query_enhancer.enhance_query(f"Find all messages mentioning doctor {doctor_name}")
+        else:
+            search_params = orchestrator.query_enhancer.enhance_query(ai_intent)
     else:
         # Fallback to simple keyword from AI intent
         search_params = SearchParams(keyword=ai_intent or "")
@@ -858,7 +890,8 @@ async def run_search_async(search_fields: Optional[dict], ai_intent: Optional[st
             '/srv/caaa_scraper/venv/bin/python',
             '/srv/caaa_scraper/run_search_worker.py',
             search_id,
-            ai_intent
+            ai_intent,
+            query_type  # Pass query_type to worker
         ], stdout=log_file, stderr=log_file, env=worker_env)
     
     return search_id

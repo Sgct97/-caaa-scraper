@@ -16,11 +16,12 @@ from database import Database
 
 def main():
     if len(sys.argv) < 3:
-        print("Usage: run_search_worker.py <search_id> <query>")
+        print("Usage: run_search_worker.py <search_id> <query> [query_type]")
         sys.exit(1)
     
     search_id = sys.argv[1]
     query = sys.argv[2]
+    query_type = sys.argv[3] if len(sys.argv) > 3 else "general"
     
     print(f"🔍 Worker started for search {search_id}", flush=True)
     
@@ -106,13 +107,56 @@ def main():
         orchestrator.db.update_search_status(search_id, 'running', total_found=len(messages))
         print(f"✓ Stored {len(messages)} messages in database", flush=True)
         
-        # Analyze relevance with AI
-        if orchestrator.ai_analyzer and len(messages) > 0:
-            print(f"🤖 Starting AI analysis...", flush=True)
-            relevant_count = orchestrator._analyze_relevance(search_id, messages, query)
-            print(f"✓ AI analysis complete: {relevant_count} relevant", flush=True)
+        # Handle doctor evaluation vs general search
+        if query_type == "doctor_evaluation":
+            # Extract doctor name from query (format: "Evaluate doctor: Dr. John Smith")
+            doctor_name = query.replace("Evaluate doctor:", "").strip()
+            
+            # Synthesize all messages about the doctor
+            if orchestrator.ai_analyzer and len(messages) > 0:
+                print(f"🤖 Starting doctor evaluation synthesis for: {doctor_name}", flush=True)
+                try:
+                    synthesis = orchestrator.ai_analyzer.synthesize_doctor_evaluation(doctor_name, messages)
+                    
+                    # Store synthesis result in database
+                    orchestrator.db.save_synthesis_result(search_id, synthesis)
+                    
+                    print(f"✓ Synthesis complete:", flush=True)
+                    print(f"   Score: {synthesis['score']}/100", flush=True)
+                    print(f"   Evaluation: {synthesis['evaluation']}", flush=True)
+                except Exception as e:
+                    print(f"⚠️  Synthesis error: {e}", flush=True)
+                    import traceback
+                    traceback.print_exc()
+                    # Continue with search even if synthesis fails
+                    synthesis = {
+                        'score': 0,
+                        'evaluation': 'error',
+                        'reasoning': f'Error during synthesis: {str(e)}'
+                    }
+                    orchestrator.db.save_synthesis_result(search_id, synthesis)
+                
+                # Mark as relevant count = all messages (for doctor evaluation, all are relevant)
+                relevant_count = len(messages)
+            elif len(messages) == 0:
+                print(f"⚠️  No messages found for doctor: {doctor_name}", flush=True)
+                synthesis = {
+                    'score': 0,
+                    'evaluation': 'unknown',
+                    'reasoning': 'No messages found about this doctor.'
+                }
+                orchestrator.db.save_synthesis_result(search_id, synthesis)
+                relevant_count = 0
+            else:
+                relevant_count = len(messages)
         else:
-            relevant_count = len(messages)
+            # Standard relevance analysis
+            if orchestrator.ai_analyzer and len(messages) > 0:
+                print(f"🤖 Starting AI analysis...", flush=True)
+                relevant_count = orchestrator._analyze_relevance(search_id, messages, query)
+                print(f"✓ AI analysis complete: {relevant_count} relevant", flush=True)
+            else:
+                relevant_count = len(messages)
         
         # Mark complete
         orchestrator.db.update_search_status(search_id, 'completed', total_relevant=relevant_count)
