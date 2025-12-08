@@ -137,8 +137,8 @@
                         </p>
                     </div>
                     
-                    <!-- AI Intent Box (Always Visible) -->
-                    <div class="mb-6">
+                    <!-- AI Intent Box (Only shown for General Question) -->
+                    <div x-show="queryType === 'general'" class="mb-6">
                         <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
                             <i class="fas fa-brain text-primary-500 mr-2"></i>
                             What are you trying to find? (Optional AI Assistant)
@@ -159,7 +159,7 @@
                             <button 
                                 type="button"
                                 @click="askAI"
-                                x-show="aiIntent.trim().length > 0"
+                                x-show="queryType === 'general' && aiIntent.trim().length > 0"
                                 class="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-semibold rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all"
                                 :disabled="searching || aiAnalyzing">
                                 <span x-show="!aiAnalyzing">
@@ -258,9 +258,9 @@
                         </div>
                     </div>
 
-                    <!-- Manual Search Fields -->
+                    <!-- Manual Search Fields (Only shown for General Question) -->
                     <form @submit.prevent="submitSearch">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div x-show="queryType === 'general'" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             
                             <!-- First Name (Witness/Expert) -->
                             <div>
@@ -437,7 +437,7 @@
                             </div>
                         </div>
                         
-                        <!-- Options & Submit -->
+                        <!-- Options & Submit (Always visible) -->
                         <div class="flex items-center justify-between pt-6 border-t">
                             <div class="flex items-center space-x-3">
                                 <label class="text-sm font-semibold text-gray-700">
@@ -460,10 +460,10 @@
                             <button 
                                 type="submit"
                                 class="px-8 py-3 bg-gradient-to-r from-primary-600 to-purple-600 text-white font-semibold rounded-xl hover:from-primary-700 hover:to-purple-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                                :disabled="searching || !hasAnySearchCriteria()">
+                                :disabled="searching || (queryType === 'general' && !hasAnySearchCriteria()) || (queryType === 'doctor_evaluation' && !doctorName.trim())">
                                 <span x-show="!searching" class="flex items-center">
-                                    <i class="fas fa-search mr-2"></i>
-                                    Search & Analyze
+                                    <i class="fas mr-2" :class="queryType === 'doctor_evaluation' ? 'fa-user-md' : 'fa-search'"></i>
+                                    <span x-text="queryType === 'doctor_evaluation' ? 'Evaluate Doctor' : 'Search & Analyze'"></span>
                                 </span>
                                 <span x-show="searching" class="flex items-center">
                                     <i class="fas fa-spinner fa-spin mr-2"></i>
