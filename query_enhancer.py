@@ -6,7 +6,8 @@ Converts plain English user queries into optimized SearchParams
 
 import os
 import json
-from openai import OpenAI
+import anthropic
+import re as regex
 from typing import Dict, Optional
 from datetime import date, timedelta
 import re
@@ -26,12 +27,11 @@ class QueryEnhancer:
             model: Model to use (default: gpt-4o-mini)
         """
         # Use Vast.ai GPU with Qwen 32B via SSH tunnel for fast, HIPAA-compliant processing
-        ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434/v1")
-        self.client = OpenAI(
-            base_url=ollama_url,
-            api_key="ollama"
-        )
-        self.model = "qwen2.5:32b"
+        api_key = os.getenv("ANTHROPIC_API_KEY")
+        if not api_key:
+            raise ValueError("ANTHROPIC_API_KEY not set")
+        self.client = anthropic.Anthropic(api_key=api_key)
+        self.model = "claude-sonnet-4-20250514"
     
     def enhance_query(self, user_query: str) -> SearchParams:
         """
@@ -55,21 +55,11 @@ class QueryEnhancer:
         
         try:
             # Call OpenAI
-            response = self.client.chat.completions.create(
+            response = self.client.messages.create(
                 model=self.model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are an expert at California workers' compensation law and legal research. Your job is to translate plain English queries into optimized search parameters for a legal listserv database."
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ],
-                response_format={"type": "json_object"},
-                temperature=0.0,
-                max_tokens=800
+                max_tokens=800,
+                system="You are an expert at California workers' compensation law and legal research. Your job is to translate plain English queries into optimized search parameters for a legal listserv database. Always respond with valid JSON.",
+                messages=[{"role": "user", "content": prompt}]
             )
             
             # Parse response
@@ -237,7 +227,10 @@ CRITICAL RULES:
     def _parse_ai_response(self, response) -> Dict:
         """Parse OpenAI response"""
         try:
-            content = response.choices[0].message.content
+            raw = response.content[0].text
+            # Extract JSON from response
+            match = regex.search(r"\{[\s\S]*\}", raw)
+            content = match.group() if match else raw
             data = json.loads(content)
             
             print(f"\n→ AI reasoning: {data.get('reasoning', 'No reasoning provided')}")

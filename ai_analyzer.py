@@ -7,7 +7,8 @@ Uses OpenAI to determine if messages are relevant to search queries
 import os
 from typing import Dict, Optional
 import json
-from openai import OpenAI
+import anthropic
+import re as regex
 
 
 class AIAnalyzer:
@@ -22,12 +23,11 @@ class AIAnalyzer:
             model: Model to use (default: gpt-4o-mini for cost efficiency)
         """
         # Use Vast.ai GPU with Qwen 32B via SSH tunnel for fast, HIPAA-compliant processing
-        ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434/v1")
-        self.client = OpenAI(
-            base_url=ollama_url,
-            api_key="ollama"
-        )
-        self.model = "qwen2.5:32b"
+        api_key = os.getenv("ANTHROPIC_API_KEY")
+        if not api_key:
+            raise ValueError("ANTHROPIC_API_KEY not set")
+        self.client = anthropic.Anthropic(api_key=api_key)
+        self.model = "claude-sonnet-4-20250514"
         self.total_tokens_used = 0
         self.total_cost_usd = 0.0
     
@@ -57,28 +57,18 @@ class AIAnalyzer:
         
         try:
             # Call OpenAI
-            response = self.client.chat.completions.create(
+            response = self.client.messages.create(
                 model=self.model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are an expert legal assistant analyzing workers' compensation case law and listserv messages. Your job is to determine if a message is genuinely relevant to a user's search query."
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ],
-                response_format={"type": "json_object"},
-                temperature=0.0,  # Zero temperature for deterministic results
-                max_tokens=500
+                max_tokens=500,
+                system="You are an expert legal assistant. Always respond with valid JSON.",
+                messages=[{"role": "user", "content": prompt}]
             )
             
             # Parse response
             result = self._parse_response(response)
             
             # Track usage
-            tokens_used = response.usage.total_tokens
+            tokens_used = (response.usage.input_tokens + response.usage.output_tokens)
             cost = self._calculate_cost(tokens_used, self.model)
             
             self.total_tokens_used += tokens_used
@@ -184,7 +174,7 @@ Respond in JSON format:
     def _parse_response(self, response) -> Dict:
         """Parse OpenAI response"""
         try:
-            content = response.choices[0].message.content
+            raw = response.content[0].text; import re; match = re.search(r"{[sS]*}", raw); content = match.group() if match else raw
             data = json.loads(content)
             
             return {

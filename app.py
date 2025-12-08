@@ -342,14 +342,16 @@ Return JSON:
   "follow_up_question": "clarifying question" OR null
 }}"""
 
-        vagueness_response = orchestrator.client.chat.completions.create(
-            model="qwen2.5:32b",
-            messages=[{"role": "user", "content": vagueness_check}],
-            response_format={"type": "json_object"},
-            temperature=0.3
+        vagueness_response = orchestrator.client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=500,
+            messages=[{"role": "user", "content": vagueness_check + " Respond with JSON only."}]
         )
         
-        vagueness_result = json.loads(vagueness_response.choices[0].message.content)
+        _raw = vagueness_response.content[0].text
+        import re as _re
+        _match = _re.search(r"\{[\s\S]*\}", _raw)
+        vagueness_result = json.loads(_match.group() if _match else _raw)
         print(f"🔍 Vagueness check: {vagueness_result}")
         
         # If vague, return follow-up question immediately

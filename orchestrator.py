@@ -34,18 +34,15 @@ class CAAAOrchestrator:
         self.scraper = CAAAScraper(storage_state_path)
         
         # AI components - using Qwen 14B on Vast.ai GPU via SSH tunnel (HIPAA compliant)
-        from openai import OpenAI
+        import anthropic
         
         # Use Vast.ai GPU via SSH tunnel for fast processing
         # SSH tunnel: ssh -N -L 11434:localhost:11434 -p 47162 root@171.247.185.4
-        ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434/v1")
-        self.client = OpenAI(
-            base_url=ollama_url,
-            api_key="ollama"  # Ollama doesn't need a real key
-        )
+        api_key = os.getenv("ANTHROPIC_API_KEY")
+        self.client = anthropic.Anthropic(api_key=api_key) if api_key else None
         self.query_enhancer = QueryEnhancer()
         self.ai_analyzer = AIAnalyzer()
-        print(f"✓ AI components initialized (Qwen 14B on Vast.ai GPU via tunnel)")
+        print(f"✓ AI components initialized (Claude 4.5 Opus)")
     
     def search(self, user_query: str, use_ai_enhancement: bool = True) -> Dict:
         """
