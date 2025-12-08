@@ -98,6 +98,11 @@ class AIAnalyzer:
     def _build_prompt(self, message: Dict, real_question: str, search_keyword: str, context: Optional[str]) -> str:
         """Build the prompt for OpenAI"""
         
+        # Exception: Doctor evaluation queries use simpler, focused prompt
+        if real_question and real_question.startswith("Evaluate doctor:"):
+            return self._build_doctor_relevance_prompt(message, real_question)
+        
+        # Standard legal research prompt (unchanged)
         subject = message.get('subject', 'No subject')
         body = message.get('body', '')
         from_name = message.get('from_name', 'Unknown')
@@ -165,6 +170,68 @@ Return JSON:
   "is_relevant": true/false,
   "confidence": 0.0-1.0,
   "reasoning": "Explain how this message relates to (or fails to relate to) the REAL question above. Reference the REAL question in your reasoning, NOT the search keywords."
+}}"""
+        return prompt
+    
+    def _build_doctor_relevance_prompt(self, message: Dict, real_question: str) -> str:
+        """Build simplified prompt for doctor evaluation relevance filtering"""
+        
+        # Extract doctor name from real_question (format: "Evaluate doctor: Dr. John Smith")
+        doctor_name = real_question.replace("Evaluate doctor:", "").strip()
+        
+        subject = message.get('subject', 'No subject')
+        body = message.get('body', '')
+        from_name = message.get('from_name', 'Unknown')
+        
+        # Truncate body if too long (to save tokens)
+        max_body_length = 2000
+        if len(body) > max_body_length:
+            body = body[:max_body_length] + "... [truncated]"
+        
+        prompt = f"""You are the Relevance Filter in a doctor evaluation system:
+
+SYSTEM OVERVIEW:
+1. Query Enhancer → Found messages matching doctor name
+2. YOU (Relevance Filter) → Filter messages that contain information ABOUT the doctor
+3. Synthesis Analyzer → Will evaluate if doctor is good/bad using your filtered messages
+
+YOUR SPECIFIC ROLE:
+Filter messages that contain information about {doctor_name} that would be useful for determining if they are a good or bad doctor from a California workers' compensation attorney's perspective.
+
+DOCTOR TO EVALUATE: "{doctor_name}"
+
+MESSAGE TO FILTER:
+From: {from_name}
+Subject: {subject}
+
+{body}
+
+YOUR GOAL:
+Mark as RELEVANT if the message:
+- Mentions the doctor by name (any variation: "{doctor_name}", "Dr. [Last Name]", "[First Name] [Last Name]", etc.)
+- Is authored by the doctor
+- Discusses the doctor's work, reports, evaluations, or reputation
+- Contains attorney opinions, experiences, or recommendations about the doctor
+- References cases or situations involving this doctor
+
+Mark as NOT RELEVANT if:
+- Only mentions doctor's name in passing without any context or information
+- Different doctor with similar name (be careful with common names)
+- No substantive information about the doctor that would help evaluate them
+- Message is about a different topic entirely
+
+CONFIDENCE SCORING:
+0.95-1.0: Message clearly discusses this specific doctor with substantive information
+0.80-0.94: Message mentions doctor with useful context
+0.60-0.79: Message mentions doctor but information is limited
+0.40-0.59: Unclear if message is about this doctor or another
+0.00-0.39: Not about this doctor or no useful information
+
+Return JSON:
+{{
+  "is_relevant": true/false,
+  "confidence": 0.0-1.0,
+  "reasoning": "Brief explanation of why this message is or isn't relevant for evaluating {doctor_name}"
 }}"""
         return prompt
     
@@ -261,7 +328,7 @@ Return JSON:
             score = max(0, min(100, score))  # Clamp to 0-100
             
             evaluation = result.get('evaluation', 'mixed').lower()
-            if evaluation not in ['good', 'bad', 'mixed']:
+            if evaluation not in ['good', 'bad', 'mixed', 'insufficient_data']:
                 evaluation = 'mixed'
             
             # Track usage
@@ -331,11 +398,19 @@ Synthesize ALL messages to provide a comprehensive evaluation. Consider:
 Return JSON:
 {{
   "score": <0-100 integer>,
-  "evaluation": "good" | "bad" | "mixed",
+  "evaluation": "good" | "bad" | "mixed" | "insufficient_data",
   "reasoning": "<detailed explanation of your evaluation, citing specific examples from the messages>"
 }}
 
-SCORING GUIDE:
+🚨 CRITICAL - INSUFFICIENT DATA:
+If there are fewer than 3 messages, or the messages don't contain enough substantive information to make a reliable determination, you MUST return:
+- "evaluation": "insufficient_data"
+- "score": 0
+- "reasoning": "Explain why there isn't enough information (too few messages, messages lack detail, etc.)"
+
+DO NOT make up a determination if there isn't enough information. It is better to say "insufficient_data" than to guess.
+
+SCORING GUIDE (only use if you have sufficient data):
 - 80-100: Excellent doctor, highly recommended by attorneys
 - 60-79: Good doctor with some positive feedback
 - 40-59: Mixed reviews, some concerns

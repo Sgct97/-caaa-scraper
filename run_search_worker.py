@@ -112,37 +112,52 @@ def main():
             # Extract doctor name from query (format: "Evaluate doctor: Dr. John Smith")
             doctor_name = query.replace("Evaluate doctor:", "").strip()
             
-            # Synthesize all messages about the doctor
+            # Step 1: Use existing relevance analysis (automatically uses doctor-specific prompt)
             if orchestrator.ai_analyzer and len(messages) > 0:
-                print(f"🤖 Starting doctor evaluation synthesis for: {doctor_name}", flush=True)
-                try:
-                    synthesis = orchestrator.ai_analyzer.synthesize_doctor_evaluation(doctor_name, messages)
-                    
-                    # Store synthesis result in database
-                    orchestrator.db.save_synthesis_result(search_id, synthesis)
-                    
-                    print(f"✓ Synthesis complete:", flush=True)
-                    print(f"   Score: {synthesis['score']}/100", flush=True)
-                    print(f"   Evaluation: {synthesis['evaluation']}", flush=True)
-                except Exception as e:
-                    print(f"⚠️  Synthesis error: {e}", flush=True)
-                    import traceback
-                    traceback.print_exc()
-                    # Continue with search even if synthesis fails
+                print(f"🔍 Analyzing messages for doctor evaluation: {doctor_name}", flush=True)
+                relevant_count = orchestrator._analyze_relevance(search_id, messages, query)
+                print(f"✓ Analysis complete: {relevant_count} relevant messages", flush=True)
+                
+                # Step 2: Get relevant messages from database for synthesis
+                all_results = orchestrator.db.get_relevant_results(search_id)
+                # Filter to only include messages marked as relevant
+                relevant_messages = [dict(r) for r in all_results if r.get('is_relevant')] if all_results else []
+                
+                # Step 3: Synthesize only relevant messages
+                if len(relevant_messages) >= 3:  # Minimum threshold for synthesis
+                    print(f"🤖 Starting doctor evaluation synthesis for: {doctor_name}", flush=True)
+                    try:
+                        synthesis = orchestrator.ai_analyzer.synthesize_doctor_evaluation(doctor_name, relevant_messages)
+                        
+                        # Store synthesis result in database
+                        orchestrator.db.save_synthesis_result(search_id, synthesis)
+                        
+                        print(f"✓ Synthesis complete:", flush=True)
+                        print(f"   Score: {synthesis['score']}/100", flush=True)
+                        print(f"   Evaluation: {synthesis['evaluation']}", flush=True)
+                    except Exception as e:
+                        print(f"⚠️  Synthesis error: {e}", flush=True)
+                        import traceback
+                        traceback.print_exc()
+                        synthesis = {
+                            'score': 0,
+                            'evaluation': 'error',
+                            'reasoning': f'Error during synthesis: {str(e)}'
+                        }
+                        orchestrator.db.save_synthesis_result(search_id, synthesis)
+                else:
+                    print(f"⚠️  Insufficient relevant messages ({len(relevant_messages)} < 3) for synthesis", flush=True)
                     synthesis = {
                         'score': 0,
-                        'evaluation': 'error',
-                        'reasoning': f'Error during synthesis: {str(e)}'
+                        'evaluation': 'insufficient_data',
+                        'reasoning': f'Only found {len(relevant_messages)} relevant messages about {doctor_name}. Need at least 3 messages to make a reliable evaluation.'
                     }
                     orchestrator.db.save_synthesis_result(search_id, synthesis)
-                
-                # Mark as relevant count = all messages (for doctor evaluation, all are relevant)
-                relevant_count = len(messages)
             elif len(messages) == 0:
                 print(f"⚠️  No messages found for doctor: {doctor_name}", flush=True)
                 synthesis = {
                     'score': 0,
-                    'evaluation': 'unknown',
+                    'evaluation': 'insufficient_data',
                     'reasoning': 'No messages found about this doctor.'
                 }
                 orchestrator.db.save_synthesis_result(search_id, synthesis)
