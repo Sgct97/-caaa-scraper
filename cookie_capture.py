@@ -70,41 +70,41 @@ def decrypt_storage_state(key):
 
 def capture_cookies():
     """
-    Interactive cookie capture - client logs in manually while we watch
+    Web-compatible cookie capture - polls for signal file instead of terminal input
     """
-    print("\n" + "="*60)
-    print("CAAA Cookie Capture - Interactive Mode")
-    print("="*60)
-    print("\nInstructions:")
-    print("1. A browser window will open to the CAAA login page")
-    print("2. CLIENT: Please log in with your credentials")
-    print("3. CLIENT: Complete any MFA/CAPTCHA if prompted")
-    print("4. CLIENT: Wait until you see your dashboard/member portal")
-    print("5. DEV: Press ENTER in this terminal once login is complete")
-    print("\nStarting browser in 3 seconds...\n")
-    
     import time
-    time.sleep(3)
+    import subprocess
+    
+    SIGNAL_FILE = "/tmp/cookie_capture_done"
+    
+    # Remove any existing signal file
+    if os.path.exists(SIGNAL_FILE):
+        os.remove(SIGNAL_FILE)
+    
+    print("\n" + "="*60)
+    print("CAAA Cookie Capture - Web Mode")
+    print("="*60)
+    print("\nWaiting for user to log in via VNC...")
+    print("Browser will stay open until signal received.\n")
     
     with sync_playwright() as p:
         # Launch visible browser for manual login
         browser = p.chromium.launch(
             headless=False,
-            slow_mo=100,  # Slightly slower for human interaction
+            slow_mo=100,
             args=[
                 '--disable-blink-features=AutomationControlled',
                 '--disable-dev-shm-usage',
+                '--no-sandbox',
             ]
         )
         
         # Create context with realistic settings
         context = browser.new_context(
-            viewport={'width': 1920, 'height': 1080},
+            viewport={'width': 1280, 'height': 900},
             user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             locale='en-US',
             timezone_id='America/Los_Angeles',
-            # Add proxy here if needed:
-            # proxy={'server': 'http://proxy-url:port', 'username': 'user', 'password': 'pass'}
         )
         
         page = context.new_page()
@@ -113,22 +113,26 @@ def capture_cookies():
         print(f"→ Navigating to: {LOGIN_URL}")
         page.goto(LOGIN_URL, wait_until="domcontentloaded")
         
-        # Wait for user to complete login
-        input("\n⏸  Press ENTER after you've successfully logged in and see your dashboard...\n")
+        # Poll for signal file (created when user clicks "I'm done" button on web page)
+        print("→ Waiting for login completion signal...")
+        max_wait = 600  # 10 minutes max
+        waited = 0
+        while waited < max_wait:
+            if os.path.exists(SIGNAL_FILE):
+                print("✓ Signal received - user completed login")
+                break
+            time.sleep(2)
+            waited += 2
+            if waited % 30 == 0:
+                print(f"   Still waiting... ({waited}s)")
+        
+        if waited >= max_wait:
+            print("✗ Timeout waiting for login")
+            browser.close()
+            return False
         
         # Give page a moment to settle
         time.sleep(2)
-        
-        # Verify we're logged in by checking URL changed or specific element exists
-        current_url = page.url
-        print(f"✓ Current URL: {current_url}")
-        
-        if current_url == LOGIN_URL:
-            print("⚠  WARNING: Still on login page. Login may have failed.")
-            confirm = input("Continue anyway? (y/n): ")
-            if confirm.lower() != 'y':
-                browser.close()
-                return False
         
         # Save storage state (cookies + localStorage)
         context.storage_state(path=STORAGE_STATE_PATH)
@@ -141,6 +145,16 @@ def capture_cookies():
             print(f"✓ Captured {cookie_count} cookies")
         
         browser.close()
+        
+        # Clean up signal file
+        if os.path.exists(SIGNAL_FILE):
+            os.remove(SIGNAL_FILE)
+        
+        # Restart browser service with new cookies
+        print("→ Restarting browser service with new cookies...")
+        subprocess.run(["systemctl", "restart", "caaa-browser"])
+        print("✓ Browser service restarted")
+        
         return True
 
 

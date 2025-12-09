@@ -597,9 +597,9 @@ async def refresh_cookies_page():
     )
     time.sleep(1)
     
-    # Launch cookie capture script in background on VNC display
+    # Launch cookie capture WEB script in background on VNC display
     subprocess.Popen(
-        ["/srv/caaa_scraper/venv/bin/python", "/srv/caaa_scraper/cookie_capture.py"],
+        ["/srv/caaa_scraper/venv/bin/python", "/srv/caaa_scraper/cookie_capture_web.py"],
         env={"DISPLAY": ":99", "PATH": "/usr/bin:/bin"},
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
     )
@@ -661,19 +661,83 @@ async def refresh_cookies_page():
             </div>
             
             <div class="step">
-                <strong>Step 3:</strong> After logging in successfully, close this tab. The system will automatically save your login and restart.
+                <strong>Step 3:</strong> After logging in successfully and you can see your dashboard, click the button below:
             </div>
+            
+            <button onclick="completeLogin()" class="btn" style="background: #4caf50; cursor: pointer; border: none;">
+                ✅ I've Finished Logging In
+            </button>
+            
+            <div id="status" style="margin-top: 20px; padding: 15px; border-radius: 5px; display: none;"></div>
             
             <p style="color: #666; margin-top: 30px;">
                 <strong>Note:</strong> The login window opens in a remote desktop viewer. 
                 Everything happens on the server - nothing is installed on your computer.
             </p>
         </div>
+        
+        <script>
+            async function completeLogin() {
+                const statusDiv = document.getElementById('status');
+                statusDiv.style.display = 'block';
+                statusDiv.style.background = '#fff3cd';
+                statusDiv.innerHTML = '⏳ Saving login cookies... please wait...';
+                
+                try {
+                    const response = await fetch('/admin/complete-login', { method: 'POST' });
+                    const data = await response.json();
+                    
+                    // Poll for completion
+                    let attempts = 0;
+                    const checkStatus = async () => {
+                        const statusResp = await fetch('/admin/cookie-status');
+                        const status = await statusResp.json();
+                        
+                        if (status.status === 'complete') {
+                            statusDiv.style.background = '#d4edda';
+                            statusDiv.innerHTML = '✅ Success! Cookies saved and browser restarted. You can close this tab.';
+                        } else if (status.status === 'error') {
+                            statusDiv.style.background = '#f8d7da';
+                            statusDiv.innerHTML = '❌ Error: ' + status.message;
+                        } else if (attempts < 30) {
+                            attempts++;
+                            statusDiv.innerHTML = '⏳ ' + (status.message || 'Processing...') + ' (' + attempts + 's)';
+                            setTimeout(checkStatus, 1000);
+                        } else {
+                            statusDiv.style.background = '#f8d7da';
+                            statusDiv.innerHTML = '❌ Timeout - please try again';
+                        }
+                    };
+                    
+                    setTimeout(checkStatus, 2000);
+                } catch (e) {
+                    statusDiv.style.background = '#f8d7da';
+                    statusDiv.innerHTML = '❌ Error: ' + e.message;
+                }
+            }
+        </script>
     </body>
     </html>
     """
     
     return HTMLResponse(content=html_content)
+
+@app.post("/admin/complete-login")
+async def complete_login():
+    """Signal that user has completed login - triggers cookie capture"""
+    signal_file = "/srv/caaa_scraper/login_complete.signal"
+    with open(signal_file, "w") as f:
+        f.write("done")
+    return {"status": "ok", "message": "Login completion signal sent"}
+
+@app.get("/admin/cookie-status")
+async def cookie_status():
+    """Get current status of cookie capture process"""
+    status_file = "/srv/caaa_scraper/cookie_status.json"
+    if os.path.exists(status_file):
+        with open(status_file, "r") as f:
+            return json.load(f)
+    return {"status": "unknown", "message": "No status available"}
 
 # ============================================================
 # Helper Functions
