@@ -72,8 +72,24 @@ def main():
             except:
                 date_to = None
         
+        # Determine if s_fname is keyword or author_first_name
+        # If s_lname exists, s_fname is author_first_name; otherwise it's keyword
+        s_fname = search_params_dict.get('s_fname')
+        s_lname = search_params_dict.get('s_lname')
+        
+        keyword_value = None
+        author_first_name_value = None
+        
+        if s_fname:
+            if s_lname:
+                # If both first and last name exist, s_fname is author_first_name
+                author_first_name_value = s_fname
+            else:
+                # If only s_fname exists without s_lname, it's a keyword
+                keyword_value = s_fname
+        
         search_params = SearchParams(
-            keyword=search_params_dict.get('s_fname'),  # Basic keyword uses fname field
+            keyword=keyword_value,
             keywords_all=search_params_dict.get('s_key_all'),
             keywords_phrase=search_params_dict.get('s_key_phrase'),
             keywords_any=search_params_dict.get('s_key_one'),  # 'any' maps to 's_key_one'
@@ -82,7 +98,8 @@ def main():
             date_from=date_from,
             date_to=date_to,
             posted_by=search_params_dict.get('s_postedby'),
-            author_last_name=search_params_dict.get('s_lname'),  # Last name is 's_lname'
+            author_first_name=author_first_name_value,  # First name when s_lname also exists
+            author_last_name=s_lname,  # Last name is 's_lname'
             search_in='subject_only' if search_params_dict.get('s_cat') == '1' else 'subject_and_body',
             attachment_filter='with_attachments' if search_params_dict.get('s_attachment') == '1' else ('without_attachments' if search_params_dict.get('s_attachment') == '0' else 'all'),
             max_messages=search_params_dict.get('max_messages', 100),

@@ -136,61 +136,25 @@ class CAAAScraper:
         # Submit search
         print(f"→ Submitting search...")
         try:
-            # Wait for response after clicking (form might submit via AJAX)
-            with page.expect_response(lambda response: "forum2.cgi" in response.url or response.status == 200, timeout=20000):
-                # Try clicking the search button
-                page.click('#s_btn', timeout=10000)
+            # Try clicking the search button
+            page.click('#s_btn', timeout=10000)
         except Exception as e:
-            print(f"  ⚠️  Could not click #s_btn or wait for response: {e}")
-            # Try alternative selector without waiting for response
+            print(f"  ⚠️  Could not click #s_btn: {e}")
+            # Try alternative selector
             try:
                 page.click('input[name="s_btn"]', timeout=5000)
             except:
                 print(f"  ⚠️  Trying to find any submit button...")
                 page.click('button[type="submit"], input[type="submit"]', timeout=5000)
         
-        # Wait for results table to appear (more reliable than networkidle)
+        # Wait for results
         try:
-            page.wait_for_selector("table.table-striped", timeout=20000)
-            print(f"✓ Results table appeared")
+            page.wait_for_load_state("networkidle", timeout=15000)
         except:
-            print(f"  ⚠️  Results table did not appear, waiting for network...")
-            try:
-                page.wait_for_load_state("networkidle", timeout=15000)
-            except:
-                pass
+            pass
         
-        page.wait_for_timeout(3000)  # Extra wait for any JS rendering
-        
-        # Debug: Check what's on the page
-        page_url = page.url
-        page_title = page.title()
+        page.wait_for_timeout(5000)
         print(f"✓ Search submitted")
-        print(f"   Page URL: {page_url}")
-        print(f"   Page title: {page_title}")
-        
-        # Check if results table exists
-        results_table = page.query_selector("table.table-striped")
-        if results_table:
-            print(f"   ✓ Results table found")
-        else:
-            print(f"   ⚠️  Results table NOT found - checking page content...")
-            # Take screenshot for debugging
-            try:
-                page.screenshot(path=f"/tmp/search_debug_{search_params.keyword or 'unknown'}.png")
-                print(f"   Screenshot saved to /tmp/search_debug_{search_params.keyword or 'unknown'}.png")
-            except:
-                pass
-            
-            # Check for error messages
-            error_msg = page.query_selector(".error, .alert-danger, .alert-warning")
-            if error_msg:
-                print(f"   ⚠️  Error message found: {error_msg.inner_text()[:200]}")
-            
-            # Check for "no results" message
-            no_results = page.query_selector("text=/no.*results/i, text=/no.*messages/i")
-            if no_results:
-                print(f"   ℹ️  No results message found: {no_results.inner_text()[:200]}")
     
     def _extract_message_ids(self, 
                              page: Page,
