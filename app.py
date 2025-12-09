@@ -562,17 +562,47 @@ async def refresh_cookies_page():
     """Web page for refreshing CAAA login cookies
     
     EMAIL THIS LINK TO USER: http://134.199.196.31:8000/admin/refresh-cookies
+    Or add a button to frontend that opens this in new tab
     """
-    
-    # Stop persistent browser and launch cookie capture
     import subprocess
-    subprocess.run(["systemctl", "stop", "caaa-browser"])
+    import time
     
-    # Launch cookie capture in background on VNC display
-    subprocess.Popen([
-        "/srv/caaa_scraper/venv/bin/python",
-        "/srv/caaa_scraper/cookie_capture.py"
-    ], env={"DISPLAY": ":99"})
+    # Stop persistent browser
+    subprocess.run(["systemctl", "stop", "caaa-browser"], capture_output=True)
+    
+    # Kill any existing VNC processes
+    subprocess.run(["pkill", "-f", "Xvfb"], capture_output=True)
+    subprocess.run(["pkill", "-f", "x11vnc"], capture_output=True)
+    subprocess.run(["pkill", "-f", "websockify"], capture_output=True)
+    time.sleep(1)
+    
+    # Start Xvfb (virtual framebuffer) on display :99
+    subprocess.Popen(
+        ["Xvfb", ":99", "-screen", "0", "1280x1024x24"],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+    )
+    time.sleep(1)
+    
+    # Start x11vnc to expose the display
+    subprocess.Popen(
+        ["x11vnc", "-display", ":99", "-forever", "-nopw", "-shared"],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+    )
+    time.sleep(1)
+    
+    # Start noVNC websocket proxy (web browser accessible VNC on port 6080)
+    subprocess.Popen(
+        ["websockify", "--web=/usr/share/novnc", "6080", "localhost:5900"],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+    )
+    time.sleep(1)
+    
+    # Launch cookie capture script in background on VNC display
+    subprocess.Popen(
+        ["/srv/caaa_scraper/venv/bin/python", "/srv/caaa_scraper/cookie_capture.py"],
+        env={"DISPLAY": ":99", "PATH": "/usr/bin:/bin"},
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+    )
     
     html_content = """
     <!DOCTYPE html>
