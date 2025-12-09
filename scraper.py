@@ -136,24 +136,31 @@ class CAAAScraper:
         # Submit search
         print(f"→ Submitting search...")
         try:
-            # Try clicking the search button
-            page.click('#s_btn', timeout=10000)
+            # Wait for response after clicking (form might submit via AJAX)
+            with page.expect_response(lambda response: "forum2.cgi" in response.url or response.status == 200, timeout=20000):
+                # Try clicking the search button
+                page.click('#s_btn', timeout=10000)
         except Exception as e:
-            print(f"  ⚠️  Could not click #s_btn: {e}")
-            # Try alternative selector
+            print(f"  ⚠️  Could not click #s_btn or wait for response: {e}")
+            # Try alternative selector without waiting for response
             try:
                 page.click('input[name="s_btn"]', timeout=5000)
             except:
                 print(f"  ⚠️  Trying to find any submit button...")
                 page.click('button[type="submit"], input[type="submit"]', timeout=5000)
         
-        # Wait for results
+        # Wait for results table to appear (more reliable than networkidle)
         try:
-            page.wait_for_load_state("networkidle", timeout=15000)
+            page.wait_for_selector("table.table-striped", timeout=20000)
+            print(f"✓ Results table appeared")
         except:
-            pass
+            print(f"  ⚠️  Results table did not appear, waiting for network...")
+            try:
+                page.wait_for_load_state("networkidle", timeout=15000)
+            except:
+                pass
         
-        page.wait_for_timeout(5000)
+        page.wait_for_timeout(3000)  # Extra wait for any JS rendering
         
         # Debug: Check what's on the page
         page_url = page.url
