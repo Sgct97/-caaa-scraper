@@ -107,6 +107,12 @@
             
             <!-- Main Search Interface -->
             <div class="max-w-6xl mx-auto" x-data="searchApp()" x-init="init()">
+                
+                <!-- SIMPLE TEST AT TOP -->
+                <div class="p-4 bg-red-100 mb-4">
+                    <strong>TOP TEST:</strong> searchHistory.length = <span x-text="searchHistory.length"></span>
+                </div>
+                
                 <div class="glass rounded-2xl p-8 search-box-shadow">
                     
                     <!-- Query Type Selector -->
