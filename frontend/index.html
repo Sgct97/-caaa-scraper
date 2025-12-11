@@ -609,8 +609,8 @@
     </div>
 
     <script>
-        function searchApp() {
-            return {
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('searchApp', () => ({
                 // Query Type
                 queryType: 'general',
                 doctorName: '',
@@ -952,7 +952,8 @@
                     }
                 }
             }
-        }
+            }));
+        });
     </script>
 </body>
 </html>
