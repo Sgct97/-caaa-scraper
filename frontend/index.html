@@ -109,7 +109,7 @@
             </div>
             
             <!-- Main Search Interface -->
-            <div class="max-w-6xl mx-auto" x-data="searchApp" x-init="init()">
+            <div class="max-w-6xl mx-auto" x-data="searchApp()" x-init="init()">
                 <div class="glass rounded-2xl p-8 search-box-shadow">
                     
                     <!-- Query Type Selector -->
@@ -609,8 +609,8 @@
     </div>
 
     <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('searchApp', () => ({
+        function searchApp() {
+            return {
                 // Query Type
                 queryType: 'general',
                 doctorName: '',
@@ -952,8 +952,7 @@
                     }
                 }
             }
-            }));
-        });
+        }
     </script>
 </body>
 </html>
