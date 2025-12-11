@@ -657,13 +657,23 @@
                 
                 async fetchHistory() {
                     try {
-                        const response = await fetch('http://134.199.196.31:8000/api/search-history');
+                        const response = await fetch('/api/search-history');
                         const data = await response.json();
                         if (data.success) {
                             this.searchHistory = data.history;
                         }
                     } catch (err) {
                         console.error('Error fetching history:', err);
+                        // Fallback to direct backend URL if proxy doesn't exist yet
+                        try {
+                            const response = await fetch('http://134.199.196.31:8000/api/search-history');
+                            const data = await response.json();
+                            if (data.success) {
+                                this.searchHistory = data.history;
+                            }
+                        } catch (err2) {
+                            console.error('Error fetching history (fallback):', err2);
+                        }
                     }
                 },
                 
