@@ -849,7 +849,7 @@ async def run_search_async(query_type: str, search_fields: Optional[dict], ai_in
             # Use QueryEnhancer to find the doctor
             search_params = orchestrator.query_enhancer.enhance_query(f"Find all messages mentioning doctor {doctor_name}")
         else:
-        search_params = orchestrator.query_enhancer.enhance_query(ai_intent)
+            search_params = orchestrator.query_enhancer.enhance_query(ai_intent)
     else:
         # Fallback to simple keyword from AI intent
         search_params = SearchParams(keyword=ai_intent or "")
