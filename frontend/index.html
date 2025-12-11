@@ -656,23 +656,32 @@
                 },
                 
                 async fetchHistory() {
+                    console.log('🔍 Fetching search history...');
                     try {
                         const response = await fetch('/api/search-history');
+                        console.log('History response status:', response.status);
                         const data = await response.json();
-                        if (data.success) {
+                        console.log('History data:', data);
+                        if (data.success && data.history) {
                             this.searchHistory = data.history;
+                            console.log('✅ Loaded', data.history.length, 'searches');
+                        } else {
+                            console.warn('⚠️ No history in response');
                         }
                     } catch (err) {
-                        console.error('Error fetching history:', err);
+                        console.error('❌ Error fetching history:', err);
                         // Fallback to direct backend URL if proxy doesn't exist yet
                         try {
+                            console.log('Trying fallback URL...');
                             const response = await fetch('http://134.199.196.31:8000/api/search-history');
                             const data = await response.json();
-                            if (data.success) {
+                            console.log('Fallback data:', data);
+                            if (data.success && data.history) {
                                 this.searchHistory = data.history;
+                                console.log('✅ Loaded', data.history.length, 'searches via fallback');
                             }
                         } catch (err2) {
-                            console.error('Error fetching history (fallback):', err2);
+                            console.error('❌ Fallback also failed:', err2);
                         }
                     }
                 },
