@@ -554,7 +554,9 @@
                 <div class="mb-4 p-4 bg-yellow-50 text-xs">
                     <strong>DEBUG:</strong> searchHistory type: <span x-text="typeof searchHistory"></span>, 
                     length: <span x-text="searchHistory.length"></span>,
-                    is array: <span x-text="Array.isArray(searchHistory)"></span>
+                    is array: <span x-text="Array.isArray(searchHistory)"></span><br>
+                    <strong>TEST stats variable:</strong> total_searches = <span x-text="stats.total_searches"></span><br>
+                    <strong>TEST maxMessages variable:</strong> <span x-text="maxMessages"></span>
                 </div>
                 
                 <div x-show="searchHistory.length === 0" class="text-center py-8 text-gray-500">
