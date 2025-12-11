@@ -328,6 +328,7 @@ async def get_search_history(limit: int = 50):
                 cur.execute("""
                     SELECT 
                         id,
+                        search_number,
                         COALESCE(
                             search_params->>'ai_intent',
                             keyword,
@@ -351,12 +352,13 @@ async def get_search_history(limit: int = 50):
                 for row in results:
                     history.append({
                         'id': row[0],
-                        'query': row[1],  # query_text from COALESCE
-                        'ai_intent': row[2],  # keyword (for backward compat)
-                        'status': row[3],
-                        'created_at': row[4].isoformat() if row[4] else None,
-                        'result_count': row[5] or 0,
-                        'relevant_count': row[6] or 0
+                        'search_number': row[1],
+                        'query': row[2],  # query_text from COALESCE
+                        'ai_intent': row[3],
+                        'status': row[4],
+                        'created_at': row[5].isoformat() if row[5] else None,
+                        'result_count': row[6] or 0,
+                        'relevant_count': row[7] or 0
                     })
                 
                 return {"success": True, "history": history}
