@@ -168,8 +168,8 @@ async def create_search(search_req: SearchRequest, background_tasks: BackgroundT
             if not search_req.ai_intent:
                 raise HTTPException(status_code=400, detail="Doctor evaluation requires ai_intent with doctor name")
         else:
-            if not search_req.search_fields and not search_req.ai_intent:
-                raise HTTPException(status_code=400, detail="Must provide search fields or AI intent")
+        if not search_req.search_fields and not search_req.ai_intent:
+            raise HTTPException(status_code=400, detail="Must provide search fields or AI intent")
         
         # Start search in background
         search_id = await run_search_async(
@@ -847,7 +847,7 @@ async def run_search_async(query_type: str, search_fields: Optional[dict], ai_in
             # Use QueryEnhancer to find the doctor
             search_params = orchestrator.query_enhancer.enhance_query(f"Find all messages mentioning doctor {doctor_name}")
         else:
-            search_params = orchestrator.query_enhancer.enhance_query(ai_intent)
+        search_params = orchestrator.query_enhancer.enhance_query(ai_intent)
     else:
         # Fallback to simple keyword from AI intent
         search_params = SearchParams(keyword=ai_intent or "")

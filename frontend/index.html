@@ -92,7 +92,7 @@
         </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="searchApp()" x-init="init()">
         
         <!-- Hero Section -->
         <div class="mb-12">
@@ -106,7 +106,7 @@
             </div>
             
             <!-- Main Search Interface -->
-            <div class="max-w-6xl mx-auto" x-data="searchApp()" x-init="init()">
+            <div class="max-w-6xl mx-auto">
                 
                 <!-- SIMPLE TEST AT TOP -->
                 <div class="p-4 bg-red-100 mb-4">
@@ -543,9 +543,10 @@
                         <i class="fas fa-spinner fa-pulse text-yellow-600 text-xl"></i>
                     </div>
                 </div>
+            </div>
         </div> <!-- Close stats grid -->
             
-                <!-- Search History Section -->
+        <!-- Search History Section -->
                 <div class="mt-16 glass p-8 rounded-2xl">
                 <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
                     <i class="fas fa-history text-primary-600 mr-3"></i>
@@ -612,11 +613,9 @@
                         </div>
                     </template>
                 </div>
-                </div> <!-- Close search history -->
+        </div> <!-- Close search history -->
 
-            </div> <!-- Close searchApp x-data div -->
-
-    </div>
+    </div> <!-- Close max-w-7xl x-data="searchApp()" -->
 
     <script>
         function searchApp() {
