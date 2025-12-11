@@ -336,6 +336,10 @@ async def get_search_history(limit: int = 50):
                             search_params->>'keywords_all',
                             search_params->>'keywords_phrase',
                             search_params->>'s_keyword',
+                            search_params->>'s_key_one',
+                            CASE WHEN (search_params->>'s_postedby') IS NOT NULL 
+                                 THEN 'Posted by: ' || search_params->>'s_postedby'
+                                 ELSE NULL END,
                             CASE WHEN (search_params->>'s_lname') IS NOT NULL 
                                  THEN 'Name search: ' || COALESCE(search_params->>'s_fname', '') || ' ' || COALESCE(search_params->>'s_lname', '')
                                  ELSE NULL END,
