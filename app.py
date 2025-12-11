@@ -319,6 +319,45 @@ async def get_search_results_json(search_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/api/search-history")
+async def get_search_history(limit: int = 50):
+    """Get recent search history"""
+    try:
+        with orchestrator.db.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT 
+                        id,
+                        query,
+                        ai_intent,
+                        status,
+                        created_at,
+                        (SELECT COUNT(*) FROM search_results WHERE search_id = searches.id) as result_count,
+                        (SELECT COUNT(*) FROM analyses WHERE search_id = searches.id AND is_relevant = true) as relevant_count
+                    FROM searches
+                    WHERE status IN ('completed', 'analyzing', 'running')
+                    ORDER BY created_at DESC
+                    LIMIT %s
+                """, (limit,))
+                
+                results = cur.fetchall()
+                
+                history = []
+                for row in results:
+                    history.append({
+                        'id': row[0],
+                        'query': row[1],
+                        'ai_intent': row[2],
+                        'status': row[3],
+                        'created_at': row[4].isoformat() if row[4] else None,
+                        'result_count': row[5] or 0,
+                        'relevant_count': row[6] or 0
+                    })
+                
+                return {"success": True, "history": history}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/api/ai/analyze")
 async def ai_analyze(request: AIAnalyzeRequest):
     """AI analyzes user intent - asks follow-up if vague, uses QueryEnhancer if specific"""
