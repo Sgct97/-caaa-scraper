@@ -335,7 +335,6 @@ async def get_search_history(limit: int = 50):
                         (SELECT COUNT(*) FROM search_results WHERE search_id = searches.id) as result_count,
                         (SELECT COUNT(*) FROM analyses WHERE search_id = searches.id AND is_relevant = true) as relevant_count
                     FROM searches
-                    WHERE status IN ('completed', 'analyzing', 'running')
                     ORDER BY created_at DESC
                     LIMIT %s
                 """, (limit,))
