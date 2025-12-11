@@ -334,6 +334,14 @@ async def get_search_history(limit: int = 50):
                             keyword,
                             search_params->>'keywords_any',
                             search_params->>'keywords_all',
+                            search_params->>'keywords_phrase',
+                            search_params->>'s_keyword',
+                            CASE WHEN search_params->>'s_lname' IS NOT NULL 
+                                 THEN 'Name search: ' || COALESCE(search_params->>'s_fname', '') || ' ' || search_params->>'s_lname'
+                                 ELSE NULL END,
+                            CASE WHEN search_params->>'s_fname' IS NOT NULL 
+                                 THEN 'Name search: ' || search_params->>'s_fname'
+                                 ELSE NULL END,
                             'Search'
                         ) as query_text,
                         search_params->>'ai_intent' as ai_intent,
