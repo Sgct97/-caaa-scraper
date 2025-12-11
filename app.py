@@ -168,8 +168,8 @@ async def create_search(search_req: SearchRequest, background_tasks: BackgroundT
             if not search_req.ai_intent:
                 raise HTTPException(status_code=400, detail="Doctor evaluation requires ai_intent with doctor name")
         else:
-        if not search_req.search_fields and not search_req.ai_intent:
-            raise HTTPException(status_code=400, detail="Must provide search fields or AI intent")
+            if not search_req.search_fields and not search_req.ai_intent:
+                raise HTTPException(status_code=400, detail="Must provide search fields or AI intent")
         
         # Start search in background
         search_id = await run_search_async(
