@@ -107,12 +107,6 @@
             
             <!-- Main Search Interface -->
             <div class="max-w-6xl mx-auto">
-                
-                <!-- SIMPLE TEST AT TOP -->
-                <div class="p-4 bg-red-100 mb-4">
-                    <strong>TOP TEST:</strong> searchHistory.length = <span x-text="searchHistory.length"></span>
-                </div>
-                
                 <div class="glass rounded-2xl p-8 search-box-shadow">
                     
                     <!-- Query Type Selector -->
@@ -554,26 +548,9 @@
                     <span class="ml-3 text-sm text-gray-500" x-text="'(' + searchHistory.length + ' searches)'"></span>
                 </h2>
                 
-                <!-- Debug -->
-                <div class="mb-4 p-4 bg-yellow-50 text-xs">
-                    <strong>DEBUG:</strong> searchHistory type: <span x-text="typeof searchHistory"></span>, 
-                    length: <span x-text="searchHistory.length"></span>,
-                    is array: <span x-text="Array.isArray(searchHistory)"></span><br>
-                    <strong>TEST stats variable:</strong> total_searches = <span x-text="stats.total_searches"></span><br>
-                    <strong>TEST maxMessages variable:</strong> <span x-text="maxMessages"></span>
-                </div>
-                
                 <div x-show="searchHistory.length === 0" class="text-center py-8 text-gray-500">
                     <i class="fas fa-search text-4xl mb-4 opacity-50"></i>
                     <p>No searches yet. Start your first search above!</p>
-                </div>
-                
-                <!-- Extra debug -->
-                <div class="p-4 bg-blue-50 text-xs mb-4">
-                    <strong>TEMPLATE DEBUG:</strong><br>
-                    searchHistory: <span x-text="JSON.stringify(searchHistory).substring(0, 100)"></span>...<br>
-                    length: <span x-text="searchHistory.length"></span><br>
-                    condition (length > 0): <span x-text="searchHistory.length > 0"></span>
                 </div>
                 
                 <div x-show="searchHistory.length > 0" class="space-y-4">
@@ -581,7 +558,12 @@
                         <div class="bg-white p-6 rounded-lg border border-gray-200 hover:border-primary-300 transition-colors">
                             <div class="flex justify-between items-start mb-3">
                                 <div class="flex-1">
-                                    <h3 class="font-semibold text-gray-900 mb-1" x-text="search.ai_intent || search.query"></h3>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-mono rounded" 
+                                              x-text="'#' + search.id"
+                                              title="Search Reference ID"></span>
+                                        <h3 class="font-semibold text-gray-900" x-text="search.ai_intent || search.query"></h3>
+                                    </div>
                                     <p class="text-sm text-gray-500" x-text="new Date(search.created_at).toLocaleString()"></p>
                                 </div>
                                 <span class="px-3 py-1 rounded-full text-xs font-medium"
