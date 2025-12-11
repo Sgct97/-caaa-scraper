@@ -550,6 +550,13 @@
                     <span class="ml-3 text-sm text-gray-500" x-text="'(' + searchHistory.length + ' searches)'"></span>
                 </h2>
                 
+                <!-- Debug -->
+                <div class="mb-4 p-4 bg-yellow-50 text-xs">
+                    <strong>DEBUG:</strong> searchHistory type: <span x-text="typeof searchHistory"></span>, 
+                    length: <span x-text="searchHistory.length"></span>,
+                    is array: <span x-text="Array.isArray(searchHistory)"></span>
+                </div>
+                
                 <div x-show="searchHistory.length === 0" class="text-center py-8 text-gray-500">
                     <i class="fas fa-search text-4xl mb-4 opacity-50"></i>
                     <p>No searches yet. Start your first search above!</p>
