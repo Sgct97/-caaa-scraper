@@ -328,8 +328,14 @@ async def get_search_history(limit: int = 50):
                 cur.execute("""
                     SELECT 
                         id,
-                        COALESCE(keyword, search_params->>'keywords_any', search_params->>'keywords_all', 'Search') as query_text,
-                        keyword,
+                        COALESCE(
+                            search_params->>'ai_intent',
+                            keyword,
+                            search_params->>'keywords_any',
+                            search_params->>'keywords_all',
+                            'Search'
+                        ) as query_text,
+                        search_params->>'ai_intent' as ai_intent,
                         status,
                         created_at,
                         (SELECT COUNT(*) FROM search_results WHERE search_id = searches.id) as result_count,
