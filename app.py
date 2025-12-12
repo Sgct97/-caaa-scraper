@@ -115,7 +115,7 @@ templates = Jinja2Templates(directory="templates")
 # ============================================================
 
 class SearchRequest(BaseModel):
-    query_type: str = "general"  # "general", "doctor_evaluation", or "judge_evaluation"
+    query_type: str = "general"  # "general", "doctor_evaluation", "judge_evaluation", or "adjuster_evaluation"
     search_fields: Optional[dict] = None
     ai_intent: Optional[str] = None
     use_ai_enhancement: bool = False
@@ -170,6 +170,9 @@ async def create_search(search_req: SearchRequest, background_tasks: BackgroundT
         elif search_req.query_type == "judge_evaluation":
             if not search_req.ai_intent:
                 raise HTTPException(status_code=400, detail="Judge evaluation requires ai_intent with judge name")
+        elif search_req.query_type == "adjuster_evaluation":
+            if not search_req.ai_intent:
+                raise HTTPException(status_code=400, detail="Adjuster evaluation requires ai_intent with adjuster name")
         else:
             if not search_req.search_fields and not search_req.ai_intent:
                 raise HTTPException(status_code=400, detail="Must provide search fields or AI intent")
@@ -868,6 +871,11 @@ async def run_search_async(query_type: str, search_fields: Optional[dict], ai_in
             judge_name = ai_intent.replace("Evaluate judge:", "").strip()
             # Use QueryEnhancer to find the judge
             search_params = orchestrator.query_enhancer.enhance_query(f"Find all messages mentioning judge {judge_name}")
+        elif query_type == "adjuster_evaluation":
+            # Extract adjuster name from ai_intent (format: "Evaluate adjuster: John Smith")
+            adjuster_name = ai_intent.replace("Evaluate adjuster:", "").strip()
+            # Use QueryEnhancer to find the adjuster
+            search_params = orchestrator.query_enhancer.enhance_query(f"Find all messages mentioning adjuster {adjuster_name}")
         else:
             search_params = orchestrator.query_enhancer.enhance_query(ai_intent)
     else:
