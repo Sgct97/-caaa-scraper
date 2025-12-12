@@ -221,7 +221,7 @@
             </div>
         </div>
 
-        <!-- Doctor Evaluation Synthesis (if available) -->
+        <!-- Evaluation Synthesis (if available) -->
         <div x-show="synthesis" class="glass rounded-xl p-8 mb-8 border-4" 
              :class="{
                  'border-green-500': synthesis?.score >= 60,
@@ -231,10 +231,10 @@
             <div class="flex items-start justify-between mb-6">
                 <div class="flex-1">
                     <h2 class="text-3xl font-bold text-gray-900 mb-2 flex items-center">
-                        <i class="fas fa-user-md text-primary-600 mr-3"></i>
-                        Doctor Evaluation
+                        <i class="fas mr-3 text-primary-600" :class="getEvaluationIcon()"></i>
+                        <span x-text="getEvaluationTitle()"></span>
                     </h2>
-                    <p class="text-gray-600">Synthesis of all messages about this doctor</p>
+                    <p class="text-gray-600" x-text="'Evaluation for ' + getEvaluatedName()"></p>
                 </div>
                 
                 <!-- Score Badge -->
@@ -253,19 +253,19 @@
             <div class="mb-6">
                 <span class="px-4 py-2 rounded-full font-semibold text-lg"
                       :class="{
-                          'bg-green-100 text-green-700': synthesis?.evaluation === 'good',
-                          'bg-yellow-100 text-yellow-700': synthesis?.evaluation === 'mixed',
-                          'bg-red-100 text-red-700': synthesis?.evaluation === 'bad',
-                          'bg-gray-100 text-gray-700': synthesis?.evaluation === 'error' || synthesis?.evaluation === 'unknown'
+                          'bg-green-100 text-green-700': synthesis?.evaluation === 'good' || synthesis?.evaluation === 'easy_to_deal_with',
+                          'bg-yellow-100 text-yellow-700': synthesis?.evaluation === 'mixed' || synthesis?.evaluation === 'moderate',
+                          'bg-red-100 text-red-700': synthesis?.evaluation === 'bad' || synthesis?.evaluation === 'difficult_to_deal_with',
+                          'bg-gray-100 text-gray-700': synthesis?.evaluation === 'error' || synthesis?.evaluation === 'unknown' || synthesis?.evaluation === 'insufficient_data'
                       }">
                     <i class="fas mr-2" 
                        :class="{
-                           'fa-check-circle': synthesis?.evaluation === 'good',
-                           'fa-exclamation-triangle': synthesis?.evaluation === 'mixed',
-                           'fa-times-circle': synthesis?.evaluation === 'bad',
-                           'fa-question-circle': synthesis?.evaluation === 'error' || synthesis?.evaluation === 'unknown'
+                           'fa-check-circle': synthesis?.evaluation === 'good' || synthesis?.evaluation === 'easy_to_deal_with',
+                           'fa-exclamation-triangle': synthesis?.evaluation === 'mixed' || synthesis?.evaluation === 'moderate',
+                           'fa-times-circle': synthesis?.evaluation === 'bad' || synthesis?.evaluation === 'difficult_to_deal_with',
+                           'fa-question-circle': synthesis?.evaluation === 'error' || synthesis?.evaluation === 'unknown' || synthesis?.evaluation === 'insufficient_data'
                        }"></i>
-                    <span x-text="(synthesis?.evaluation || 'unknown').toUpperCase()"></span>
+                    <span x-text="formatEvaluation(synthesis?.evaluation)"></span>
                 </span>
             </div>
             
@@ -431,6 +431,59 @@
                     this.refreshing = true;
                     await this.fetchResults();
                     setTimeout(() => this.refreshing = false, 500);
+                },
+                
+                getEvaluationType() {
+                    const aiIntent = this.searchData?.search_params?.ai_intent || '';
+                    if (aiIntent.startsWith('Evaluate doctor:')) return 'doctor';
+                    if (aiIntent.startsWith('Evaluate judge:')) return 'judge';
+                    if (aiIntent.startsWith('Evaluate adjuster:')) return 'adjuster';
+                    if (aiIntent.startsWith('Evaluate defense attorney:')) return 'defense_attorney';
+                    return 'general';
+                },
+                
+                getEvaluatedName() {
+                    const aiIntent = this.searchData?.search_params?.ai_intent || '';
+                    if (aiIntent.startsWith('Evaluate doctor:')) return aiIntent.replace('Evaluate doctor:', '').trim();
+                    if (aiIntent.startsWith('Evaluate judge:')) return aiIntent.replace('Evaluate judge:', '').trim();
+                    if (aiIntent.startsWith('Evaluate adjuster:')) return aiIntent.replace('Evaluate adjuster:', '').trim();
+                    if (aiIntent.startsWith('Evaluate defense attorney:')) return aiIntent.replace('Evaluate defense attorney:', '').trim();
+                    return 'Unknown';
+                },
+                
+                getEvaluationTitle() {
+                    const type = this.getEvaluationType();
+                    if (type === 'doctor') return 'Doctor Evaluation';
+                    if (type === 'judge') return 'Judge Evaluation';
+                    if (type === 'adjuster') return 'Adjuster Evaluation';
+                    if (type === 'defense_attorney') return 'Defense Attorney Evaluation';
+                    return 'Evaluation';
+                },
+                
+                getEvaluationIcon() {
+                    const type = this.getEvaluationType();
+                    if (type === 'doctor') return 'fa-user-md';
+                    if (type === 'judge') return 'fa-gavel';
+                    if (type === 'adjuster') return 'fa-clipboard-check';
+                    if (type === 'defense_attorney') return 'fa-user-tie';
+                    return 'fa-search';
+                },
+                
+                formatEvaluation(evaluation) {
+                    if (!evaluation) return 'UNKNOWN';
+                    // Map defense attorney terminology to display text
+                    const displayMap = {
+                        'good': 'GOOD',
+                        'bad': 'BAD',
+                        'mixed': 'MIXED',
+                        'easy_to_deal_with': 'EASY TO DEAL WITH',
+                        'moderate': 'MODERATE',
+                        'difficult_to_deal_with': 'DIFFICULT TO DEAL WITH',
+                        'insufficient_data': 'INSUFFICIENT DATA',
+                        'error': 'ERROR',
+                        'unknown': 'UNKNOWN'
+                    };
+                    return displayMap[evaluation] || evaluation.toUpperCase().replace(/_/g, ' ');
                 },
                 
                 expandMessage(messageId) {
