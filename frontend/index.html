@@ -642,6 +642,13 @@
                                         <i class="fas fa-check-circle mr-1"></i>
                                         <span x-text="search.relevant_count"></span> relevant
                                     </span>
+                                    <!-- Feedback indicator -->
+                                    <span x-show="search.feedback_positive === true" class="flex items-center text-green-600" title="Marked as helpful">
+                                        <i class="fas fa-thumbs-up mr-1"></i> Helpful
+                                    </span>
+                                    <span x-show="search.feedback_positive === false" class="flex items-center text-red-500" title="Marked as not helpful">
+                                        <i class="fas fa-thumbs-down mr-1"></i> Not helpful
+                                    </span>
                                 </div>
                                 <a :href="`/results.html?id=${search.id}`" 
                                    class="text-primary-600 hover:text-primary-700 font-medium text-sm flex items-center">

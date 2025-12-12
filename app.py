@@ -392,34 +392,36 @@ async def get_search_history(limit: int = 50):
             with conn.cursor() as cur:
                 cur.execute("""
                     SELECT 
-                        id,
-                        search_number,
+                        s.id,
+                        s.search_number,
                         COALESCE(
-                            search_params->>'ai_intent',
-                            keyword,
-                            search_params->>'keywords_any',
-                            search_params->>'keywords_all',
-                            search_params->>'keywords_phrase',
-                            search_params->>'s_keyword',
-                            search_params->>'s_key_one',
-                            CASE WHEN (search_params->>'s_postedby') IS NOT NULL 
-                                 THEN CONCAT('Posted by: ', search_params->>'s_postedby')
+                            s.search_params->>'ai_intent',
+                            s.keyword,
+                            s.search_params->>'keywords_any',
+                            s.search_params->>'keywords_all',
+                            s.search_params->>'keywords_phrase',
+                            s.search_params->>'s_keyword',
+                            s.search_params->>'s_key_one',
+                            CASE WHEN (s.search_params->>'s_postedby') IS NOT NULL 
+                                 THEN CONCAT('Posted by: ', s.search_params->>'s_postedby')
                                  ELSE NULL END,
-                            CASE WHEN (search_params->>'s_lname') IS NOT NULL 
-                                 THEN CONCAT('Name search: ', COALESCE(search_params->>'s_fname', ''), ' ', COALESCE(search_params->>'s_lname', ''))
+                            CASE WHEN (s.search_params->>'s_lname') IS NOT NULL 
+                                 THEN CONCAT('Name search: ', COALESCE(s.search_params->>'s_fname', ''), ' ', COALESCE(s.search_params->>'s_lname', ''))
                                  ELSE NULL END,
-                            CASE WHEN (search_params->>'s_fname') IS NOT NULL 
-                                 THEN CONCAT('Name search: ', COALESCE(search_params->>'s_fname', ''))
+                            CASE WHEN (s.search_params->>'s_fname') IS NOT NULL 
+                                 THEN CONCAT('Name search: ', COALESCE(s.search_params->>'s_fname', ''))
                                  ELSE NULL END,
                             'Search'
                         ) as query_text,
-                        search_params->>'ai_intent' as ai_intent,
-                        status,
-                        created_at,
-                        (SELECT COUNT(*) FROM search_results WHERE search_id = searches.id) as result_count,
-                        (SELECT COUNT(*) FROM analyses WHERE search_id = searches.id AND is_relevant = true) as relevant_count
-                    FROM searches
-                    ORDER BY created_at DESC
+                        s.search_params->>'ai_intent' as ai_intent,
+                        s.status,
+                        s.created_at,
+                        (SELECT COUNT(*) FROM search_results WHERE search_id = s.id) as result_count,
+                        (SELECT COUNT(*) FROM analyses WHERE search_id = s.id AND is_relevant = true) as relevant_count,
+                        sf.is_positive as feedback_positive
+                    FROM searches s
+                    LEFT JOIN synthesis_feedback sf ON sf.search_id = s.id
+                    ORDER BY s.created_at DESC
                     LIMIT %s
                 """, (limit,))
                 
@@ -435,7 +437,8 @@ async def get_search_history(limit: int = 50):
                         'status': row[4],
                         'created_at': row[5].isoformat() if row[5] else None,
                         'result_count': row[6] or 0,
-                        'relevant_count': row[7] or 0
+                        'relevant_count': row[7] or 0,
+                        'feedback_positive': row[8]  # True, False, or None
                     })
                 
                 return {"success": True, "history": history}
