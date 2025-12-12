@@ -328,6 +328,62 @@ async def get_search_results_json(search_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# ============================================================
+# Feedback Endpoints
+# ============================================================
+
+class SynthesisFeedbackRequest(BaseModel):
+    search_id: str
+    is_positive: bool
+    comment: Optional[str] = None
+
+class MessageFeedbackRequest(BaseModel):
+    search_id: str
+    message_id: str
+    is_positive: bool
+    comment: Optional[str] = None
+
+@app.post("/api/feedback/synthesis")
+async def save_synthesis_feedback(request: SynthesisFeedbackRequest):
+    """Save feedback on a synthesis (evaluation) result"""
+    try:
+        feedback_id = orchestrator.db.save_synthesis_feedback(
+            request.search_id,
+            request.is_positive,
+            request.comment
+        )
+        return {"success": True, "feedback_id": feedback_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/feedback/message")
+async def save_message_feedback(request: MessageFeedbackRequest):
+    """Save feedback on an individual message analysis"""
+    try:
+        feedback_id = orchestrator.db.save_message_feedback(
+            request.search_id,
+            request.message_id,
+            request.is_positive,
+            request.comment
+        )
+        return {"success": True, "feedback_id": feedback_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/feedback/{search_id}")
+async def get_feedback(search_id: str):
+    """Get all feedback for a search"""
+    try:
+        synthesis_feedback = orchestrator.db.get_synthesis_feedback(search_id)
+        message_feedback = orchestrator.db.get_message_feedback(search_id)
+        return {
+            "success": True,
+            "synthesis_feedback": dict(synthesis_feedback) if synthesis_feedback else None,
+            "message_feedback": [dict(f) for f in message_feedback] if message_feedback else []
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/api/search-history")
 async def get_search_history(limit: int = 50):
     """Get recent search history"""

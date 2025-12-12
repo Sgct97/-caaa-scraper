@@ -277,6 +277,41 @@
                 </h3>
                 <div class="prose max-w-none text-gray-700 whitespace-pre-line" x-text="synthesis?.reasoning || 'No reasoning available.'"></div>
             </div>
+            
+            <!-- Synthesis Feedback -->
+            <div class="mt-6 pt-6 border-t border-gray-200">
+                <div x-show="!synthesisFeedbackSubmitted" class="space-y-4">
+                    <h4 class="text-sm font-semibold text-gray-700">Was this evaluation helpful?</h4>
+                    <div class="flex items-center gap-4">
+                        <button @click="synthesisFeedbackPositive = true" 
+                                class="flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all"
+                                :class="synthesisFeedbackPositive === true ? 'border-green-500 bg-green-50 text-green-700' : 'border-gray-200 hover:border-green-300'">
+                            <i class="fas fa-thumbs-up"></i> Yes
+                        </button>
+                        <button @click="synthesisFeedbackPositive = false"
+                                class="flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all"
+                                :class="synthesisFeedbackPositive === false ? 'border-red-500 bg-red-50 text-red-700' : 'border-gray-200 hover:border-red-300'">
+                            <i class="fas fa-thumbs-down"></i> No
+                        </button>
+                    </div>
+                    <div x-show="synthesisFeedbackPositive !== null">
+                        <textarea x-model="synthesisFeedbackComment" 
+                                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all resize-none"
+                                  rows="2"
+                                  placeholder="Optional: Tell us why (helps improve future analyses)..."></textarea>
+                        <button @click="submitSynthesisFeedback()"
+                                :disabled="synthesisFeedbackSubmitting"
+                                class="mt-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition disabled:opacity-50">
+                            <span x-show="!synthesisFeedbackSubmitting">Submit Feedback</span>
+                            <span x-show="synthesisFeedbackSubmitting"><i class="fas fa-spinner fa-spin mr-2"></i>Submitting...</span>
+                        </button>
+                    </div>
+                </div>
+                <div x-show="synthesisFeedbackSubmitted" class="flex items-center gap-2 text-green-600">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Thank you for your feedback!</span>
+                </div>
+            </div>
         </div>
 
         <!-- Results -->
@@ -371,11 +406,31 @@
                         <div class="text-xs text-gray-500">
                             Message ID: <span x-text="result.caaa_message_id"></span>
                         </div>
-                        <button 
-                            @click="expandMessage(result.message_id)"
-                            class="text-sm text-primary-600 hover:text-primary-700 font-medium">
-                            Read Full Message <i class="fas fa-arrow-right ml-1"></i>
-                        </button>
+                        <div class="flex items-center gap-4">
+                            <!-- Message Feedback -->
+                            <div x-show="!getMessageFeedbackState(result.message_id).submitted" class="flex items-center gap-2">
+                                <span class="text-xs text-gray-500">Helpful?</span>
+                                <button @click="submitMessageFeedback(result.message_id, true)"
+                                        :disabled="getMessageFeedbackState(result.message_id).submitting"
+                                        class="p-1.5 rounded hover:bg-green-100 text-gray-400 hover:text-green-600 transition">
+                                    <i class="fas fa-thumbs-up"></i>
+                                </button>
+                                <button @click="submitMessageFeedback(result.message_id, false)"
+                                        :disabled="getMessageFeedbackState(result.message_id).submitting"
+                                        class="p-1.5 rounded hover:bg-red-100 text-gray-400 hover:text-red-600 transition">
+                                    <i class="fas fa-thumbs-down"></i>
+                                </button>
+                            </div>
+                            <div x-show="getMessageFeedbackState(result.message_id).submitted" class="flex items-center gap-1 text-xs">
+                                <i class="fas fa-check text-green-500"></i>
+                                <span class="text-gray-500">Thanks!</span>
+                            </div>
+                            <button 
+                                @click="expandMessage(result.message_id)"
+                                class="text-sm text-primary-600 hover:text-primary-700 font-medium">
+                                Read Full Message <i class="fas fa-arrow-right ml-1"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 </template>
@@ -402,6 +457,15 @@
                 error: null,
                 showModal: false,
                 modalMessage: null,
+                
+                // Synthesis feedback state
+                synthesisFeedbackPositive: null,
+                synthesisFeedbackComment: '',
+                synthesisFeedbackSubmitting: false,
+                synthesisFeedbackSubmitted: false,
+                
+                // Message feedback state
+                messageFeedback: {},  // keyed by message_id
                 
                 async init() {
                     await this.fetchResults();
@@ -484,6 +548,59 @@
                         'unknown': 'UNKNOWN'
                     };
                     return displayMap[evaluation] || evaluation.toUpperCase().replace(/_/g, ' ');
+                },
+                
+                async submitSynthesisFeedback() {
+                    if (this.synthesisFeedbackPositive === null) return;
+                    
+                    this.synthesisFeedbackSubmitting = true;
+                    try {
+                        const response = await fetch('/api/feedback/synthesis', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                search_id: this.searchId,
+                                is_positive: this.synthesisFeedbackPositive,
+                                comment: this.synthesisFeedbackComment || null
+                            })
+                        });
+                        
+                        if (response.ok) {
+                            this.synthesisFeedbackSubmitted = true;
+                        }
+                    } catch (err) {
+                        console.error('Failed to submit synthesis feedback:', err);
+                    } finally {
+                        this.synthesisFeedbackSubmitting = false;
+                    }
+                },
+                
+                async submitMessageFeedback(messageId, isPositive, comment = null) {
+                    const key = messageId;
+                    this.messageFeedback[key] = { ...this.messageFeedback[key], submitting: true };
+                    
+                    try {
+                        const response = await fetch('/api/feedback/message', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                search_id: this.searchId,
+                                message_id: messageId,
+                                is_positive: isPositive,
+                                comment: comment
+                            })
+                        });
+                        
+                        if (response.ok) {
+                            this.messageFeedback[key] = { submitted: true, isPositive };
+                        }
+                    } catch (err) {
+                        console.error('Failed to submit message feedback:', err);
+                    }
+                },
+                
+                getMessageFeedbackState(messageId) {
+                    return this.messageFeedback[messageId] || { submitted: false, isPositive: null, submitting: false };
                 },
                 
                 expandMessage(messageId) {

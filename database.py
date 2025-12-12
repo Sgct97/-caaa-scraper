@@ -419,6 +419,58 @@ class Database:
                 """)
                 
                 return cur.fetchone()
+    
+    # ============================================================
+    # Feedback Methods
+    # ============================================================
+    
+    def save_synthesis_feedback(self, search_id: str, is_positive: bool, comment: str = None) -> str:
+        """Save feedback on a synthesis (evaluation) result"""
+        with self.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO synthesis_feedback (search_id, is_positive, comment)
+                    VALUES (%s, %s, %s)
+                    RETURNING id::text
+                """, (search_id, is_positive, comment))
+                conn.commit()
+                return cur.fetchone()[0]
+    
+    def save_message_feedback(self, search_id: str, message_id: str, is_positive: bool, comment: str = None) -> str:
+        """Save feedback on an individual message analysis"""
+        with self.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO message_feedback (search_id, message_id, is_positive, comment)
+                    VALUES (%s, %s, %s, %s)
+                    RETURNING id::text
+                """, (search_id, message_id, is_positive, comment))
+                conn.commit()
+                return cur.fetchone()[0]
+    
+    def get_synthesis_feedback(self, search_id: str) -> dict:
+        """Get feedback for a synthesis result"""
+        with self.get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("""
+                    SELECT id::text, is_positive, comment, created_at
+                    FROM synthesis_feedback
+                    WHERE search_id = %s
+                    ORDER BY created_at DESC
+                    LIMIT 1
+                """, (search_id,))
+                return cur.fetchone()
+    
+    def get_message_feedback(self, search_id: str) -> list:
+        """Get all message feedback for a search"""
+        with self.get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("""
+                    SELECT id::text, message_id::text, is_positive, comment, created_at
+                    FROM message_feedback
+                    WHERE search_id = %s
+                """, (search_id,))
+                return cur.fetchall()
 
 
 # ============================================================
