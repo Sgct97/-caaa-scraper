@@ -99,13 +99,15 @@ class AIAnalyzer:
     def _build_prompt(self, message: Dict, real_question: str, search_keyword: str, context: Optional[str]) -> str:
         """Build the prompt for OpenAI"""
         
-        # Exception: Doctor/Judge/Adjuster evaluation queries use simpler, focused prompts
+        # Exception: Evaluation queries use simpler, focused prompts
         if real_question and real_question.startswith("Evaluate doctor:"):
             return self._build_doctor_relevance_prompt(message, real_question)
         if real_question and real_question.startswith("Evaluate judge:"):
             return self._build_judge_relevance_prompt(message, real_question)
         if real_question and real_question.startswith("Evaluate adjuster:"):
             return self._build_adjuster_relevance_prompt(message, real_question)
+        if real_question and real_question.startswith("Evaluate defense attorney:"):
+            return self._build_defense_attorney_relevance_prompt(message, real_question)
         
         # Standard legal research prompt (unchanged)
         subject = message.get('subject', 'No subject')
@@ -362,6 +364,69 @@ Return JSON:
   "is_relevant": true/false,
   "confidence": 0.0-1.0,
   "reasoning": "Brief explanation of why this message is or isn't relevant for evaluating {adjuster_name}"
+}}"""
+        return prompt
+    
+    def _build_defense_attorney_relevance_prompt(self, message: Dict, real_question: str) -> str:
+        """Build simplified prompt for defense attorney evaluation relevance filtering"""
+        
+        # Extract defense attorney name from real_question (format: "Evaluate defense attorney: John Smith")
+        defense_attorney_name = real_question.replace("Evaluate defense attorney:", "").strip()
+        
+        subject = message.get('subject', 'No subject')
+        body = message.get('body', '')
+        from_name = message.get('from_name', 'Unknown')
+        
+        # Truncate body if too long (to save tokens)
+        max_body_length = 2000
+        if len(body) > max_body_length:
+            body = body[:max_body_length] + "... [truncated]"
+        
+        prompt = f"""You are the Relevance Filter in a defense attorney evaluation system:
+
+SYSTEM OVERVIEW:
+1. Query Enhancer → Found messages matching defense attorney name
+2. YOU (Relevance Filter) → Filter messages that contain information ABOUT the defense attorney
+3. Synthesis Analyzer → Will evaluate if this defense attorney is easy or difficult to deal with
+
+YOUR SPECIFIC ROLE:
+Filter messages that contain information about {defense_attorney_name} that would be useful for determining how easy or difficult they are to deal with from an applicant attorney's perspective.
+
+DEFENSE ATTORNEY TO EVALUATE: "{defense_attorney_name}"
+
+MESSAGE TO FILTER:
+From: {from_name}
+Subject: {subject}
+
+{body}
+
+YOUR GOAL:
+Mark as RELEVANT if the message:
+- Mentions the defense attorney by name (any variation: "{defense_attorney_name}", first name, last name, etc.)
+- Discusses experiences negotiating or dealing with this attorney
+- Contains opinions about their professionalism, responsiveness, or tactics
+- References settlements, mediations, or trials involving this attorney
+- Describes their litigation style or approach
+- Mentions which insurance company/firm they work for
+
+Mark as NOT RELEVANT if:
+- Only mentions attorney's name in passing without any context or information
+- Different attorney with similar name (be careful with common names)
+- No substantive information about dealing with this attorney
+- Message is about a different topic entirely
+
+CONFIDENCE SCORING:
+0.95-1.0: Message clearly discusses this specific defense attorney with substantive information
+0.80-0.94: Message mentions attorney with useful context
+0.60-0.79: Message mentions attorney but information is limited
+0.40-0.59: Unclear if message is about this attorney or another
+0.00-0.39: Not about this attorney or no useful information
+
+Return JSON:
+{{
+  "is_relevant": true/false,
+  "confidence": 0.0-1.0,
+  "reasoning": "Brief explanation of why this message is or isn't relevant for evaluating {defense_attorney_name}"
 }}"""
         return prompt
     
@@ -851,6 +916,166 @@ SCORING GUIDE (only use if you have sufficient data):
 - 40-59: Mixed reviews, some concerns but not terrible
 - 20-39: Difficult adjuster, significant concerns, delays or denials common
 - 0-19: Terrible adjuster, multiple red flags, bad faith behavior reported
+
+Be thorough and cite specific examples from the messages in your reasoning."""
+        
+        return prompt
+    
+    def synthesize_defense_attorney_evaluation(self, defense_attorney_name: str, messages: list[Dict]) -> Dict:
+        """
+        Synthesize all messages about a defense attorney to determine if they are easy or difficult
+        to deal with from an applicant attorney's perspective.
+        
+        Args:
+            defense_attorney_name: Name of the defense attorney being evaluated
+            messages: List of message dicts with keys: subject, body, from_name, etc.
+        
+        Returns:
+            Dict with:
+                - score: int (0-100) - Overall ease score (higher = easier to deal with)
+                - evaluation: str ("easy_to_deal_with", "moderate", "difficult_to_deal_with")
+                - reasoning: str - Detailed explanation
+                - cost_usd: float - API cost
+        """
+        if not messages:
+            return {
+                'score': 0,
+                'evaluation': 'unknown',
+                'reasoning': 'No messages found about this defense attorney.',
+                'cost_usd': 0.0
+            }
+        
+        prompt = self._build_defense_attorney_synthesis_prompt(defense_attorney_name, messages)
+        
+        try:
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=2000,
+                temperature=0.5,
+                system="You are an expert California workers' compensation attorney evaluating opposing counsel.",
+                messages=[{"role": "user", "content": prompt}]
+            )
+            
+            # Parse response
+            response_text = response.content[0].text
+            
+            # Extract JSON from response
+            json_match = regex.search(r'\{.*\}', response_text, regex.DOTALL)
+            if json_match:
+                result = json.loads(json_match.group())
+            else:
+                # Fallback parsing
+                result = {
+                    'score': 50,
+                    'evaluation': 'moderate',
+                    'reasoning': response_text
+                }
+            
+            # Validate and normalize score
+            score = int(result.get('score', 50))
+            score = max(0, min(100, score))  # Clamp to 0-100
+            
+            evaluation = result.get('evaluation', 'moderate').lower()
+            if evaluation not in ['easy_to_deal_with', 'moderate', 'difficult_to_deal_with', 'insufficient_data']:
+                # Map old terminology if needed
+                if evaluation == 'good':
+                    evaluation = 'easy_to_deal_with'
+                elif evaluation == 'bad':
+                    evaluation = 'difficult_to_deal_with'
+                elif evaluation == 'mixed':
+                    evaluation = 'moderate'
+                else:
+                    evaluation = 'moderate'
+            
+            # Calculate cost
+            input_tokens = response.usage.input_tokens
+            output_tokens = response.usage.output_tokens
+            total_tokens = input_tokens + output_tokens
+            cost = self._calculate_cost(total_tokens, self.model)
+            
+            self.total_tokens_used += total_tokens
+            self.total_cost_usd += cost
+            
+            return {
+                'score': score,
+                'evaluation': evaluation,
+                'reasoning': result.get('reasoning', 'No reasoning provided'),
+                'cost_usd': cost
+            }
+            
+        except Exception as e:
+            print(f"❌ Defense attorney synthesis error: {e}")
+            return {
+                'score': 0,
+                'evaluation': 'error',
+                'reasoning': f'Error during synthesis: {str(e)}',
+                'cost_usd': 0.0
+            }
+    
+    def _build_defense_attorney_synthesis_prompt(self, defense_attorney_name: str, messages: list[Dict]) -> str:
+        """Build the synthesis prompt for defense attorney evaluation"""
+        
+        # Format messages for prompt
+        messages_text = ""
+        for i, msg in enumerate(messages[:50], 1):  # Limit to 50 messages to avoid token limits
+            messages_text += f"\n--- Message {i} ---\n"
+            messages_text += f"From: {msg.get('from_name', 'Unknown')}\n"
+            messages_text += f"Subject: {msg.get('subject', 'No subject')}\n"
+            messages_text += f"Body: {msg.get('body', '')[:1000]}\n"  # Limit body length
+        
+        prompt = f"""You are an expert California workers' compensation APPLICANT attorney evaluating a DEFENSE attorney based on discussions from a professional legal listserv.
+
+DEFENSE ATTORNEY BEING EVALUATED: {defense_attorney_name}
+
+You have access to {len(messages)} messages from experienced California workers' compensation applicant attorneys discussing their experiences with this defense attorney. Your job is to synthesize ALL of these messages to determine:
+
+1. Is this defense attorney "easy to deal with" or "difficult to deal with"?
+2. What is their overall ease-of-dealing score (0-100)?
+3. What are the key factors attorneys mention?
+
+EVALUATION CRITERIA (from applicant attorney perspective):
+- **Negotiation Style**: Are they reasonable? Willing to negotiate in good faith? Or hardball/unreasonable?
+- **Settlement Behavior**: Do they make fair offers? Or lowball and refuse to budge?
+- **Responsiveness**: Do they return calls/emails? Follow through on commitments?
+- **Professionalism**: Are they respectful and professional? Or hostile/difficult?
+- **Honesty/Reliability**: Do they keep their word? Can they be trusted?
+- **Tactics**: Are they straightforward? Or do they play games, delay, or use dirty tricks?
+- **Litigation Style**: Are they settlement-oriented? Or fight everything needlessly?
+- **Case Preparation**: Are they organized and prepared? Or waste everyone's time?
+- **Flexibility**: Are they willing to work with you on scheduling, discovery, etc.?
+- **Firm/Company**: Which firm do they work for? (Some firms are known to be worse than others)
+
+MESSAGES TO ANALYZE:
+{messages_text}
+
+YOUR TASK:
+Synthesize ALL messages to provide a comprehensive evaluation. Consider:
+- What patterns emerge across multiple messages?
+- Are there consistent positive or negative themes?
+- What specific strengths or weaknesses are mentioned?
+- How do applicant attorneys generally view dealing with this person?
+
+Return JSON:
+{{
+  "score": <0-100 integer>,
+  "evaluation": "easy_to_deal_with" | "moderate" | "difficult_to_deal_with" | "insufficient_data",
+  "reasoning": "<detailed explanation of your evaluation, citing specific examples from the messages>"
+}}
+
+🚨 CRITICAL - INSUFFICIENT DATA:
+If there are fewer than 3 messages, or the messages don't contain enough substantive information to make a reliable determination, you MUST return:
+- "evaluation": "insufficient_data"
+- "score": 0
+- "reasoning": "Explain why there isn't enough information (too few messages, messages lack detail, etc.)"
+
+DO NOT make up a determination if there isn't enough information. It is better to say "insufficient_data" than to guess.
+
+SCORING GUIDE (only use if you have sufficient data):
+- 80-100: Easy to deal with - Reasonable, professional, negotiates in good faith
+- 60-79: Generally easy - Some positive experiences, minor issues
+- 40-59: Moderate - Mixed experiences, neither easy nor difficult
+- 20-39: Difficult - Frequently unreasonable, delays, or problematic behavior
+- 0-19: Very difficult - Hostile, bad faith, multiple red flags, avoid if possible
 
 Be thorough and cite specific examples from the messages in your reasoning."""
         
