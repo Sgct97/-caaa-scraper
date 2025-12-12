@@ -62,6 +62,7 @@ class AIAnalyzer:
             response = self.client.messages.create(
                 model=self.model,
                 max_tokens=500,
+                temperature=0.5,
                 system="You are an expert legal assistant. Always respond with valid JSON.",
                 messages=[{"role": "user", "content": prompt}]
             )
@@ -368,6 +369,7 @@ Return JSON:
             response = self.client.messages.create(
                 model=self.model,
                 max_tokens=2000,
+                temperature=0.5,
                 system="You are an expert California workers' compensation attorney evaluating medical experts.",
                 messages=[{"role": "user", "content": prompt}]
             )
@@ -515,6 +517,7 @@ Be thorough and cite specific examples from the messages in your reasoning."""
             response = self.client.messages.create(
                 model=self.model,
                 max_tokens=2000,
+                temperature=0.5,
                 system="You are an expert California workers' compensation attorney evaluating judges.",
                 messages=[{"role": "user", "content": prompt}]
             )
