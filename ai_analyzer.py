@@ -98,9 +98,11 @@ class AIAnalyzer:
     def _build_prompt(self, message: Dict, real_question: str, search_keyword: str, context: Optional[str]) -> str:
         """Build the prompt for OpenAI"""
         
-        # Exception: Doctor evaluation queries use simpler, focused prompt
+        # Exception: Doctor/Judge evaluation queries use simpler, focused prompts
         if real_question and real_question.startswith("Evaluate doctor:"):
             return self._build_doctor_relevance_prompt(message, real_question)
+        if real_question and real_question.startswith("Evaluate judge:"):
+            return self._build_judge_relevance_prompt(message, real_question)
         
         # Standard legal research prompt (unchanged)
         subject = message.get('subject', 'No subject')
@@ -232,6 +234,68 @@ Return JSON:
   "is_relevant": true/false,
   "confidence": 0.0-1.0,
   "reasoning": "Brief explanation of why this message is or isn't relevant for evaluating {doctor_name}"
+}}"""
+        return prompt
+    
+    def _build_judge_relevance_prompt(self, message: Dict, real_question: str) -> str:
+        """Build simplified prompt for judge evaluation relevance filtering"""
+        
+        # Extract judge name from real_question (format: "Evaluate judge: Judge Smith")
+        judge_name = real_question.replace("Evaluate judge:", "").strip()
+        
+        subject = message.get('subject', 'No subject')
+        body = message.get('body', '')
+        from_name = message.get('from_name', 'Unknown')
+        
+        # Truncate body if too long (to save tokens)
+        max_body_length = 2000
+        if len(body) > max_body_length:
+            body = body[:max_body_length] + "... [truncated]"
+        
+        prompt = f"""You are the Relevance Filter in a judge evaluation system:
+
+SYSTEM OVERVIEW:
+1. Query Enhancer → Found messages matching judge name
+2. YOU (Relevance Filter) → Filter messages that contain information ABOUT the judge
+3. Synthesis Analyzer → Will evaluate if judge is good/bad using your filtered messages
+
+YOUR SPECIFIC ROLE:
+Filter messages that contain information about {judge_name} that would be useful for determining if they are a good or bad judge from a California workers' compensation attorney's perspective.
+
+JUDGE TO EVALUATE: "{judge_name}"
+
+MESSAGE TO FILTER:
+From: {from_name}
+Subject: {subject}
+
+{body}
+
+YOUR GOAL:
+Mark as RELEVANT if the message:
+- Mentions the judge by name (any variation: "{judge_name}", "Judge [Last Name]", "Hon. [Name]", "WCJ [Name]", etc.)
+- Discusses the judge's rulings, decisions, or courtroom behavior
+- Contains attorney opinions, experiences, or recommendations about the judge
+- References cases or hearings before this judge
+- Describes the judge's demeanor, fairness, or case management style
+
+Mark as NOT RELEVANT if:
+- Only mentions judge's name in passing without any context or information
+- Different judge with similar name (be careful with common names)
+- No substantive information about the judge that would help evaluate them
+- Message is about a different topic entirely
+
+CONFIDENCE SCORING:
+0.95-1.0: Message clearly discusses this specific judge with substantive information
+0.80-0.94: Message mentions judge with useful context
+0.60-0.79: Message mentions judge but information is limited
+0.40-0.59: Unclear if message is about this judge or another
+0.00-0.39: Not about this judge or no useful information
+
+Return JSON:
+{{
+  "is_relevant": true/false,
+  "confidence": 0.0-1.0,
+  "reasoning": "Brief explanation of why this message is or isn't relevant for evaluating {judge_name}"
 }}"""
         return prompt
     
@@ -416,6 +480,157 @@ SCORING GUIDE (only use if you have sufficient data):
 - 40-59: Mixed reviews, some concerns
 - 20-39: Generally negative feedback, significant concerns
 - 0-19: Poor doctor, multiple red flags, not recommended
+
+Be thorough and cite specific examples from the messages in your reasoning."""
+        
+        return prompt
+    
+    def synthesize_judge_evaluation(self, judge_name: str, messages: list[Dict]) -> Dict:
+        """
+        Synthesize all messages about a judge to determine if they are "good" or "bad"
+        from a California workers' compensation attorney's perspective.
+        
+        Args:
+            judge_name: Name of the judge being evaluated
+            messages: List of message dicts with keys: subject, body, from_name, etc.
+        
+        Returns:
+            Dict with:
+                - score: int (0-100) - Overall quality score
+                - evaluation: str ("good", "bad", or "mixed")
+                - reasoning: str - Detailed explanation
+                - cost_usd: float - API cost
+        """
+        if not messages:
+            return {
+                'score': 0,
+                'evaluation': 'unknown',
+                'reasoning': 'No messages found about this judge.',
+                'cost_usd': 0.0
+            }
+        
+        prompt = self._build_judge_synthesis_prompt(judge_name, messages)
+        
+        try:
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=2000,
+                system="You are an expert California workers' compensation attorney evaluating judges.",
+                messages=[{"role": "user", "content": prompt}]
+            )
+            
+            # Parse response
+            response_text = response.content[0].text
+            
+            # Extract JSON from response
+            json_match = regex.search(r'\{.*\}', response_text, regex.DOTALL)
+            if json_match:
+                result = json.loads(json_match.group())
+            else:
+                # Fallback parsing
+                result = {
+                    'score': 50,
+                    'evaluation': 'mixed',
+                    'reasoning': response_text
+                }
+            
+            # Validate and normalize score
+            score = int(result.get('score', 50))
+            score = max(0, min(100, score))  # Clamp to 0-100
+            
+            evaluation = result.get('evaluation', 'mixed').lower()
+            if evaluation not in ['good', 'bad', 'mixed', 'insufficient_data']:
+                evaluation = 'mixed'
+            
+            # Calculate cost
+            input_tokens = response.usage.input_tokens
+            output_tokens = response.usage.output_tokens
+            total_tokens = input_tokens + output_tokens
+            cost = self._calculate_cost(total_tokens, self.model)
+            
+            self.total_tokens_used += total_tokens
+            self.total_cost_usd += cost
+            
+            return {
+                'score': score,
+                'evaluation': evaluation,
+                'reasoning': result.get('reasoning', 'No reasoning provided'),
+                'cost_usd': cost
+            }
+            
+        except Exception as e:
+            print(f"❌ Judge synthesis error: {e}")
+            return {
+                'score': 0,
+                'evaluation': 'error',
+                'reasoning': f'Error during synthesis: {str(e)}',
+                'cost_usd': 0.0
+            }
+    
+    def _build_judge_synthesis_prompt(self, judge_name: str, messages: list[Dict]) -> str:
+        """Build the synthesis prompt for judge evaluation"""
+        
+        # Format messages for prompt
+        messages_text = ""
+        for i, msg in enumerate(messages[:50], 1):  # Limit to 50 messages to avoid token limits
+            messages_text += f"\n--- Message {i} ---\n"
+            messages_text += f"From: {msg.get('from_name', 'Unknown')}\n"
+            messages_text += f"Subject: {msg.get('subject', 'No subject')}\n"
+            messages_text += f"Body: {msg.get('body', '')[:1000]}\n"  # Limit body length
+        
+        prompt = f"""You are an expert California workers' compensation attorney evaluating a Workers' Compensation Judge (WCJ) based on discussions from a professional legal listserv.
+
+JUDGE BEING EVALUATED: {judge_name}
+
+You have access to {len(messages)} messages from experienced California workers' compensation attorneys discussing this judge. Your job is to synthesize ALL of these messages to determine:
+
+1. Is this judge "good" or "bad" from an APPLICANT ATTORNEY'S perspective?
+2. What is their overall quality score (0-100)?
+3. What are the key factors attorneys mention?
+
+EVALUATION CRITERIA (from applicant attorney perspective):
+- Ruling tendencies: Does the judge tend to rule in favor of injured workers or insurance companies?
+- Fairness and impartiality: Does the judge give both sides a fair hearing?
+- Legal knowledge: Does the judge understand workers' compensation law?
+- Case management: Is the judge efficient? Do hearings start on time? Are decisions timely?
+- Courtroom demeanor: Is the judge respectful to attorneys and parties?
+- Settlement encouragement: Does the judge appropriately encourage settlements?
+- Consistency: Are the judge's rulings predictable and consistent?
+- Treatment of injured workers: Is the judge compassionate toward applicants?
+- Evidence handling: Does the judge properly weigh medical evidence?
+- Any red flags or concerns mentioned by attorneys
+
+MESSAGES TO ANALYZE:
+{messages_text}
+
+YOUR TASK:
+Synthesize ALL messages to provide a comprehensive evaluation. Consider:
+- What patterns emerge across multiple messages?
+- Are there consistent positive or negative themes?
+- What specific strengths or weaknesses are mentioned?
+- How do applicant attorneys generally view this judge?
+
+Return JSON:
+{{
+  "score": <0-100 integer>,
+  "evaluation": "good" | "bad" | "mixed" | "insufficient_data",
+  "reasoning": "<detailed explanation of your evaluation, citing specific examples from the messages>"
+}}
+
+🚨 CRITICAL - INSUFFICIENT DATA:
+If there are fewer than 3 messages, or the messages don't contain enough substantive information to make a reliable determination, you MUST return:
+- "evaluation": "insufficient_data"
+- "score": 0
+- "reasoning": "Explain why there isn't enough information (too few messages, messages lack detail, etc.)"
+
+DO NOT make up a determination if there isn't enough information. It is better to say "insufficient_data" than to guess.
+
+SCORING GUIDE (only use if you have sufficient data):
+- 80-100: Excellent judge for applicants, highly recommended by attorneys
+- 60-79: Good judge with generally positive feedback from applicant perspective
+- 40-59: Mixed reviews, some concerns from applicant attorneys
+- 20-39: Generally negative feedback, significant concerns for applicants
+- 0-19: Poor judge for applicants, multiple red flags, not recommended
 
 Be thorough and cite specific examples from the messages in your reasoning."""
         

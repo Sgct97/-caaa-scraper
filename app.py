@@ -115,7 +115,7 @@ templates = Jinja2Templates(directory="templates")
 # ============================================================
 
 class SearchRequest(BaseModel):
-    query_type: str = "general"  # "general" or "doctor_evaluation"
+    query_type: str = "general"  # "general", "doctor_evaluation", or "judge_evaluation"
     search_fields: Optional[dict] = None
     ai_intent: Optional[str] = None
     use_ai_enhancement: bool = False
@@ -167,6 +167,9 @@ async def create_search(search_req: SearchRequest, background_tasks: BackgroundT
         if search_req.query_type == "doctor_evaluation":
             if not search_req.ai_intent:
                 raise HTTPException(status_code=400, detail="Doctor evaluation requires ai_intent with doctor name")
+        elif search_req.query_type == "judge_evaluation":
+            if not search_req.ai_intent:
+                raise HTTPException(status_code=400, detail="Judge evaluation requires ai_intent with judge name")
         else:
             if not search_req.search_fields and not search_req.ai_intent:
                 raise HTTPException(status_code=400, detail="Must provide search fields or AI intent")
@@ -860,6 +863,11 @@ async def run_search_async(query_type: str, search_fields: Optional[dict], ai_in
             doctor_name = ai_intent.replace("Evaluate doctor:", "").strip()
             # Use QueryEnhancer to find the doctor
             search_params = orchestrator.query_enhancer.enhance_query(f"Find all messages mentioning doctor {doctor_name}")
+        elif query_type == "judge_evaluation":
+            # Extract judge name from ai_intent (format: "Evaluate judge: Judge Smith")
+            judge_name = ai_intent.replace("Evaluate judge:", "").strip()
+            # Use QueryEnhancer to find the judge
+            search_params = orchestrator.query_enhancer.enhance_query(f"Find all messages mentioning judge {judge_name}")
         else:
             search_params = orchestrator.query_enhancer.enhance_query(ai_intent)
     else:
