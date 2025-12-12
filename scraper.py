@@ -153,7 +153,7 @@ class CAAAScraper:
         except:
             pass
         
-        page.wait_for_timeout(5000)
+        page.wait_for_timeout(2500)
         print(f"✓ Search submitted")
     
     def _extract_message_ids(self, 
@@ -243,7 +243,7 @@ class CAAAScraper:
                     break
                 
                 current_page += 1
-                page.wait_for_timeout(2000)
+                page.wait_for_timeout(1500)
             else:
                 break
         
@@ -275,7 +275,7 @@ class CAAAScraper:
             if next_link and next_link.is_visible():
                 print(f"  → Clicking page number link: {next_page_num}")
                 next_link.click()
-                page.wait_for_timeout(3000)
+                page.wait_for_timeout(1500)
                 page.wait_for_selector("#seachResultsPaginationBar", timeout=10000)
                 return True
             
@@ -295,7 +295,7 @@ class CAAAScraper:
                     # Fallback to regular click
                     next_button.click()
                 
-                page.wait_for_timeout(3000)
+                page.wait_for_timeout(1500)
                 page.wait_for_selector("#seachResultsPaginationBar", timeout=10000)
                 return True
             
@@ -304,7 +304,7 @@ class CAAAScraper:
             if next_text_link and next_text_link.is_visible():
                 print(f"  → Clicking 'Next' text link")
                 next_text_link.click()
-                page.wait_for_timeout(3000)
+                page.wait_for_timeout(1500)
                 page.wait_for_selector("#seachResultsPaginationBar", timeout=10000)
                 return True
             
@@ -350,7 +350,7 @@ class CAAAScraper:
                 print(f"      Trying direct URL: {message_url}")
                 page.goto(message_url, timeout=10000)
             
-            page.wait_for_timeout(3000)  # Wait longer for content to load
+            page.wait_for_timeout(1500)  # Wait for content to load
             
             # Wait for message content with better error handling
             print(f"      Waiting for message window...")
