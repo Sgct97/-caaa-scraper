@@ -307,9 +307,18 @@
                         </button>
                     </div>
                 </div>
-                <div x-show="synthesisFeedbackSubmitted" class="flex items-center gap-2 text-green-600">
-                    <i class="fas fa-check-circle"></i>
-                    <span>Thank you for your feedback!</span>
+                <div x-show="synthesisFeedbackSubmitted" class="bg-gray-50 rounded-lg p-4">
+                    <div class="flex items-center gap-2 text-green-600 mb-2">
+                        <i class="fas fa-check-circle"></i>
+                        <span class="font-medium">Feedback submitted!</span>
+                        <span :class="synthesisFeedbackPositive ? 'text-green-600' : 'text-red-500'">
+                            <i :class="synthesisFeedbackPositive ? 'fas fa-thumbs-up' : 'fas fa-thumbs-down'"></i>
+                            <span x-text="synthesisFeedbackPositive ? 'Helpful' : 'Not helpful'"></span>
+                        </span>
+                    </div>
+                    <div x-show="synthesisFeedbackComment" class="text-gray-600 text-sm italic">
+                        "<span x-text="synthesisFeedbackComment"></span>"
+                    </div>
                 </div>
             </div>
         </div>
@@ -485,9 +494,36 @@
                         this.stats = data.stats || {};
                         this.synthesis = data.synthesis || null;
                         this.loading = false;
+                        
+                        // Load existing feedback
+                        await this.loadExistingFeedback();
                     } catch (err) {
                         this.error = err.message;
                         this.loading = false;
+                    }
+                },
+                
+                async loadExistingFeedback() {
+                    try {
+                        const response = await fetch(`/api/feedback/${this.searchId}`);
+                        const data = await response.json();
+                        
+                        if (data.synthesis_feedback) {
+                            this.synthesisFeedbackPositive = data.synthesis_feedback.is_positive;
+                            this.synthesisFeedbackComment = data.synthesis_feedback.comment || '';
+                            this.synthesisFeedbackSubmitted = true;
+                        }
+                        
+                        if (data.message_feedback && data.message_feedback.length > 0) {
+                            data.message_feedback.forEach(fb => {
+                                this.messageFeedback[fb.message_id] = {
+                                    submitted: true,
+                                    isPositive: fb.is_positive
+                                };
+                            });
+                        }
+                    } catch (err) {
+                        console.log('No existing feedback:', err);
                     }
                 },
                 
