@@ -363,7 +363,7 @@ async def save_message_feedback(request: MessageFeedbackRequest):
         feedback_id = orchestrator.db.save_message_feedback(
             request.search_id,
             request.message_id,
-            request.is_positive,
+            requeplest.is_positive,
             request.comment
         )
         return {"success": True, "feedback_id": feedback_id}
@@ -822,6 +822,9 @@ async def refresh_cookies_page():
                         if (status.status === 'complete') {
                             statusDiv.style.background = '#d4edda';
                             statusDiv.innerHTML = '✅ Success! Cookies saved and browser restarted. You can close this tab.';
+                        } else if (status.status === 'warning') {
+                            statusDiv.style.background = '#fff3cd';
+                            statusDiv.innerHTML = '⚠️ Warning: ' + status.message + '<br><br><strong>The auth cookie (mcidme) was not found. This usually means you were not fully logged in when you clicked complete.</strong><br><br>Please try again and make sure you can see your CAAA dashboard before clicking the button.';
                         } else if (status.status === 'error') {
                             statusDiv.style.background = '#f8d7da';
                             statusDiv.innerHTML = '❌ Error: ' + status.message;

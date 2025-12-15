@@ -150,6 +150,14 @@ def launch_browser_for_login():
             current_url = page.url
             logger.info(f'After login signal - Current URL: {current_url}')
             
+            # Take screenshot for debugging
+            screenshot_path = '/srv/caaa_scraper/login_screenshot.png'
+            try:
+                page.screenshot(path=screenshot_path)
+                logger.info(f'Screenshot saved to: {screenshot_path}')
+            except Exception as e:
+                logger.warning(f'Could not save screenshot: {e}')
+            
             # Save storage state
             logger.info(f'Saving storage state to: {STORAGE_STATE_PATH}')
             context.storage_state(path=STORAGE_STATE_PATH)
@@ -165,12 +173,28 @@ def launch_browser_for_login():
             for cookie in state.get('cookies', []):
                 logger.info(f'  Cookie: {cookie.get("name")} domain={cookie.get("domain")} expires={cookie.get("expires", "session")}')
             
-            if cookie_count == 0:
-                logger.warning('WARNING: No cookies captured!')
-                update_status('warning', 'Login captured but 0 cookies found', {'url': current_url})
+            # Validate auth cookies exist
+            cookie_names = [c.get('name') for c in state.get('cookies', [])]
+            has_mcidme = 'mcidme' in cookie_names
+            auth_valid = has_mcidme
             
             browser.close()
             logger.info('Browser closed')
+            
+            if not auth_valid:
+                logger.warning('WARNING: mcidme auth cookie NOT found - login may have failed!')
+                update_status('warning', 'Auth cookie missing - login may not have succeeded', {
+                    'url': current_url,
+                    'missing_cookie': 'mcidme',
+                    'cookie_count': cookie_count,
+                    'screenshot': screenshot_path
+                })
+                return False  # Don't proceed with restart if auth failed
+            
+            if cookie_count == 0:
+                logger.warning('WARNING: No cookies captured!')
+                update_status('warning', 'Login captured but 0 cookies found', {'url': current_url})
+                return False
             
             update_status('captured', f'Captured {cookie_count} cookies', {
                 'cookie_count': cookie_count,
