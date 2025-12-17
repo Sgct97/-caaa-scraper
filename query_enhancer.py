@@ -253,6 +253,115 @@ Translate the REAL question into the best possible search parameters optimized f
             max_pages=10,
             max_messages=100
         )
+    
+    # ============================================================
+    # DETERMINISTIC QUERY ENHANCERS (No AI calls)
+    # For person-name searches where consistency is critical
+    # ============================================================
+    
+    def _extract_name(self, raw_name: str, prefixes: list) -> tuple:
+        """
+        Extract clean name from input, removing professional prefixes.
+        
+        Args:
+            raw_name: Raw input like "Judge Dobrin" or "Hon. John Smith"
+            prefixes: List of prefixes to strip (case-insensitive)
+            
+        Returns:
+            tuple: (full_clean_name, last_name_only)
+        """
+        name = raw_name.strip()
+        
+        # Remove common prefixes (case-insensitive)
+        for prefix in prefixes:
+            # Handle prefixes with or without periods/spaces
+            pattern = re.compile(rf'^{re.escape(prefix)}[\s.]*', re.IGNORECASE)
+            name = pattern.sub('', name).strip()
+        
+        # Split into parts
+        parts = name.split()
+        
+        if len(parts) >= 2:
+            # Full name provided (e.g., "John Dobrin")
+            full_name = name
+            last_name = parts[-1]  # Last word is last name
+        else:
+            # Single name provided (e.g., "Dobrin")
+            full_name = name
+            last_name = name
+        
+        return (full_name, last_name)
+    
+    def enhance_judge_query(self, name: str) -> SearchParams:
+        """
+        Deterministic query enhancement for judge searches.
+        
+        Generates consistent, exhaustive variations of judge name
+        to maximize search recall without AI variability.
+        
+        Args:
+            name: Judge name (e.g., "Dobrin", "Judge Dobrin", "John Dobrin")
+            
+        Returns:
+            SearchParams with keywords_any containing all variations
+        """
+        # Common judge-related prefixes to strip
+        judge_prefixes = [
+            "Judge", "Hon.", "Hon", "Honorable", "WCJ", 
+            "Workers Compensation Judge", "Workers' Compensation Judge"
+        ]
+        
+        full_name, last_name = self._extract_name(name, judge_prefixes)
+        
+        # Build variations list
+        variations = []
+        
+        # Last name variations (always include)
+        variations.extend([
+            f"Judge {last_name}",
+            last_name,
+            f"Hon. {last_name}",
+            f"Hon {last_name}",
+            f"WCJ {last_name}",
+            f"Honorable {last_name}",
+            f"{last_name} WCJ",
+        ])
+        
+        # If full name differs from last name, add full name variations too
+        if full_name != last_name:
+            variations.extend([
+                f"Judge {full_name}",
+                full_name,
+                f"Hon. {full_name}",
+                f"WCJ {full_name}",
+                f"Honorable {full_name}",
+            ])
+        
+        # Remove duplicates while preserving order
+        seen = set()
+        unique_variations = []
+        for v in variations:
+            if v.lower() not in seen:
+                seen.add(v.lower())
+                unique_variations.append(v)
+        
+        keywords_any = ", ".join(unique_variations)
+        
+        print(f"\n{'='*60}")
+        print("DETERMINISTIC JUDGE QUERY ENHANCEMENT")
+        print(f"{'='*60}")
+        print(f"Input: \"{name}\"")
+        print(f"Extracted: full_name=\"{full_name}\", last_name=\"{last_name}\"")
+        print(f"Generated {len(unique_variations)} search variations:")
+        for v in unique_variations:
+            print(f"  • {v}")
+        print(f"keywords_any: \"{keywords_any}\"")
+        
+        return SearchParams(
+            keywords_any=keywords_any,
+            max_pages=10,
+            max_messages=100
+        )
 
 
 # ============================================================

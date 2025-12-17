@@ -363,7 +363,7 @@ async def save_message_feedback(request: MessageFeedbackRequest):
         feedback_id = orchestrator.db.save_message_feedback(
             request.search_id,
             request.message_id,
-            requeplest.is_positive,
+            request.is_positive,
             request.comment
         )
         return {"success": True, "feedback_id": feedback_id}
@@ -934,8 +934,8 @@ async def run_search_async(query_type: str, search_fields: Optional[dict], ai_in
         elif query_type == "judge_evaluation":
             # Extract judge name from ai_intent (format: "Evaluate judge: Judge Smith")
             judge_name = ai_intent.replace("Evaluate judge:", "").strip()
-            # Use QueryEnhancer to find the judge
-            search_params = orchestrator.query_enhancer.enhance_query(f"Find all messages mentioning judge {judge_name}")
+            # Use DETERMINISTIC enhancer for consistent judge name variations
+            search_params = orchestrator.query_enhancer.enhance_judge_query(judge_name)
         elif query_type == "adjuster_evaluation":
             # Extract adjuster name from ai_intent (format: "Evaluate adjuster: John Smith")
             adjuster_name = ai_intent.replace("Evaluate adjuster:", "").strip()
