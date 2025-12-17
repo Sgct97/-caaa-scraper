@@ -934,8 +934,15 @@ async def run_search_async(query_type: str, search_fields: Optional[dict], ai_in
         elif query_type == "judge_evaluation":
             # Extract judge name from ai_intent (format: "Evaluate judge: Judge Smith")
             judge_name = ai_intent.replace("Evaluate judge:", "").strip()
-            # Use DETERMINISTIC enhancer for consistent judge name variations
-            search_params = orchestrator.query_enhancer.enhance_judge_query(judge_name)
+            # Strip common prefixes to get clean name for keywords_all
+            clean_name = judge_name.replace("Judge ", "").replace("Hon. ", "").replace("Hon ", "").replace("WCJ ", "").replace("Honorable ", "").strip()
+            # DETERMINISTIC: keywords_all=name (MUST HAVE), keywords_any=judge context words
+            search_params = SearchParams(
+                keywords_all=clean_name,
+                keywords_any="judge, WCJ, Hon, Honorable, ruling, decision, presiding, presided, tribunal, hearing, bench, courtroom",
+                max_messages=50,
+                max_pages=10
+            )
         elif query_type == "adjuster_evaluation":
             # Extract adjuster name from ai_intent (format: "Evaluate adjuster: John Smith")
             adjuster_name = ai_intent.replace("Evaluate adjuster:", "").strip()
