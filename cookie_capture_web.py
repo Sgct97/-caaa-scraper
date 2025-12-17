@@ -263,29 +263,41 @@ def main():
     logger.info('Starting cookie capture flow')
     update_status('starting', 'Cookie capture process starting')
     
-    # Step 1: Launch browser for login
-    if not launch_browser_for_login():
-        logger.error('Browser login failed')
-        return
+    login_succeeded = False
     
-    # Step 2: Encrypt cookies
-    logger.info('Encrypting captured cookies')
-    update_status('encrypting', 'Encrypting cookies for secure storage')
     try:
-        key = generate_or_load_key()
-        encrypt_storage_state(key)
-        logger.info('Cookies encrypted successfully')
-    except Exception as e:
-        logger.exception(f'Encryption failed: {e}')
-        update_status('error', f'Encryption failed: {str(e)}')
-        return
-    
-    # Step 3: Restart persistent browser
-    restart_persistent_browser()
-    
-    logger.info('='*60)
-    logger.info('COOKIE CAPTURE COMPLETED')
-    logger.info('='*60)
+        # Step 1: Launch browser for login
+        if not launch_browser_for_login():
+            logger.error('Browser login failed')
+            return
+        
+        login_succeeded = True
+        
+        # Step 2: Encrypt cookies
+        logger.info('Encrypting captured cookies')
+        update_status('encrypting', 'Encrypting cookies for secure storage')
+        try:
+            key = generate_or_load_key()
+            encrypt_storage_state(key)
+            logger.info('Cookies encrypted successfully')
+        except Exception as e:
+            logger.exception(f'Encryption failed: {e}')
+            update_status('error', f'Encryption failed: {str(e)}')
+            return
+        
+        logger.info('='*60)
+        logger.info('COOKIE CAPTURE COMPLETED')
+        logger.info('='*60)
+        
+    finally:
+        # ALWAYS restart persistent browser, even if login failed
+        # If login failed, it will use the last valid cookies from auth.json
+        # This prevents a failed login from killing the entire system
+        logger.info('Restarting persistent browser (even if login failed)')
+        if not login_succeeded:
+            logger.warning('Login failed/timed out - restarting browser with previous cookies')
+            update_status('warning', 'Login failed - browser restarted with previous cookies')
+        restart_persistent_browser()
 
 if __name__ == '__main__':
     main()
