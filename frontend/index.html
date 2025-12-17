@@ -5,24 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CAAA Legal Intelligence | AI-Powered Research Platform</title>
     
-    <!-- Access Control -->
-    <script>
-        (function() {
-            const ACCESS_CODE = "CAAA2025";
-            const stored = sessionStorage.getItem('caaa_access_granted');
-            
-            if (stored !== ACCESS_CODE) {
-                const entered = prompt("Enter access code to continue:");
-                if (entered === ACCESS_CODE) {
-                    sessionStorage.setItem('caaa_access_granted', ACCESS_CODE);
-                } else {
-                    document.write('<html><body style="margin:0;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;background:#f3f4f6;"><div style="text-align:center;"><h1 style="color:#ef4444;font-size:48px;margin:0;">Access Denied</h1><p style="color:#6b7280;font-size:18px;margin-top:10px;">Invalid access code</p></div></body></html>');
-                    document.close();
-                    throw new Error('Access denied');
-                }
-            }
-        })();
-    </script>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
