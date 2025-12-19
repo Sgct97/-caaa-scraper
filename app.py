@@ -939,9 +939,7 @@ async def run_search_async(query_type: str, search_fields: Optional[dict], ai_in
             # DETERMINISTIC: keywords_all=name (MUST HAVE), keywords_any=judge context words
             search_params = SearchParams(
                 keywords_all=clean_name,
-                keywords_any="judge, WCJ, Hon, Honorable, ruling, decision, presiding, presided, tribunal, hearing, bench, courtroom",
-                max_messages=50,
-                max_pages=10
+                keywords_any="judge, WCJ, Hon, Honorable, ruling, decision, presiding, presided, tribunal, hearing, bench, courtroom"
             )
         elif query_type == "adjuster_evaluation":
             # Extract adjuster name from ai_intent (format: "Evaluate adjuster: John Smith")
