@@ -949,8 +949,14 @@ async def run_search_async(query_type: str, search_fields: Optional[dict], ai_in
         elif query_type == "defense_attorney_evaluation":
             # Extract defense attorney name from ai_intent (format: "Evaluate defense attorney: John Smith")
             defense_attorney_name = ai_intent.replace("Evaluate defense attorney:", "").strip()
-            # Use QueryEnhancer to find the defense attorney
-            search_params = orchestrator.query_enhancer.enhance_query(f"Find all messages mentioning defense attorney {defense_attorney_name}")
+            # Get clean last name for keywords_all (handle "First Last" format)
+            name_parts = defense_attorney_name.split()
+            clean_name = name_parts[-1] if name_parts else defense_attorney_name  # Use last name
+            # DETERMINISTIC: keywords_all=name (MUST HAVE), keywords_any=defense attorney context words
+            search_params = SearchParams(
+                keywords_all=clean_name,
+                keywords_any="defense, defendant, opposing, counsel, attorney, negotiate, settlement, deposition, lien"
+            )
         else:
             search_params = orchestrator.query_enhancer.enhance_query(ai_intent)
     else:
