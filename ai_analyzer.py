@@ -402,25 +402,27 @@ Subject: {subject}
 
 YOUR GOAL:
 Mark as RELEVANT if the message:
-- Mentions the defense attorney by name (any variation: "{defense_attorney_name}", first name, last name, etc.)
+- Mentions the defense attorney by name in the SUBJECT LINE (high confidence - clearly about them)
+- Someone is ASKING about this attorney (requests for info are valuable)
 - Discusses experiences negotiating or dealing with this attorney
 - Contains opinions about their professionalism, responsiveness, or tactics
 - References settlements, mediations, or trials involving this attorney
 - Describes their litigation style or approach
 - Mentions which insurance company/firm they work for
 
+IMPORTANT: If the attorney's name appears in the subject line asking about them, mark as RELEVANT with high confidence. These inquiry messages are valuable for evaluation.
+
 Mark as NOT RELEVANT if:
-- Only mentions attorney's name in passing without any context or information
 - Different attorney with similar name (be careful with common names)
-- No substantive information about dealing with this attorney
-- Message is about a different topic entirely
+- Message is clearly about a different topic where name appears coincidentally
+- Name appears only in signature or forwarded headers
 
 CONFIDENCE SCORING:
-0.95-1.0: Message clearly discusses this specific defense attorney with substantive information
-0.80-0.94: Message mentions attorney with useful context
-0.60-0.79: Message mentions attorney but information is limited
+0.95-1.0: Attorney name in subject line OR detailed experiences shared
+0.80-0.94: Message discusses or asks about this attorney
+0.60-0.79: Message mentions attorney with some context
 0.40-0.59: Unclear if message is about this attorney or another
-0.00-0.39: Not about this attorney or no useful information
+0.00-0.39: Not about this attorney
 
 Return JSON:
 {{
