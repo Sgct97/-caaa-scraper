@@ -79,12 +79,42 @@ class PersistentBrowser:
         """Keep the browser alive and periodically refresh the session"""
         page = self.context.pages[0]
         refresh_interval = 3600  # Refresh every hour
+        restart_interval = 43200  # FULL RESTART every 12 hours to clear memory
         last_refresh = time.time()
+        last_restart = time.time()
         
         while self.running:
             try:
                 # Sleep for a bit
                 time.sleep(60)  # Check every minute
+                
+                # Periodic FULL RESTART to clear memory leaks (every 12 hours)
+                if time.time() - last_restart > restart_interval:
+                    print(f"\n[{datetime.now()}] 🔄 FULL RESTART to clear memory...")
+                    new_page = self._restart_context()
+                    if new_page:
+                        page = new_page  # Only update if successful
+                        last_restart = time.time()
+                        last_refresh = time.time()
+                        print("  ✓ Browser context restarted, memory cleared")
+                    else:
+                        # Restart failed - try to recover a working page
+                        print("  ⚠️ Restart failed, attempting recovery...")
+                        try:
+                            if self.context and self.context.pages:
+                                page = self.context.pages[0]
+                            else:
+                                # Context broken, recreate from saved cookies
+                                self.context = self.browser.new_context(
+                                    storage_state=self.storage_state_path
+                                )
+                                page = self.context.new_page()
+                                page.goto("https://www.caaa.org/", wait_until="domcontentloaded")
+                            last_restart = time.time()
+                            print("  ✓ Recovery successful")
+                        except Exception as e:
+                            print(f"  ❌ Recovery failed: {e}, will retry next cycle")
+                    continue
                 
                 # Periodic refresh to keep session active
                 if time.time() - last_refresh > refresh_interval:
@@ -100,6 +130,36 @@ class PersistentBrowser:
             except Exception as e:
                 print(f"\n⚠️  Keep-alive error: {e}")
                 time.sleep(10)
+    
+    def _restart_context(self):
+        """Restart browser context to clear memory - keeps cookies"""
+        try:
+            # Save cookies first
+            if self.context:
+                self.context.storage_state(path=self.storage_state_path)
+                print("  → Cookies saved")
+                
+                # Close old context
+                for page in self.context.pages:
+                    page.close()
+                self.context.close()
+                print("  → Old context closed")
+            
+            # Create fresh context with saved cookies
+            self.context = self.browser.new_context(
+                storage_state=self.storage_state_path
+            )
+            
+            # Create new page and navigate
+            page = self.context.new_page()
+            page.goto("https://www.caaa.org/", wait_until="domcontentloaded")
+            print("  → New context created with fresh memory")
+            
+            return page
+            
+        except Exception as e:
+            print(f"  ❌ Restart failed: {e}")
+            return None
     
     def _signal_handler(self, signum, frame):
         """Handle shutdown signals"""
