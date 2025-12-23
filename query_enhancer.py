@@ -253,7 +253,7 @@ Translate the REAL question into the best possible search parameters optimized f
             max_pages=10,
             max_messages=100
         )
-    
+
     # ============================================================
     # DETERMINISTIC QUERY ENHANCERS (No AI calls)
     # For person-name searches where consistency is critical

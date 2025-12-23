@@ -957,6 +957,14 @@ async def run_search_async(query_type: str, search_fields: Optional[dict], ai_in
                 keywords_all=clean_name,
                 keywords_any="defense, defendant, opposing, counsel, attorney, negotiate, settlement, deposition, lien"
             )
+        elif query_type == "insurance_company_evaluation":
+            # Extract insurance company name from ai_intent (format: "Evaluate insurance company: State Fund")
+            insurance_company_name = ai_intent.replace("Evaluate insurance company:", "").strip()
+            # DETERMINISTIC: keywords_all=company name (MUST HAVE), keywords_any=insurance context words
+            search_params = SearchParams(
+                keywords_all=insurance_company_name,
+                keywords_any="insurance, carrier, insurer, claim, adjuster, authorization, denial, coverage, settlement, premium"
+            )
         else:
             search_params = orchestrator.query_enhancer.enhance_query(ai_intent)
     else:

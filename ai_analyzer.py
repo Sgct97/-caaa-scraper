@@ -108,6 +108,8 @@ class AIAnalyzer:
             return self._build_adjuster_relevance_prompt(message, real_question)
         if real_question and real_question.startswith("Evaluate defense attorney:"):
             return self._build_defense_attorney_relevance_prompt(message, real_question)
+        if real_question and real_question.startswith("Evaluate insurance company:"):
+            return self._build_insurance_company_relevance_prompt(message, real_question)
         
         # Standard legal research prompt (unchanged)
         subject = message.get('subject', 'No subject')
@@ -429,6 +431,72 @@ Return JSON:
   "is_relevant": true/false,
   "confidence": 0.0-1.0,
   "reasoning": "Brief explanation of why this message is or isn't relevant for evaluating {defense_attorney_name}"
+}}"""
+        return prompt
+    
+    def _build_insurance_company_relevance_prompt(self, message: Dict, real_question: str) -> str:
+        """Build simplified prompt for insurance company evaluation relevance filtering"""
+        
+        # Extract insurance company name from real_question (format: "Evaluate insurance company: State Fund")
+        insurance_company_name = real_question.replace("Evaluate insurance company:", "").strip()
+        
+        subject = message.get('subject', 'No subject')
+        body = message.get('body', '')
+        from_name = message.get('from_name', 'Unknown')
+        
+        # Truncate body if too long (to save tokens)
+        max_body_length = 2000
+        if len(body) > max_body_length:
+            body = body[:max_body_length] + "... [truncated]"
+        
+        prompt = f"""You are the Relevance Filter in an insurance company evaluation system:
+
+SYSTEM OVERVIEW:
+1. Query Enhancer → Found messages matching insurance company name
+2. YOU (Relevance Filter) → Filter messages that contain information ABOUT the insurance company
+3. Synthesis Analyzer → Will evaluate if this insurance company is good or bad to deal with
+
+YOUR SPECIFIC ROLE:
+Filter messages that contain information about {insurance_company_name} that would be useful for determining how easy or difficult they are to deal with from an applicant attorney's perspective.
+
+INSURANCE COMPANY TO EVALUATE: "{insurance_company_name}"
+
+MESSAGE TO FILTER:
+From: {from_name}
+Subject: {subject}
+
+{body}
+
+YOUR GOAL:
+Mark as RELEVANT if the message:
+- Mentions the insurance company by name in the SUBJECT LINE (high confidence - clearly about them)
+- Someone is ASKING about this insurance company/carrier (requests for info are valuable)
+- Discusses experiences with their adjusters or claims handling
+- Contains opinions about their authorization/denial patterns
+- References settlements, negotiations, or payment behavior
+- Describes their responsiveness or communication style
+- Mentions their typical litigation or dispute resolution approach
+
+IMPORTANT: If the insurance company name appears in the subject line or someone is asking about them, mark as RELEVANT with high confidence. These inquiry messages are valuable for evaluation.
+
+Mark as NOT RELEVANT if:
+- Different insurance company with similar name
+- Message is clearly about a different topic where name appears coincidentally
+- Name appears only in signature or forwarded headers
+- Message is about a specific case without general insights about the company
+
+CONFIDENCE SCORING:
+0.95-1.0: Company name in subject line OR detailed experiences shared
+0.80-0.94: Message discusses or asks about this insurance company
+0.60-0.79: Message mentions company with some context
+0.40-0.59: Unclear if message is about this company or another
+0.00-0.39: Not about this insurance company
+
+Return JSON:
+{{
+  "is_relevant": true/false,
+  "confidence": 0.0-1.0,
+  "reasoning": "Brief explanation of why this message is or isn't relevant for evaluating {insurance_company_name}"
 }}"""
         return prompt
     
@@ -1078,6 +1146,158 @@ SCORING GUIDE (only use if you have sufficient data):
 - 40-59: Moderate - Mixed experiences, neither easy nor difficult
 - 20-39: Difficult - Frequently unreasonable, delays, or problematic behavior
 - 0-19: Very difficult - Hostile, bad faith, multiple red flags, avoid if possible
+
+Be thorough and cite specific examples from the messages in your reasoning."""
+        
+        return prompt
+    
+    def synthesize_insurance_company_evaluation(self, insurance_company_name: str, messages: list[Dict]) -> Dict:
+        """
+        Synthesize all messages about an insurance company to determine if they are good or bad
+        to deal with from an applicant attorney's perspective.
+        
+        Args:
+            insurance_company_name: Name of the insurance company being evaluated
+            messages: List of message dicts with keys: subject, body, from_name, etc.
+        
+        Returns:
+            Dict with:
+                - score: int (0-100) - Overall score (higher = better to deal with)
+                - evaluation: str ("good", "mixed", "bad")
+                - reasoning: str - Detailed explanation
+                - cost_usd: float - API cost
+        """
+        if not messages:
+            return {
+                'score': 0,
+                'evaluation': 'unknown',
+                'reasoning': 'No messages found about this insurance company.',
+                'cost_usd': 0.0
+            }
+        
+        prompt = self._build_insurance_company_synthesis_prompt(insurance_company_name, messages)
+        
+        try:
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=2000,
+                temperature=0.5,
+                system="You are an expert California workers' compensation attorney evaluating insurance carriers.",
+                messages=[{"role": "user", "content": prompt}]
+            )
+            
+            # Parse response
+            response_text = response.content[0].text
+            
+            # Extract JSON from response
+            json_match = regex.search(r'\{.*\}', response_text, regex.DOTALL)
+            if json_match:
+                result = json.loads(json_match.group())
+            else:
+                # Fallback parsing
+                result = {
+                    'score': 50,
+                    'evaluation': 'mixed',
+                    'reasoning': response_text
+                }
+            
+            # Validate and normalize score
+            score = int(result.get('score', 50))
+            score = max(0, min(100, score))  # Clamp to 0-100
+            
+            evaluation = result.get('evaluation', 'mixed').lower()
+            if evaluation not in ['good', 'mixed', 'bad', 'insufficient_data']:
+                evaluation = 'mixed'
+            
+            # Calculate cost
+            input_tokens = response.usage.input_tokens
+            output_tokens = response.usage.output_tokens
+            total_tokens = input_tokens + output_tokens
+            cost = self._calculate_cost(total_tokens, self.model)
+            
+            self.total_tokens_used += total_tokens
+            self.total_cost_usd += cost
+            
+            return {
+                'score': score,
+                'evaluation': evaluation,
+                'reasoning': result.get('reasoning', 'No reasoning provided'),
+                'cost_usd': cost
+            }
+            
+        except Exception as e:
+            print(f"❌ Insurance company synthesis error: {e}")
+            return {
+                'score': 0,
+                'evaluation': 'error',
+                'reasoning': f'Error during synthesis: {str(e)}',
+                'cost_usd': 0.0
+            }
+    
+    def _build_insurance_company_synthesis_prompt(self, insurance_company_name: str, messages: list[Dict]) -> str:
+        """Build the synthesis prompt for insurance company evaluation"""
+        
+        # Format messages for prompt
+        messages_text = ""
+        for i, msg in enumerate(messages[:50], 1):  # Limit to 50 messages to avoid token limits
+            messages_text += f"\n--- Message {i} ---\n"
+            messages_text += f"From: {msg.get('from_name', 'Unknown')}\n"
+            messages_text += f"Subject: {msg.get('subject', 'No subject')}\n"
+            messages_text += f"Body: {msg.get('body', '')[:1000]}\n"  # Limit body length
+        
+        prompt = f"""You are an expert California workers' compensation APPLICANT attorney evaluating an INSURANCE COMPANY/CARRIER based on discussions from a professional legal listserv.
+
+INSURANCE COMPANY BEING EVALUATED: {insurance_company_name}
+
+You have access to {len(messages)} messages from experienced California workers' compensation applicant attorneys discussing their experiences with this insurance carrier. Your job is to synthesize ALL of these messages to determine:
+
+1. Is this insurance company "good" or "bad" to deal with?
+2. What is their overall score (0-100)?
+3. What are the key factors attorneys mention?
+
+EVALUATION CRITERIA (from applicant attorney perspective):
+- **Authorization Speed**: How quickly do they authorize medical treatment? Do they delay?
+- **Denial Patterns**: Do they frequently deny claims or treatment requests?
+- **Adjuster Quality**: Are their adjusters professional, knowledgeable, and responsive?
+- **Settlement Behavior**: Do they make fair settlement offers? Or lowball and delay?
+- **Payment Timeliness**: Do they pay benefits on time? Or create payment issues?
+- **Communication**: Are they responsive to calls/emails? Easy to reach?
+- **Litigation Tendency**: Do they settle reasonably? Or litigate everything unnecessarily?
+- **Lien Resolution**: How do they handle liens and medical billing?
+- **Overall Reputation**: What is the general consensus among applicant attorneys?
+- **Specific Adjusters**: Are certain adjusters mentioned as particularly good or bad?
+
+MESSAGES TO ANALYZE:
+{messages_text}
+
+YOUR TASK:
+Synthesize ALL messages to provide a comprehensive evaluation. Consider:
+- What patterns emerge across multiple messages?
+- Are there consistent positive or negative themes?
+- What specific strengths or weaknesses are mentioned?
+- How do applicant attorneys generally view dealing with this carrier?
+
+Return JSON:
+{{
+  "score": <0-100 integer>,
+  "evaluation": "good" | "mixed" | "bad" | "insufficient_data",
+  "reasoning": "<detailed explanation of your evaluation, citing specific examples from the messages>"
+}}
+
+🚨 CRITICAL - INSUFFICIENT DATA:
+If there are fewer than 3 messages, or the messages don't contain enough substantive information to make a reliable determination, you MUST return:
+- "evaluation": "insufficient_data"
+- "score": 0
+- "reasoning": "Explain why there isn't enough information (too few messages, messages lack detail, etc.)"
+
+DO NOT make up a determination if there isn't enough information. It is better to say "insufficient_data" than to guess.
+
+SCORING GUIDE (only use if you have sufficient data):
+- 80-100: Excellent carrier - Fast authorizations, fair settlements, responsive adjusters
+- 60-79: Good carrier - Generally positive experiences, minor issues
+- 40-59: Mixed - Some positive, some negative experiences
+- 20-39: Problematic - Frequent delays, denials, or unresponsive
+- 0-19: Terrible carrier - Bad faith behavior, chronic issues, avoid if possible
 
 Be thorough and cite specific examples from the messages in your reasoning."""
         

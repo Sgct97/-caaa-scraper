@@ -349,6 +349,62 @@ def main():
                 relevant_count = 0
             else:
                 relevant_count = len(messages)
+        elif query_type == "insurance_company_evaluation":
+            # Extract insurance company name from query (format: "Evaluate insurance company: State Fund")
+            insurance_company_name = query.replace("Evaluate insurance company:", "").strip()
+            
+            # Step 1: Use existing relevance analysis (automatically uses insurance company-specific prompt)
+            if orchestrator.ai_analyzer and len(messages) > 0:
+                print(f"🔍 Analyzing messages for insurance company evaluation: {insurance_company_name}", flush=True)
+                relevant_count = orchestrator._analyze_relevance(search_id, messages, query)
+                print(f"✓ Analysis complete: {relevant_count} relevant messages", flush=True)
+                
+                # Step 2: Get relevant messages from database for synthesis
+                all_results = orchestrator.db.get_relevant_results(search_id)
+                # Filter to only include messages marked as relevant
+                relevant_messages = [dict(r) for r in all_results if r.get('is_relevant')] if all_results else []
+                
+                # Step 3: Synthesize only relevant messages
+                if len(relevant_messages) >= 3:  # Minimum threshold for synthesis
+                    print(f"🤖 Starting insurance company evaluation synthesis for: {insurance_company_name}", flush=True)
+                    try:
+                        synthesis = orchestrator.ai_analyzer.synthesize_insurance_company_evaluation(insurance_company_name, relevant_messages)
+                        
+                        # Store synthesis result in database
+                        orchestrator.db.save_synthesis_result(search_id, synthesis)
+                        
+                        print(f"✓ Synthesis complete:", flush=True)
+                        print(f"   Score: {synthesis['score']}/100", flush=True)
+                        print(f"   Evaluation: {synthesis['evaluation']}", flush=True)
+                    except Exception as e:
+                        print(f"⚠️  Synthesis error: {e}", flush=True)
+                        import traceback
+                        traceback.print_exc()
+                        synthesis = {
+                            'score': 0,
+                            'evaluation': 'error',
+                            'reasoning': f'Error during synthesis: {str(e)}'
+                        }
+                        orchestrator.db.save_synthesis_result(search_id, synthesis)
+                else:
+                    print(f"⚠️  Insufficient relevant messages ({len(relevant_messages)} < 3) for synthesis", flush=True)
+                    synthesis = {
+                        'score': 0,
+                        'evaluation': 'insufficient_data',
+                        'reasoning': f'Only found {len(relevant_messages)} relevant messages about {insurance_company_name}. Need at least 3 messages to make a reliable evaluation.'
+                    }
+                    orchestrator.db.save_synthesis_result(search_id, synthesis)
+            elif len(messages) == 0:
+                print(f"⚠️  No messages found for insurance company: {insurance_company_name}", flush=True)
+                synthesis = {
+                    'score': 0,
+                    'evaluation': 'insufficient_data',
+                    'reasoning': 'No messages found about this insurance company.'
+                }
+                orchestrator.db.save_synthesis_result(search_id, synthesis)
+                relevant_count = 0
+            else:
+                relevant_count = len(messages)
         else:
             # Standard relevance analysis
             if orchestrator.ai_analyzer and len(messages) > 0:

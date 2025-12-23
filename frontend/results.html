@@ -521,6 +521,7 @@
                     if (aiIntent.startsWith('Evaluate judge:')) return 'judge';
                     if (aiIntent.startsWith('Evaluate adjuster:')) return 'adjuster';
                     if (aiIntent.startsWith('Evaluate defense attorney:')) return 'defense_attorney';
+                    if (aiIntent.startsWith('Evaluate insurance company:')) return 'insurance_company';
                     return 'general';
                 },
                 
@@ -530,6 +531,7 @@
                     if (aiIntent.startsWith('Evaluate judge:')) return aiIntent.replace('Evaluate judge:', '').trim();
                     if (aiIntent.startsWith('Evaluate adjuster:')) return aiIntent.replace('Evaluate adjuster:', '').trim();
                     if (aiIntent.startsWith('Evaluate defense attorney:')) return aiIntent.replace('Evaluate defense attorney:', '').trim();
+                    if (aiIntent.startsWith('Evaluate insurance company:')) return aiIntent.replace('Evaluate insurance company:', '').trim();
                     return 'Unknown';
                 },
                 
@@ -539,6 +541,7 @@
                     if (type === 'judge') return 'Judge Evaluation';
                     if (type === 'adjuster') return 'Adjuster Evaluation';
                     if (type === 'defense_attorney') return 'Defense Attorney Evaluation';
+                    if (type === 'insurance_company') return 'Insurance Company Evaluation';
                     return 'Evaluation';
                 },
                 
@@ -548,6 +551,7 @@
                     if (type === 'judge') return 'fa-gavel';
                     if (type === 'adjuster') return 'fa-clipboard-check';
                     if (type === 'defense_attorney') return 'fa-user-tie';
+                    if (type === 'insurance_company') return 'fa-building';
                     return 'fa-search';
                 },
                 
