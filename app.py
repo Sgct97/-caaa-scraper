@@ -958,11 +958,51 @@ async def run_search_async(query_type: str, search_fields: Optional[dict], ai_in
                 keywords_any="defense, defendant, opposing, counsel, attorney, negotiate, settlement, deposition, lien"
             )
         elif query_type == "insurance_company_evaluation":
-            # Extract insurance company name from ai_intent (format: "Evaluate insurance company: State Fund")
-            insurance_company_name = ai_intent.replace("Evaluate insurance company:", "").strip()
-            # DETERMINISTIC: keywords_all=company name (MUST HAVE), keywords_any=insurance context words
+            # Extract insurance company info from ai_intent
+            # Format: "Evaluate insurance company: Name" or "Evaluate insurance company: Name (also known as: Abbrev)"
+            raw_company_info = ai_intent.replace("Evaluate insurance company:", "").strip()
+            
+            # Parse out the abbreviation if provided
+            import re
+            abbrev_match = re.search(r'\(also known as:\s*([^)]+)\)', raw_company_info)
+            if abbrev_match:
+                user_abbreviation = abbrev_match.group(1).strip()
+                insurance_company_name = re.sub(r'\s*\(also known as:[^)]+\)', '', raw_company_info).strip()
+            else:
+                user_abbreviation = None
+                insurance_company_name = raw_company_info
+            
+            # Use AI to determine the best search term
+            try:
+                import anthropic
+                client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+                
+                prompt = f"""For the California workers' compensation insurance company "{insurance_company_name}"{f' (also known as: {user_abbreviation})' if user_abbreviation else ''}, what is the MOST COMMON way attorneys refer to this company in casual discussion?
+
+Return ONLY the single most common term/abbreviation, nothing else. Examples:
+- "State Compensation Insurance Fund" → SCIF
+- "Liberty Mutual Insurance Company" → Liberty Mutual  
+- "Zenith Insurance" → Zenith
+- "American International Group" → AIG
+
+Response (just the term):"""
+
+                response = client.messages.create(
+                    model="claude-sonnet-4-20250514",
+                    max_tokens=50,
+                    temperature=0,
+                    messages=[{"role": "user", "content": prompt}]
+                )
+                best_search_term = response.content[0].text.strip()
+                print(f"🤖 AI determined best search term for '{insurance_company_name}': '{best_search_term}'", flush=True)
+            except Exception as e:
+                print(f"⚠️ AI abbreviation lookup failed: {e}, using user input", flush=True)
+                # Fallback: use user abbreviation if provided, otherwise first word of company name
+                best_search_term = user_abbreviation if user_abbreviation else insurance_company_name.split()[0]
+            
+            # Use AI-determined term in keywords_all
             search_params = SearchParams(
-                keywords_all=insurance_company_name,
+                keywords_all=best_search_term,
                 keywords_any="insurance, carrier, insurer, claim, adjuster, authorization, denial, coverage, settlement, premium"
             )
         else:
