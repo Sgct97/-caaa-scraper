@@ -1038,11 +1038,17 @@ Response (just the term):"""
             else:  # Both
                 examiner_keywords = "AME, QME, medical examiner, agreed, qualified, panel"
             
+            # Get the primary specialty keyword for keywords_all (use first term only)
+            primary_specialty = specialty_search.split(',')[0].strip()
+            
             # Search for recommendation discussions
+            # REQUIRE specialty in keywords_all, use context words in keywords_any
             search_params = SearchParams(
-                keywords_any=f"{specialty_search}, {examiner_keywords}, recommend, recommendation, looking for, anyone, good, best, excellent, who"
+                keywords_all=primary_specialty,
+                keywords_any=f"{examiner_keywords}, recommend, recommendation, looking for, anyone know, good, best, excellent, experience, experiences"
             )
             print(f"🔍 AME/QME Search: specialty={specialty}, type={examiner_type}", flush=True)
+            print(f"   keywords_all: {search_params.keywords_all}", flush=True)
             print(f"   keywords_any: {search_params.keywords_any}", flush=True)
         else:
             search_params = orchestrator.query_enhancer.enhance_query(ai_intent)
