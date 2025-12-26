@@ -206,11 +206,14 @@
         <!-- Evaluation Synthesis (if available) -->
         <div x-show="synthesis" class="glass rounded-xl p-8 mb-8 border-4" 
              :class="{
-                 'border-green-500': synthesis?.score >= 60,
-                 'border-yellow-500': synthesis?.score >= 40 && synthesis?.score < 60,
-                 'border-red-500': synthesis?.score < 40
+                 'border-primary-500': isAmeQmeSearch(),
+                 'border-green-500': !isAmeQmeSearch() && synthesis?.score >= 60,
+                 'border-yellow-500': !isAmeQmeSearch() && synthesis?.score >= 40 && synthesis?.score < 60,
+                 'border-red-500': !isAmeQmeSearch() && synthesis?.score < 40
              }">
-            <div class="flex items-start justify-between mb-6">
+            
+            <!-- Standard Evaluation Header (not for AME/QME) -->
+            <div x-show="!isAmeQmeSearch()" class="flex items-start justify-between mb-6">
                 <div class="flex-1">
                     <h2 class="text-3xl font-bold text-gray-900 mb-2 flex items-center">
                         <i class="fas mr-3 text-primary-600" :class="getEvaluationIcon()"></i>
@@ -231,8 +234,91 @@
                 </div>
             </div>
             
-            <!-- Evaluation Badge -->
-            <div class="mb-6">
+            <!-- AME/QME Search Header -->
+            <div x-show="isAmeQmeSearch()" class="mb-6">
+                <h2 class="text-3xl font-bold text-gray-900 mb-2 flex items-center">
+                    <i class="fas fa-list-ol mr-3 text-primary-600"></i>
+                    <span x-text="getEvaluationTitle()"></span>
+                </h2>
+                <p class="text-gray-600" x-text="'Searching for best ' + getEvaluatedName()"></p>
+            </div>
+            
+            <!-- AME/QME Ranked Doctor List -->
+            <div x-show="isAmeQmeSearch() && synthesis?.doctors?.length > 0" class="mb-6">
+                <div class="space-y-4">
+                    <template x-for="(doctor, index) in synthesis?.doctors || []" :key="index">
+                        <div class="bg-white rounded-lg p-5 border-2 border-gray-200 hover:border-primary-300 transition-all">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center gap-4">
+                                    <div class="flex items-center justify-center w-10 h-10 rounded-full font-bold text-lg"
+                                         :class="{
+                                             'bg-yellow-400 text-yellow-900': index === 0,
+                                             'bg-gray-300 text-gray-700': index === 1,
+                                             'bg-orange-300 text-orange-800': index === 2,
+                                             'bg-gray-100 text-gray-600': index > 2
+                                         }">
+                                        <span x-text="index + 1"></span>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-xl font-bold text-gray-900" x-text="doctor.name"></h3>
+                                        <div class="flex items-center gap-4 text-sm text-gray-600 mt-1">
+                                            <span class="flex items-center gap-1">
+                                                <i class="fas fa-thumbs-up text-green-500"></i>
+                                                <span x-text="doctor.positive_mentions + ' positive'"></span>
+                                            </span>
+                                            <span x-show="doctor.negative_mentions > 0" class="flex items-center gap-1">
+                                                <i class="fas fa-thumbs-down text-red-500"></i>
+                                                <span x-text="doctor.negative_mentions + ' negative'"></span>
+                                            </span>
+                                            <span x-show="doctor.specialty_confirmed" class="flex items-center gap-1 text-primary-600">
+                                                <i class="fas fa-check-circle"></i>
+                                                Specialty confirmed
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-2xl font-bold" 
+                                         :class="doctor.net_score >= 0 ? 'text-green-600' : 'text-red-600'"
+                                         x-text="(doctor.net_score >= 0 ? '+' : '') + doctor.net_score"></div>
+                                    <div class="text-xs text-gray-500">net score</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Sample Quotes -->
+                            <div x-show="doctor.sample_quotes?.length > 0" class="mt-4 space-y-2">
+                                <template x-for="(quote, qi) in doctor.sample_quotes?.slice(0, 2) || []" :key="qi">
+                                    <div class="bg-gray-50 rounded p-3 text-sm text-gray-700 italic border-l-4 border-primary-300">
+                                        "<span x-text="quote"></span>"
+                                    </div>
+                                </template>
+                            </div>
+                            
+                            <!-- Warnings -->
+                            <div x-show="doctor.warnings?.length > 0" class="mt-3">
+                                <template x-for="(warning, wi) in doctor.warnings || []" :key="wi">
+                                    <div class="bg-red-50 rounded p-2 text-sm text-red-700 flex items-center gap-2">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <span x-text="warning"></span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+            
+            <!-- No doctors found message for AME/QME -->
+            <div x-show="isAmeQmeSearch() && (!synthesis?.doctors || synthesis?.doctors?.length === 0)" class="mb-6">
+                <div class="bg-yellow-50 rounded-lg p-6 text-center">
+                    <i class="fas fa-search text-4xl text-yellow-500 mb-3"></i>
+                    <h3 class="text-xl font-semibold text-yellow-800 mb-2">No Doctor Recommendations Found</h3>
+                    <p class="text-yellow-700">The search didn't find specific doctor recommendations in the messages. Try adjusting the specialty or increasing the number of messages to search.</p>
+                </div>
+            </div>
+            
+            <!-- Evaluation Badge (not for AME/QME) -->
+            <div x-show="!isAmeQmeSearch()" class="mb-6">
                 <span class="px-4 py-2 rounded-full font-semibold text-lg"
                       :class="{
                           'bg-green-100 text-green-700': synthesis?.evaluation === 'good' || synthesis?.evaluation === 'easy_to_deal_with',
@@ -251,11 +337,11 @@
                 </span>
             </div>
             
-            <!-- Reasoning -->
+            <!-- Reasoning / Summary -->
             <div class="bg-gray-50 rounded-lg p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-3">
-                    <i class="fas fa-brain text-primary-600 mr-2"></i>
-                    Analysis
+                    <i class="fas mr-2 text-primary-600" :class="isAmeQmeSearch() ? 'fa-info-circle' : 'fa-brain'"></i>
+                    <span x-text="isAmeQmeSearch() ? 'Summary' : 'Analysis'"></span>
                 </h3>
                 <div class="prose max-w-none text-gray-700 whitespace-pre-line" x-text="synthesis?.reasoning || 'No reasoning available.'"></div>
             </div>
@@ -522,6 +608,7 @@
                     if (aiIntent.startsWith('Evaluate adjuster:')) return 'adjuster';
                     if (aiIntent.startsWith('Evaluate defense attorney:')) return 'defense_attorney';
                     if (aiIntent.startsWith('Evaluate insurance company:')) return 'insurance_company';
+                    if (aiIntent.startsWith('Find best')) return 'ame_qme_search';
                     return 'general';
                 },
                 
@@ -532,6 +619,7 @@
                     if (aiIntent.startsWith('Evaluate adjuster:')) return aiIntent.replace('Evaluate adjuster:', '').trim();
                     if (aiIntent.startsWith('Evaluate defense attorney:')) return aiIntent.replace('Evaluate defense attorney:', '').trim();
                     if (aiIntent.startsWith('Evaluate insurance company:')) return aiIntent.replace('Evaluate insurance company:', '').trim();
+                    if (aiIntent.startsWith('Find best')) return aiIntent.replace('Find best', '').trim();
                     return 'Unknown';
                 },
                 
@@ -542,6 +630,7 @@
                     if (type === 'adjuster') return 'Adjuster Evaluation';
                     if (type === 'defense_attorney') return 'Defense Attorney Evaluation';
                     if (type === 'insurance_company') return 'Insurance Company Evaluation';
+                    if (type === 'ame_qme_search') return 'Top Recommended Doctors';
                     return 'Evaluation';
                 },
                 
@@ -552,7 +641,13 @@
                     if (type === 'adjuster') return 'fa-clipboard-check';
                     if (type === 'defense_attorney') return 'fa-user-tie';
                     if (type === 'insurance_company') return 'fa-building';
+                    if (type === 'ame_qme_search') return 'fa-list-ol';
                     return 'fa-search';
+                },
+                
+                // Check if this is an AME/QME search (for conditional rendering)
+                isAmeQmeSearch() {
+                    return this.getEvaluationType() === 'ame_qme_search';
                 },
                 
                 formatEvaluation(evaluation) {

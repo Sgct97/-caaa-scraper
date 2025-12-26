@@ -1005,6 +1005,45 @@ Response (just the term):"""
                 keywords_all=best_search_term,
                 keywords_any="insurance, carrier, insurer, claim, adjuster, authorization, denial, coverage, settlement, premium"
             )
+        elif query_type == "ame_qme_search":
+            # Extract specialty and examiner type from ai_intent (format: "Find best AME/QME/Both: specialty")
+            import re
+            match = re.match(r"Find best (AME|QME|Both): (.+)", ai_intent)
+            if match:
+                examiner_type = match.group(1)
+                specialty = match.group(2).strip()
+            else:
+                examiner_type = "Both"
+                specialty = ai_intent.replace("Find best", "").strip()
+            
+            # Map specialty to search-friendly terms
+            specialty_terms = {
+                "orthopedic": "ortho, orthopedic, orthopedist",
+                "psychiatric": "psych, psychiatric, psychiatry, psychology, psychologist",
+                "neurology": "neuro, neurology, neurologist",
+                "internal_medicine": "internal medicine, internist",
+                "pain_management": "pain, pain management, pain specialist",
+                "cardiology": "cardio, cardiology, cardiologist, heart",
+                "pulmonary": "pulmonary, pulmonologist, lung, respiratory",
+                "chiropractic": "chiro, chiropractic, chiropractor",
+                "spine": "spine, spinal, spine surgery, spine surgeon"
+            }
+            specialty_search = specialty_terms.get(specialty, specialty)
+            
+            # Build examiner type keywords
+            if examiner_type == "AME":
+                examiner_keywords = "AME, agreed medical examiner"
+            elif examiner_type == "QME":
+                examiner_keywords = "QME, qualified medical examiner, panel"
+            else:  # Both
+                examiner_keywords = "AME, QME, medical examiner, agreed, qualified, panel"
+            
+            # Search for recommendation discussions
+            search_params = SearchParams(
+                keywords_any=f"{specialty_search}, {examiner_keywords}, recommend, recommendation, looking for, anyone, good, best, excellent, who"
+            )
+            print(f"🔍 AME/QME Search: specialty={specialty}, type={examiner_type}", flush=True)
+            print(f"   keywords_any: {search_params.keywords_any}", flush=True)
         else:
             search_params = orchestrator.query_enhancer.enhance_query(ai_intent)
     else:

@@ -405,6 +405,72 @@ def main():
                 relevant_count = 0
             else:
                 relevant_count = len(messages)
+        elif query_type == "ame_qme_search":
+            # Extract specialty and examiner type from query (format: "Find best AME/QME/Both: specialty")
+            import re
+            match = re.match(r"Find best (AME|QME|Both): (.+)", query)
+            if match:
+                examiner_type = match.group(1)
+                specialty = match.group(2).strip()
+            else:
+                examiner_type = "Both"
+                specialty = query.replace("Find best", "").strip()
+            
+            # Step 1: Use existing relevance analysis (automatically uses AME/QME-specific prompt)
+            if orchestrator.ai_analyzer and len(messages) > 0:
+                print(f"🔍 Analyzing messages for {specialty} {examiner_type} recommendations", flush=True)
+                relevant_count = orchestrator._analyze_relevance(search_id, messages, query)
+                print(f"✓ Analysis complete: {relevant_count} relevant messages", flush=True)
+                
+                # Step 2: Get relevant messages from database for synthesis
+                all_results = orchestrator.db.get_relevant_results(search_id)
+                # Filter to only include messages marked as relevant
+                relevant_messages = [dict(r) for r in all_results if r.get('is_relevant')] if all_results else []
+                
+                # Step 3: Synthesize to extract and rank doctor recommendations
+                if len(relevant_messages) >= 1:  # Even 1 message might have multiple recommendations
+                    print(f"🤖 Extracting doctor recommendations from {len(relevant_messages)} messages", flush=True)
+                    try:
+                        synthesis = orchestrator.ai_analyzer.synthesize_ame_qme_recommendations(specialty, examiner_type, relevant_messages)
+                        
+                        # Store synthesis result in database
+                        orchestrator.db.save_synthesis_result(search_id, synthesis)
+                        
+                        doctor_count = len(synthesis.get('doctors', []))
+                        print(f"✓ Synthesis complete:", flush=True)
+                        print(f"   Found {doctor_count} doctors mentioned", flush=True)
+                        if doctor_count > 0:
+                            top_doc = synthesis['doctors'][0]
+                            print(f"   Top recommendation: {top_doc.get('name')} ({top_doc.get('positive_mentions', 0)} positive mentions)", flush=True)
+                    except Exception as e:
+                        print(f"⚠️  Synthesis error: {e}", flush=True)
+                        import traceback
+                        traceback.print_exc()
+                        synthesis = {
+                            'doctors': [],
+                            'total_mentions': 0,
+                            'reasoning': f'Error during synthesis: {str(e)}'
+                        }
+                        orchestrator.db.save_synthesis_result(search_id, synthesis)
+                else:
+                    print(f"⚠️  No relevant messages found for {specialty} {examiner_type} recommendations", flush=True)
+                    synthesis = {
+                        'doctors': [],
+                        'total_mentions': 0,
+                        'reasoning': f'No relevant messages found discussing {specialty} {examiner_type} recommendations.'
+                    }
+                    orchestrator.db.save_synthesis_result(search_id, synthesis)
+            elif len(messages) == 0:
+                print(f"⚠️  No messages found for {specialty} {examiner_type} search", flush=True)
+                synthesis = {
+                    'doctors': [],
+                    'total_mentions': 0,
+                    'reasoning': 'No messages found matching the search criteria.'
+                }
+                orchestrator.db.save_synthesis_result(search_id, synthesis)
+                relevant_count = 0
+            else:
+                relevant_count = len(messages)
         else:
             # Standard relevance analysis
             if orchestrator.ai_analyzer and len(messages) > 0:

@@ -110,6 +110,8 @@ class AIAnalyzer:
             return self._build_defense_attorney_relevance_prompt(message, real_question)
         if real_question and real_question.startswith("Evaluate insurance company:"):
             return self._build_insurance_company_relevance_prompt(message, real_question)
+        if real_question and real_question.startswith("Find best"):
+            return self._build_ame_qme_relevance_prompt(message, real_question)
         
         # Standard legal research prompt (unchanged)
         subject = message.get('subject', 'No subject')
@@ -497,6 +499,81 @@ Return JSON:
   "is_relevant": true/false,
   "confidence": 0.0-1.0,
   "reasoning": "Brief explanation of why this message is or isn't relevant for evaluating {insurance_company_name}"
+}}"""
+        return prompt
+    
+    def _build_ame_qme_relevance_prompt(self, message: Dict, real_question: str) -> str:
+        """Build simplified prompt for AME/QME recommendation relevance filtering"""
+        
+        # Extract specialty and examiner type from real_question (format: "Find best AME/QME/Both: specialty")
+        import re
+        match = re.match(r"Find best (AME|QME|Both): (.+)", real_question)
+        if match:
+            examiner_type = match.group(1)
+            specialty = match.group(2).strip()
+        else:
+            examiner_type = "Both"
+            specialty = real_question.replace("Find best", "").strip()
+        
+        subject = message.get('subject', 'No subject')
+        body = message.get('body', '')
+        from_name = message.get('from_name', 'Unknown')
+        
+        # Truncate body if too long (to save tokens)
+        max_body_length = 2000
+        if len(body) > max_body_length:
+            body = body[:max_body_length] + "... [truncated]"
+        
+        prompt = f"""You are the Relevance Filter in an AME/QME recommendation system:
+
+SYSTEM OVERVIEW:
+1. Query Enhancer → Found messages matching specialty and examiner type keywords
+2. YOU (Relevance Filter) → Filter messages that contain DOCTOR RECOMMENDATIONS
+3. Recommendation Extractor → Will extract doctor names and build a ranked list
+
+YOUR SPECIFIC ROLE:
+Filter messages that contain recommendations for {specialty} {examiner_type}s (medical examiners) in California workers' compensation.
+
+SEARCH CRITERIA:
+- Specialty: {specialty}
+- Examiner Type: {examiner_type} {"(AME = Agreed Medical Examiner, QME = Qualified Medical Examiner)" if examiner_type == "Both" else ""}
+
+MESSAGE TO FILTER:
+From: {from_name}
+Subject: {subject}
+
+{body}
+
+YOUR GOAL:
+Mark as RELEVANT if the message:
+- Someone is ASKING for recommendations for {specialty} AME/QME doctors (these threads often have valuable replies)
+- Someone RECOMMENDS a specific doctor by name for this specialty
+- Contains positive or negative experiences with a {specialty} AME/QME
+- Discusses the quality, fairness, or thoroughness of a {specialty} examiner
+- Lists doctors that are good or bad for {examiner_type} panels
+
+IMPORTANT: 
+- Messages asking "looking for recommendations" or "anyone know a good..." are HIGHLY RELEVANT because reply threads contain recommendations
+- We want to capture both the QUESTIONS and the ANSWERS about doctor recommendations
+
+Mark as NOT RELEVANT if:
+- Message is about a specific case outcome without naming/recommending doctors
+- Discusses general {specialty} medical topics without mentioning examiners
+- About treatment, not about medical-legal examinations
+- About a completely different specialty
+
+CONFIDENCE SCORING:
+0.95-1.0: Doctor explicitly recommended by name for this specialty
+0.80-0.94: Asking for or providing recommendations without specific names yet
+0.60-0.79: Discusses {specialty} examiners with some evaluative content
+0.40-0.59: Mentions specialty but unclear if about AME/QME recommendations
+0.00-0.39: Not about {specialty} AME/QME recommendations
+
+Return JSON:
+{{
+  "is_relevant": true/false,
+  "confidence": 0.0-1.0,
+  "reasoning": "Brief explanation of why this message is or isn't relevant for finding {specialty} {examiner_type} recommendations"
 }}"""
         return prompt
     
@@ -1300,6 +1377,149 @@ SCORING GUIDE (only use if you have sufficient data):
 - 0-19: Terrible carrier - Bad faith behavior, chronic issues, avoid if possible
 
 Be thorough and cite specific examples from the messages in your reasoning."""
+        
+        return prompt
+    
+    def synthesize_ame_qme_recommendations(self, specialty: str, examiner_type: str, messages: list[Dict]) -> Dict:
+        """
+        Synthesize all messages to extract and rank AME/QME recommendations.
+        
+        Args:
+            specialty: Medical specialty (e.g., "orthopedic", "psychiatric")
+            examiner_type: "AME", "QME", or "Both"
+            messages: List of message dicts with keys: subject, body, from_name, etc.
+        
+        Returns:
+            Dict with:
+                - doctors: list of ranked doctors with names, recommendation counts, and quotes
+                - total_mentions: int - total doctor mentions found
+                - reasoning: str - summary of the analysis
+                - cost_usd: float - API cost
+        """
+        if not messages:
+            return {
+                'doctors': [],
+                'total_mentions': 0,
+                'reasoning': 'No messages found to analyze for recommendations.',
+                'cost_usd': 0.0
+            }
+        
+        prompt = self._build_ame_qme_synthesis_prompt(specialty, examiner_type, messages)
+        
+        try:
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=3000,
+                temperature=0.3,
+                system="You are an expert at extracting doctor recommendations from legal professional discussions.",
+                messages=[{"role": "user", "content": prompt}]
+            )
+            
+            # Parse response
+            response_text = response.content[0].text
+            
+            # Extract JSON from response
+            json_match = regex.search(r'\{.*\}', response_text, regex.DOTALL)
+            if json_match:
+                result = json.loads(json_match.group())
+            else:
+                # Fallback parsing
+                result = {
+                    'doctors': [],
+                    'total_mentions': 0,
+                    'reasoning': response_text
+                }
+            
+            # Calculate cost
+            input_tokens = response.usage.input_tokens
+            output_tokens = response.usage.output_tokens
+            total_tokens = input_tokens + output_tokens
+            cost = self._calculate_cost(total_tokens, self.model)
+            
+            self.total_tokens_used += total_tokens
+            self.total_cost_usd += cost
+            
+            return {
+                'doctors': result.get('doctors', []),
+                'total_mentions': result.get('total_mentions', 0),
+                'reasoning': result.get('reasoning', 'No reasoning provided'),
+                'cost_usd': cost
+            }
+            
+        except Exception as e:
+            print(f"❌ AME/QME synthesis error: {e}")
+            return {
+                'doctors': [],
+                'total_mentions': 0,
+                'reasoning': f'Error during synthesis: {str(e)}',
+                'cost_usd': 0.0
+            }
+    
+    def _build_ame_qme_synthesis_prompt(self, specialty: str, examiner_type: str, messages: list[Dict]) -> str:
+        """Build the synthesis prompt for AME/QME recommendation extraction and ranking"""
+        
+        # Format messages for prompt
+        messages_text = ""
+        for i, msg in enumerate(messages[:50], 1):  # Limit to 50 messages to avoid token limits
+            messages_text += f"\n--- Message {i} ---\n"
+            messages_text += f"From: {msg.get('from_name', 'Unknown')}\n"
+            messages_text += f"Subject: {msg.get('subject', 'No subject')}\n"
+            messages_text += f"Body: {msg.get('body', '')[:1000]}\n"  # Limit body length
+        
+        prompt = f"""You are an expert at extracting doctor recommendations from California workers' compensation attorney discussions.
+
+SYSTEM OVERVIEW:
+1. Query Enhancer → Found messages about {specialty} {examiner_type}s
+2. Relevance Filter → Filtered to messages containing recommendations
+3. YOU (Recommendation Extractor) → Extract doctor names and build a RANKED LIST
+
+YOUR TASK:
+Analyze {len(messages)} messages and extract ALL doctor names that are recommended as {specialty} {examiner_type}s.
+
+SPECIALTY: {specialty}
+EXAMINER TYPE: {examiner_type} {"(AME = Agreed Medical Examiner, QME = Qualified Medical Examiner)" if examiner_type == "Both" else ""}
+
+MESSAGES TO ANALYZE:
+{messages_text}
+
+EXTRACTION RULES:
+1. Extract EVERY doctor name mentioned as a recommendation (positive or negative)
+2. Count how many times each doctor is recommended POSITIVELY
+3. Note any NEGATIVE mentions (warnings to avoid)
+4. Extract supporting quotes that explain WHY they're recommended
+5. Rank by: (positive mentions) - (negative mentions)
+
+WHAT COUNTS AS A RECOMMENDATION:
+- "I recommend Dr. Smith" → POSITIVE
+- "Dr. Smith is excellent for spine cases" → POSITIVE
+- "Anyone know Dr. Jones?" → NEUTRAL (just a question, don't count)
+- "Avoid Dr. Brown, very defendant-friendly" → NEGATIVE
+- "Dr. Smith has been fair in my experience" → POSITIVE
+
+Return JSON:
+{{
+  "doctors": [
+    {{
+      "name": "Dr. Full Name",
+      "positive_mentions": <number>,
+      "negative_mentions": <number>,
+      "net_score": <positive - negative>,
+      "specialty_confirmed": true/false,
+      "sample_quotes": ["quote1 about why recommended", "quote2..."],
+      "warnings": ["any negative feedback if applicable"]
+    }}
+  ],
+  "total_mentions": <total doctor mentions across all messages>,
+  "reasoning": "<brief summary: how many doctors found, top recommendations, any patterns noted>"
+}}
+
+IMPORTANT:
+- Sort doctors by net_score (highest first)
+- Include at least 1 sample quote per doctor
+- If fewer than 3 doctors found, explain why in reasoning
+- If messages don't contain actual doctor names/recommendations, return empty doctors list with explanation
+
+DO NOT make up doctor names. Only extract names explicitly mentioned in the messages."""
         
         return prompt
     
